@@ -8,7 +8,7 @@
 import DITranquillity
 
 final class PhotosetFeedDIPart: DIPart {
-    static func load(container: DITranquillity.DIContainer) {
+    static func load(container: DIContainer) {
         container.register(PhotosetFeedView.init)
         container.register(PhotosetFeedViewModel.init)
     }

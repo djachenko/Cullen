@@ -8,7 +8,7 @@
 import DITranquillity
 
 final class UseCasesDIPart: DIPart {
-    static func load(container: DITranquillity.DIContainer) {
+    static func load(container: DIContainer) {
         container.register(FetchPhotosetsUseCase.init)
             .as(FetchPhotosetsUseCaseProtocol.self)
 

@@ -8,7 +8,7 @@
 import DITranquillity
 
 final class RepositoriesDIPart: DIPart {
-    static func load(container: DITranquillity.DIContainer) {
+    static func load(container: DIContainer) {
         container.register(MockPhotosetsRepository.init)
             .as(PhotosetsRepository.self)
     }

@@ -15,36 +15,34 @@ struct PhotosetFeedView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                // Background
-                Color(.systemGroupedBackground)
-                    .ignoresSafeArea()
+        ZStack {
+            // Background
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
 
-                switch viewModel.state {
-                case .loading, .initial:
-                    loadingView
-                case .content(let content):
-                    contentView(content: content)
-                case .error(let message):
-                    errorView(message: message)
-                }
+            switch viewModel.state {
+            case .loading, .initial:
+                loadingView
+            case .content(let content):
+                contentView(content: content)
+            case .error(let message):
+                errorView(message: message)
             }
-            .navigationTitle("Photosets")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    sortMenu
-                }
+        }
+        .navigationTitle("Photosets")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                sortMenu
             }
-            .searchable(
-                text: $viewModel.searchText,
-                prompt: "Search photosets"
-            )
-            .task {
-                if case .initial = viewModel.state {
-                    await viewModel.loadPhotosets()
-                }
+        }
+        .searchable(
+            text: $viewModel.searchText,
+            prompt: "Search photosets"
+        )
+        .task {
+            if case .initial = viewModel.state {
+                await viewModel.loadPhotosets()
             }
         }
     }
@@ -60,12 +58,11 @@ struct PhotosetFeedView: View {
                 // Photo Sets List
                 LazyVStack(spacing: 16) {
                     ForEach(content.photosets) { photoset in
-                        NavigationLink {
-                            PhotosetDetailView(photoSet: photoset)
-                        } label: {
-                            PhotosetCardView(photoSet: photoset)
-                        }
-                        .buttonStyle(CardButtonStyle())
+                        PhotosetCardView(photoSet: photoset)
+                            .buttonStyle(CardButtonStyle())
+                            .onTapGesture {
+                                viewModel.didTap(photoset: photoset)
+                            }
                     }
                 }
             }

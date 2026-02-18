@@ -15,8 +15,9 @@ struct CullenApp: App {
 
     var body: some Scene {
         WindowGroup {
-            container.resolve() as PhotosetFeedView
-//            .preferredColorScheme(.dark) // Can be changed to .dark or nil
+            let arguments = AnyArguments(for: AppCoordinator.self, args: AppDestination.photosetFeed)
+
+            container.resolve(arguments: arguments) as AppCoordinatorView
         }
     }
 }

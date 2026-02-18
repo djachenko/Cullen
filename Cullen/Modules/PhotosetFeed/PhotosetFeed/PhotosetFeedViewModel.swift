@@ -16,21 +16,23 @@ final class PhotosetFeedViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedSortOption: PhotosetSortOption = .recent
 
+    private let coordinator: AppCoordinator
 
     private let fetchPhotosetsUseCase: FetchPhotosetsUseCaseProtocol
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol
 
     private var cancellables = Set<AnyCancellable>()
 
-
     var sortOptions: [SortOptionDisplayModel] {
         PhotosetSortOption.allCases.map { SortOptionDisplayModel(option: $0) }
     }
 
     init(
+        coordinator: AppCoordinator,
         fetchPhotosetsUseCase: FetchPhotosetsUseCaseProtocol,
         getStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol,
     ) {
+        self.coordinator = coordinator
         self.fetchPhotosetsUseCase = fetchPhotosetsUseCase
         self.getStatisticsUseCase = getStatisticsUseCase
 
@@ -64,6 +66,12 @@ final class PhotosetFeedViewModel: ObservableObject {
     }
 }
 
+extension PhotosetFeedViewModel {
+    func didTap(photoset: PhotosetCardViewModel) {
+        coordinator.show(.photosetDetail(photoset))
+    }
+}
+
 private extension PhotosetFeedViewModel {
     func setupBindings() {
         Publishers.CombineLatest(
@@ -75,11 +83,6 @@ private extension PhotosetFeedViewModel {
             Task {
                 await self?.loadPhotosets()
             }
-        }
-        .store(in: &cancellables)
-
-        $searchText.sink { [weak self] searchText in
-            print("new search text: \(searchText)")
         }
         .store(in: &cancellables)
     }

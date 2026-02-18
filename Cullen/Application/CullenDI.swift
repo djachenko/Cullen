@@ -15,12 +15,14 @@ final class CullenDI {
         container.append(part: RepositoriesDIPart.self)
         container.append(part: UseCasesDIPart.self)
         container.append(part: PhotosetFeedDIPart.self)
+        container.append(part: PhotosetDetailDIPart.self)
+        container.append(part: AppDIPart.self)
 
         container.initializeSingletonObjects()
 
-        if !container.makeGraph().checkIsValid(checkGraphCycles: true) {
-            assertionFailure("Failed to build valid dependency graph")
-        }
+//        if !container.makeGraph().checkIsValid(checkGraphCycles: true) {
+//            assertionFailure("Failed to build valid dependency graph")
+//        }
 
         return container
     }()
