@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-import DITranquillity
+import Swinject
+import SwinjectAutoregistration
 
 
 enum AppDestination: Hashable {
@@ -14,12 +15,12 @@ enum AppDestination: Hashable {
     case photosetDetail(PhotosetCardViewModel)
 
     @ViewBuilder
-    func view(in container: DIContainer) -> some View {
+    func view(from resolver: Resolver) -> some View {
         switch self {
         case .photosetFeed:
-            container.resolve() as PhotosetFeedView
+            resolver ~> PhotosetFeedView.self
         case .photosetDetail(let photoset):
-            container.resolve(args: photoset) as PhotosetDetailView
+            resolver ~> (PhotosetDetailView.self, argument: photoset)
         }
     }
 }

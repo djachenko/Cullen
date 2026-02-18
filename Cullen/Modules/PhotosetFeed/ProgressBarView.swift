@@ -52,4 +52,5 @@ struct ProgressBarView: View {
 
 #Preview {
     ProgressBarView(progress: 0.66)
+        .padding(.horizontal, 16)
 }

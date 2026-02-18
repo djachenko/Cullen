@@ -32,3 +32,20 @@ struct PhotosetDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+
+
+import SwinjectAutoregistration
+
+#Preview {
+    Cullen.resolver ~> (PhotosetDetailView.self, argument: PhotosetCardViewModel(
+        id: .init(),
+        name: "",
+        photosCountText: "117",
+        progressPercentage: 0.72,
+        approvedCount: 17,
+        rejectedCount: 66,
+        pendingCount: 33,
+        syncBadge: .init(from: .synced),
+        coverImageURL: nil
+    ))
+}

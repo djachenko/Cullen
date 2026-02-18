@@ -6,25 +6,38 @@
 //
 
 import SwiftUI
-import DITranquillity
+import Swinject
 import Combine
 
+// TODO: maybe move to another file
+protocol Coordinator {
+    func show(_ destination: AppDestination)
+}
 
 final class AppCoordinator: ObservableObject {
     @Published var path = NavigationPath()
 
     let root: AppDestination
-    let container: DIContainer
+    let resolver: Resolver
 
     init(
         root: AppDestination,
-        container: DIContainer,
+        resolver: Resolver,
     ) {
         self.root = root
-        self.container = container
+        self.resolver = resolver
     }
+}
 
+extension AppCoordinator: Coordinator {
     func show(_ destination: AppDestination) {
         path.append(destination)
+    }
+}
+
+// TODO: move to another file
+final class MockCoordinator: Coordinator {
+    func show(_ destination: AppDestination) {
+        print("will show \(destination)")
     }
 }

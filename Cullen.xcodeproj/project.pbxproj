@@ -7,30 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D0C3DEBB2EDD93F90068307C /* DITranquillity in Frameworks */ = {isa = PBXBuildFile; productRef = D0C3DEBA2EDD93F90068307C /* DITranquillity */; };
+		D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */ = {isa = PBXBuildFile; productRef = D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		D0C3DE892EDD91AE0068307C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D0C3DE732EDD91AD0068307C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D0C3DE7A2EDD91AD0068307C;
-			remoteInfo = Cullen;
-		};
-		D0C3DE932EDD91AE0068307C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D0C3DE732EDD91AD0068307C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D0C3DE7A2EDD91AD0068307C;
-			remoteInfo = Cullen;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		D0C3DE7B2EDD91AD0068307C /* Cullen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cullen.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D0C3DE882EDD91AE0068307C /* CullenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CullenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D0C3DE922EDD91AE0068307C /* CullenUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CullenUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -46,21 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0C3DEBB2EDD93F90068307C /* DITranquillity in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D0C3DE852EDD91AE0068307C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D0C3DE8F2EDD91AE0068307C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,8 +46,6 @@
 			isa = PBXGroup;
 			children = (
 				D0C3DE7B2EDD91AD0068307C /* Cullen.app */,
-				D0C3DE882EDD91AE0068307C /* CullenTests.xctest */,
-				D0C3DE922EDD91AE0068307C /* CullenUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -105,51 +70,11 @@
 			);
 			name = Cullen;
 			packageProductDependencies = (
-				D0C3DEBA2EDD93F90068307C /* DITranquillity */,
+				D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */,
 			);
 			productName = Cullen;
 			productReference = D0C3DE7B2EDD91AD0068307C /* Cullen.app */;
 			productType = "com.apple.product-type.application";
-		};
-		D0C3DE872EDD91AE0068307C /* CullenTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D0C3DE9F2EDD91AE0068307C /* Build configuration list for PBXNativeTarget "CullenTests" */;
-			buildPhases = (
-				D0C3DE842EDD91AE0068307C /* Sources */,
-				D0C3DE852EDD91AE0068307C /* Frameworks */,
-				D0C3DE862EDD91AE0068307C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D0C3DE8A2EDD91AE0068307C /* PBXTargetDependency */,
-			);
-			name = CullenTests;
-			packageProductDependencies = (
-			);
-			productName = CullenTests;
-			productReference = D0C3DE882EDD91AE0068307C /* CullenTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		D0C3DE912EDD91AE0068307C /* CullenUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D0C3DEA22EDD91AE0068307C /* Build configuration list for PBXNativeTarget "CullenUITests" */;
-			buildPhases = (
-				D0C3DE8E2EDD91AE0068307C /* Sources */,
-				D0C3DE8F2EDD91AE0068307C /* Frameworks */,
-				D0C3DE902EDD91AE0068307C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D0C3DE942EDD91AE0068307C /* PBXTargetDependency */,
-			);
-			name = CullenUITests;
-			packageProductDependencies = (
-			);
-			productName = CullenUITests;
-			productReference = D0C3DE922EDD91AE0068307C /* CullenUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -164,14 +89,6 @@
 					D0C3DE7A2EDD91AD0068307C = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
-					D0C3DE872EDD91AE0068307C = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = D0C3DE7A2EDD91AD0068307C;
-					};
-					D0C3DE912EDD91AE0068307C = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = D0C3DE7A2EDD91AD0068307C;
-					};
 				};
 			};
 			buildConfigurationList = D0C3DE762EDD91AD0068307C /* Build configuration list for PBXProject "Cullen" */;
@@ -184,8 +101,8 @@
 			mainGroup = D0C3DE722EDD91AD0068307C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				D0C3DEB92EDD93F90068307C /* XCRemoteSwiftPackageReference "DITranquillity" */,
 				D043D9B52EDD9F37009F2100 /* XCRemoteSwiftPackageReference "SwiftLint" */,
+				D0999ED42F4645E100D352C3 /* XCRemoteSwiftPackageReference "SwinjectAutoregistration" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D0C3DE7C2EDD91AD0068307C /* Products */;
@@ -193,28 +110,12 @@
 			projectRoot = "";
 			targets = (
 				D0C3DE7A2EDD91AD0068307C /* Cullen */,
-				D0C3DE872EDD91AE0068307C /* CullenTests */,
-				D0C3DE912EDD91AE0068307C /* CullenUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		D0C3DE792EDD91AD0068307C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D0C3DE862EDD91AE0068307C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D0C3DE902EDD91AE0068307C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -231,34 +132,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D0C3DE842EDD91AE0068307C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D0C3DE8E2EDD91AE0068307C /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		D0C3DE8A2EDD91AE0068307C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D0C3DE7A2EDD91AD0068307C /* Cullen */;
-			targetProxy = D0C3DE892EDD91AE0068307C /* PBXContainerItemProxy */;
-		};
-		D0C3DE942EDD91AE0068307C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D0C3DE7A2EDD91AD0068307C /* Cullen */;
-			targetProxy = D0C3DE932EDD91AE0068307C /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D0C3DE9A2EDD91AE0068307C /* Debug */ = {
@@ -442,86 +316,6 @@
 			};
 			name = Release;
 		};
-		D0C3DEA02EDD91AE0068307C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.CullenTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cullen.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cullen";
-			};
-			name = Debug;
-		};
-		D0C3DEA12EDD91AE0068307C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.CullenTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cullen.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cullen";
-			};
-			name = Release;
-		};
-		D0C3DEA32EDD91AE0068307C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.CullenUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Cullen;
-			};
-			name = Debug;
-		};
-		D0C3DEA42EDD91AE0068307C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.CullenUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Cullen;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -543,24 +337,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D0C3DE9F2EDD91AE0068307C /* Build configuration list for PBXNativeTarget "CullenTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D0C3DEA02EDD91AE0068307C /* Debug */,
-				D0C3DEA12EDD91AE0068307C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D0C3DEA22EDD91AE0068307C /* Build configuration list for PBXNativeTarget "CullenUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D0C3DEA32EDD91AE0068307C /* Debug */,
-				D0C3DEA42EDD91AE0068307C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -572,21 +348,21 @@
 				minimumVersion = 0.62.2;
 			};
 		};
-		D0C3DEB92EDD93F90068307C /* XCRemoteSwiftPackageReference "DITranquillity" */ = {
+		D0999ED42F4645E100D352C3 /* XCRemoteSwiftPackageReference "SwinjectAutoregistration" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ivlevAstef/DITranquillity";
+			repositoryURL = "https://github.com/Swinject/SwinjectAutoregistration.git";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D0C3DEBA2EDD93F90068307C /* DITranquillity */ = {
+		D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D0C3DEB92EDD93F90068307C /* XCRemoteSwiftPackageReference "DITranquillity" */;
-			productName = DITranquillity;
+			package = D0999ED42F4645E100D352C3 /* XCRemoteSwiftPackageReference "SwinjectAutoregistration" */;
+			productName = SwinjectAutoregistration;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

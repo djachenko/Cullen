@@ -21,6 +21,6 @@ struct AppCoordinatorView: View {
 
 private extension AppCoordinatorView {
     func viewBuilder(_ destination: AppDestination) -> some View {
-        destination.view(in: coordinator.container)
+        destination.view(from: coordinator.resolver)
     }
 }

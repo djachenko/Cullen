@@ -1,6 +1,6 @@
 //
 //  PhotosetCardView.swift
-//  CullenApp
+//  Cullen
 //
 //  Presentation Layer - Reusable Card Component
 //

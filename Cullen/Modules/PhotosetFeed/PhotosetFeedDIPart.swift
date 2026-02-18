@@ -1,15 +1,17 @@
 //
-//  PhotosetFeedDIPart.swift
+//  PhotosetFeedAssembly.swift
 //  Cullen
 //
 //  Created by justin on 18/2/26.
 //
 
-import DITranquillity
+import Swinject
+import SwinjectAutoregistration
 
-final class PhotosetFeedDIPart: DIPart {
-    static func load(container: DIContainer) {
-        container.register(PhotosetFeedView.init)
-        container.register(PhotosetFeedViewModel.init)
+
+final class PhotosetFeedAssembly: Assembly {
+    func assemble(container: Container) {
+        container.autoregister(PhotosetFeedView.self, initializer: PhotosetFeedView.init)
+        container.autoregister(PhotosetFeedViewModel.self, initializer: PhotosetFeedViewModel.init)
     }
 }

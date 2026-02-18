@@ -1,5 +1,5 @@
 {
-  "originHash" : "de948db91a04cae122f796f16edff1e8cc52802628f77a4969d09a7121e592de",
+  "originHash" : "dbb0770ab41b128442e712bf552db0ca0acc958e85214533187cf0e5378e6df9",
   "pins" : [
     {
       "identity" : "collectionconcurrencykit",
@@ -17,15 +17,6 @@
       "state" : {
         "revision" : "e45a26384239e028ec87fbcc788f513b67e10d8f",
         "version" : "1.9.0"
-      }
-    },
-    {
-      "identity" : "ditranquillity",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ivlevAstef/DITranquillity",
-      "state" : {
-        "branch" : "master",
-        "revision" : "9e7511a7bafe4955fc90f1b521836c2f37359764"
       }
     },
     {
@@ -56,15 +47,6 @@
       }
     },
     {
-      "identity" : "swiftlazy",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ivlevAstef/SwiftLazy.git",
-      "state" : {
-        "revision" : "1d1cfb4c8552fa2d2bf83cabc99ac9e60171d874",
-        "version" : "1.6.1"
-      }
-    },
-    {
       "identity" : "swiftlint",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/SwiftLint",
@@ -80,6 +62,24 @@
       "state" : {
         "revision" : "c6df6cf533d120716bff38f8ff9885e1ce2a4ac3",
         "version" : "0.9.0"
+      }
+    },
+    {
+      "identity" : "swinject",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Swinject/Swinject.git",
+      "state" : {
+        "revision" : "b685b549fe4d8ae265fc7a2f27d0789720425d69",
+        "version" : "2.10.0"
+      }
+    },
+    {
+      "identity" : "swinjectautoregistration",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Swinject/SwinjectAutoregistration.git",
+      "state" : {
+        "revision" : "fd9ffae5f666d37b4b3c210af2e16a10598342e4",
+        "version" : "2.9.1"
       }
     },
     {

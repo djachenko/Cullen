@@ -1,6 +1,6 @@
 //
 //  FetchPhotosetsUseCase.swift
-//  CullenApp
+//  Cullen
 //
 //  Domain Layer - Business Logic
 //

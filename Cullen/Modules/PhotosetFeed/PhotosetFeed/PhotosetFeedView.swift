@@ -1,6 +1,6 @@
 //
 //  PhotosetFeedView.swift
-//  CullenApp
+//  Cullen
 //
 //  Presentation Layer - Main View (UI Only)
 //
@@ -164,8 +164,10 @@ struct CardButtonStyle: ButtonStyle {
 
 // MARK: - Preview
 
-import DITranquillity
+import SwinjectAutoregistration
 
 #Preview {
-    CullenDI.container.resolve() as PhotosetFeedView
+    NavigationStack {
+        Cullen.resolver ~> PhotosetFeedView.self
+    }
 }

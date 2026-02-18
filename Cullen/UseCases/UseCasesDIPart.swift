@@ -1,18 +1,20 @@
 //
-//  UseCasesDIPart.swift
+//  UseCasesAssembly.swift
 //  Cullen
 //
 //  Created by justin on 18/2/26.
 //
 
-import DITranquillity
+import Swinject
+import SwinjectAutoregistration
 
-final class UseCasesDIPart: DIPart {
-    static func load(container: DIContainer) {
-        container.register(FetchPhotosetsUseCase.init)
-            .as(FetchPhotosetsUseCaseProtocol.self)
 
-        container.register(GetPhotosetStatisticsUseCase.init)
-            .as(GetPhotosetStatisticsUseCaseProtocol.self)
+final class UseCasesAssembly: Assembly {
+    func assemble(container: Container) {
+        container.autoregister(FetchPhotosetsUseCaseProtocol.self, initializer: FetchPhotosetsUseCase.init)
+        container.autoregister(
+            GetPhotosetStatisticsUseCaseProtocol.self,
+            initializer: GetPhotosetStatisticsUseCase.init
+        )
     }
 }

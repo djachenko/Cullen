@@ -1,6 +1,6 @@
 //
 //  GetPhotosetStatisticsUseCase.swift
-//  CullenApp
+//  Cullen
 //
 //  Domain Layer - Business Logic for Statistics
 //

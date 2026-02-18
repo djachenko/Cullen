@@ -1,14 +1,20 @@
 //
-//  PhotosetDetailDIPart.swift
+//  PhotosetDetailAssembly.swift
 //  Cullen
 //
 //  Created by justin on 19/2/26.
 //
 
-import DITranquillity
+import Swinject
+import SwinjectAutoregistration
 
-final class PhotosetDetailDIPart: DIPart {
-    static func load(container: DIContainer) {
-        container.register(PhotosetDetailView.init) { arg($0) }
+
+final class PhotosetDetailAssembly: Assembly {
+    func assemble(container: Container) {
+        container.autoregister(
+            PhotosetDetailView.self,
+            argument: PhotosetCardViewModel.self,
+            initializer: PhotosetDetailView.init
+        )
     }
 }

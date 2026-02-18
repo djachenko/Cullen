@@ -1,23 +1,29 @@
 //
 //  CullenApp.swift
-//  CullenApp
+//  Cullen
 //
 //  App Entry Point
 //
 
 import SwiftUI
-import DITranquillity
+import Swinject
+import SwinjectAutoregistration
 
 @main
-struct CullenApp: App {
-    // Dependency Injection Container
-    private let container = CullenDI.container
-
+struct Cullen: App {
     var body: some Scene {
         WindowGroup {
-            let arguments = AnyArguments(for: AppCoordinator.self, args: AppDestination.photosetFeed)
-
-            container.resolve(arguments: arguments) as AppCoordinatorView
+            Cullen.resolver ~> (AppCoordinatorView.self, argument: AppDestination.photosetFeed)
         }
     }
+}
+
+extension Cullen {
+    static let resolver = Assembler([
+        RepositoriesAssembly(),
+        UseCasesAssembly(),
+        PhotosetFeedAssembly(),
+        PhotosetDetailAssembly(),
+        AppAssembly(),
+    ]).resolver
 }

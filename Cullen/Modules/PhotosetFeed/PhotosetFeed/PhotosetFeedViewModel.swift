@@ -1,6 +1,6 @@
 //
 //  PhotosetFeedViewModel.swift
-//  CullenApp
+//  Cullen
 //
 //  Presentation Layer - Thin ViewModel (UI State Only)
 //
@@ -16,7 +16,7 @@ final class PhotosetFeedViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedSortOption: PhotosetSortOption = .recent
 
-    private let coordinator: AppCoordinator
+    private let coordinator: Coordinator
 
     private let fetchPhotosetsUseCase: FetchPhotosetsUseCaseProtocol
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol
@@ -28,7 +28,7 @@ final class PhotosetFeedViewModel: ObservableObject {
     }
 
     init(
-        coordinator: AppCoordinator,
+        coordinator: Coordinator,
         fetchPhotosetsUseCase: FetchPhotosetsUseCaseProtocol,
         getStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol,
     ) {
