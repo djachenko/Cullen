@@ -1,17 +1,22 @@
 //
 //  CullenApp.swift
-//  Cullen
+//  CullenApp
 //
-//  Created by justin on 01.12.2025.
+//  App Entry Point
 //
 
 import SwiftUI
+import DITranquillity
 
 @main
 struct CullenApp: App {
+    // Dependency Injection Container
+    private let container = CullenDI.container
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            container.resolve() as PhotosetFeedView
+//            .preferredColorScheme(.dark) // Can be changed to .dark or nil
         }
     }
 }

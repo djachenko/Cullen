@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D0C3DEBB2EDD93F90068307C /* DITranquillity in Frameworks */ = {isa = PBXBuildFile; productRef = D0C3DEBA2EDD93F90068307C /* DITranquillity */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D0C3DE892EDD91AE0068307C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -35,16 +39,6 @@
 			path = Cullen;
 			sourceTree = "<group>";
 		};
-		D0C3DE8B2EDD91AE0068307C /* CullenTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CullenTests;
-			sourceTree = "<group>";
-		};
-		D0C3DE952EDD91AE0068307C /* CullenUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CullenUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D0C3DEBB2EDD93F90068307C /* DITranquillity in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,8 +71,6 @@
 			isa = PBXGroup;
 			children = (
 				D0C3DE7D2EDD91AD0068307C /* Cullen */,
-				D0C3DE8B2EDD91AE0068307C /* CullenTests */,
-				D0C3DE952EDD91AE0068307C /* CullenUITests */,
 				D0C3DE7C2EDD91AD0068307C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -112,6 +105,7 @@
 			);
 			name = Cullen;
 			packageProductDependencies = (
+				D0C3DEBA2EDD93F90068307C /* DITranquillity */,
 			);
 			productName = Cullen;
 			productReference = D0C3DE7B2EDD91AD0068307C /* Cullen.app */;
@@ -129,9 +123,6 @@
 			);
 			dependencies = (
 				D0C3DE8A2EDD91AE0068307C /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				D0C3DE8B2EDD91AE0068307C /* CullenTests */,
 			);
 			name = CullenTests;
 			packageProductDependencies = (
@@ -152,9 +143,6 @@
 			);
 			dependencies = (
 				D0C3DE942EDD91AE0068307C /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				D0C3DE952EDD91AE0068307C /* CullenUITests */,
 			);
 			name = CullenUITests;
 			packageProductDependencies = (
@@ -195,6 +183,10 @@
 			);
 			mainGroup = D0C3DE722EDD91AD0068307C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D0C3DEB92EDD93F90068307C /* XCRemoteSwiftPackageReference "DITranquillity" */,
+				D043D9B52EDD9F37009F2100 /* XCRemoteSwiftPackageReference "SwiftLint" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D0C3DE7C2EDD91AD0068307C /* Products */;
 			projectDirPath = "";
@@ -411,7 +403,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -442,7 +434,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -570,6 +562,33 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D043D9B52EDD9F37009F2100 /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/SwiftLint";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.62.2;
+			};
+		};
+		D0C3DEB92EDD93F90068307C /* XCRemoteSwiftPackageReference "DITranquillity" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ivlevAstef/DITranquillity";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D0C3DEBA2EDD93F90068307C /* DITranquillity */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D0C3DEB92EDD93F90068307C /* XCRemoteSwiftPackageReference "DITranquillity" */;
+			productName = DITranquillity;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D0C3DE732EDD91AD0068307C /* Project object */;
 }
