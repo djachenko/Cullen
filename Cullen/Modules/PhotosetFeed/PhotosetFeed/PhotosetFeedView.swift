@@ -8,7 +8,11 @@
 import SwiftUI
 
 struct PhotosetFeedView: View {
-    @ObservedObject var viewModel: PhotosetFeedViewModel
+    @StateObject private var viewModel: PhotosetFeedViewModel
+
+    init(viewModel: PhotosetFeedViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
 
     var body: some View {
         ZStack {

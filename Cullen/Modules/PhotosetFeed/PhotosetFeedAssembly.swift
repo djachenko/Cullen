@@ -13,5 +13,6 @@ final class PhotosetFeedAssembly: Assembly {
     func assemble(container: Container) {
         container.autoregister(PhotosetFeedView.self, initializer: PhotosetFeedView.init)
         container.autoregister(PhotosetFeedViewModel.self, initializer: PhotosetFeedViewModel.init)
+            .inObjectScope(.weak)
     }
 }

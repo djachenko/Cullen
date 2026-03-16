@@ -10,10 +10,15 @@ import SwiftUI
 
 struct PhotosetDetailView: View {
     @State private var columnCount: Int = 3
-    @ObservedObject var viewModel: PhotosetDetailViewModel
+    @State private var gridWidth: CGFloat = 390
+    @StateObject private var viewModel: PhotosetDetailViewModel
+
+    init(viewModel: PhotosetDetailViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        ZStack {
             switch viewModel.state {
                 case .initial, .loading:
                     loaingView
@@ -33,6 +38,11 @@ struct PhotosetDetailView: View {
                 await viewModel.loadPhotos()
             }
         }
+        .onGeometryChange(for: CGFloat.self) { geometry in
+            geometry.size.width
+        } action: { width in
+            gridWidth = width
+        }
     }
 
     // MARK: - Column Picker
@@ -40,23 +50,9 @@ struct PhotosetDetailView: View {
     private var columnPicker: some View {
         Menu {
             Picker("Columns", selection: $columnCount) {
-                Label(
-                    "2 Columns",
-                    systemImage: "square.grid.2x2"
-                )
-                .tag(2)
-
-                Label(
-                    "3 Columns",
-                    systemImage: "square.grid.3x3"
-                )
-                .tag(3)
-
-                Label(
-                    "4 Columns",
-                    systemImage: "square.grid.4x3.fill"
-                )
-                .tag(4)
+                Label("2 Columns", systemImage: "square.grid.2x2").tag(2)
+                Label("3 Columns", systemImage: "square.grid.3x3").tag(3)
+                Label("4 Columns", systemImage: "square.grid.4x3.fill").tag(4)
             }
         } label: {
             Image(systemName: "square.grid.3x3")
@@ -81,31 +77,32 @@ struct PhotosetDetailView: View {
 
     @ViewBuilder
     private func contentView(content: PhotosetDetailContent) -> some View {
-        let photos = content
-
-        if photos.isEmpty {
+        if content.isEmpty {
             emptyView
         } else {
-            grid(photos: photos)
+            grid(photos: content)
         }
     }
 
     private func grid(photos: [PhotoGridCellViewModel]) -> some View {
-        return LazyVGrid(
-            columns: Array(
-                repeating: GridItem(
-                    .flexible(),
-                    spacing: 2
+        let spacing = 2.0
+        let columnWidth = (gridWidth - spacing * Double(columnCount - 1)) / Double(columnCount)
+
+        return ScrollView(showsIndicators: false) {
+            LazyVGrid(
+                columns: Array(
+                    repeating: GridItem(.fixed(columnWidth), spacing: spacing),
+                    count: columnCount
                 ),
-                count: columnCount
-            ),
-            spacing: 2
-        ) {
-            ForEach(photos) { photo in
-                PhotoGridCell(
-                    viewModel: photo,
-                    aspectRatio: viewModel.aspectRatio
-                )
+                spacing: spacing
+            ) {
+                ForEach(photos) { photo in
+                    PhotoGridCell(
+                        viewModel: photo,
+                        aspectRatio: viewModel.aspectRatio,
+                        width: columnWidth
+                    )
+                }
             }
         }
     }

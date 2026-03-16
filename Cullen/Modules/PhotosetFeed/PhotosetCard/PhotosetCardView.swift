@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct PhotosetCardView: View {
     let photoset: PhotosetCardViewModel
@@ -54,30 +55,14 @@ struct PhotosetCardView: View {
     // MARK: - Subviews
     
     private var coverImage: some View {
-        Group {
-            if let imageURL = photoset.coverImageURL {
-                AsyncImage(url: imageURL) { phase in
-                    switch phase {
-                    case .empty:
-                        placeholderImage
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    case .failure:
-                        placeholderImage
-                    @unknown default:
-                        placeholderImage
-                    }
-                }
-            } else {
-                placeholderImage
-            }
-        }
-        .frame(height: 200)
-        .clipped()
+        KFImage(photoset.coverImageURL)
+            .placeholder { placeholderImage }
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(height: 200)
+            .clipped()
     }
-    
+
     private var placeholderImage: some View {
         ZStack {
             LinearGradient(

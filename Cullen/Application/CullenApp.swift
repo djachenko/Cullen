@@ -11,6 +11,10 @@ import SwinjectAutoregistration
 
 @main
 struct Cullen: App {
+    init() {
+        KingfisherConfiguration.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             Cullen.resolver ~> (AppCoordinatorView.self, argument: AppDestination.photosetFeed)

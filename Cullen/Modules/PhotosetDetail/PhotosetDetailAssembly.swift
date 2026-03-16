@@ -22,5 +22,6 @@ final class PhotosetDetailAssembly: Assembly {
             argument: PhotosetInfo.self,
             initializer: PhotosetDetailViewModel.init
         )
+        .inObjectScope(.weak)
     }
 }

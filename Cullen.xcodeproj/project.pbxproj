@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D055F2F22F66A1F900380F46 /* Kingfisher */; };
 		D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */ = {isa = PBXBuildFile; productRef = D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */,
 				D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -89,6 +91,7 @@
 			name = Cullen;
 			packageProductDependencies = (
 				D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */,
+				D055F2F22F66A1F900380F46 /* Kingfisher */,
 			);
 			productName = Cullen;
 			productReference = D0C3DE7B2EDD91AD0068307C /* Cullen.app */;
@@ -121,6 +124,7 @@
 			packageReferences = (
 				D043D9B52EDD9F37009F2100 /* XCRemoteSwiftPackageReference "SwiftLint" */,
 				D0999ED42F4645E100D352C3 /* XCRemoteSwiftPackageReference "SwinjectAutoregistration" */,
+				D055F2F12F66A1F900380F46 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D0C3DE7C2EDD91AD0068307C /* Products */;
@@ -366,6 +370,14 @@
 				minimumVersion = 0.62.2;
 			};
 		};
+		D055F2F12F66A1F900380F46 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.8.0;
+			};
+		};
 		D0999ED42F4645E100D352C3 /* XCRemoteSwiftPackageReference "SwinjectAutoregistration" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Swinject/SwinjectAutoregistration.git";
@@ -377,6 +389,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		D055F2F22F66A1F900380F46 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D055F2F12F66A1F900380F46 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
 		D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D0999ED42F4645E100D352C3 /* XCRemoteSwiftPackageReference "SwinjectAutoregistration" */;

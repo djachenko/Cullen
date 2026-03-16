@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Kingfisher
+
 
 struct PhotoGridCellViewModel {
     let id: String
@@ -21,46 +23,27 @@ extension PhotoGridCellViewModel: Identifiable {}
 struct PhotoGridCell: View {
     let viewModel: PhotoGridCellViewModel
     let aspectRatio: Double
+    let width: CGFloat
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .bottomTrailing) {
-                photoImage
-                    .frame(
-                        width: geometry.size.width,
-                        height: geometry.size.width / aspectRatio
-                    )
-                    .clipped()
-
-                decisionBadge
-                    .padding(6)
-            }
-            .onTapGesture {
-                viewModel.onTap()
-            }
+        ZStack(alignment: .bottomTrailing) {
+            photoImage
+            decisionBadge.padding(6)
         }
         .aspectRatio(aspectRatio, contentMode: .fit)
+        .onTapGesture { viewModel.onTap() }
     }
 
-    // MARK: - Subviews
-
     private var photoImage: some View {
-        Group {
-            if let url = viewModel.imageURL {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        default:
-                            placeholder
-                    }
-                }
-            } else {
-                placeholder
-            }
-        }
+        KFImage(viewModel.imageURL)
+            .placeholder { placeholder }
+            .cancelOnDisappear(true)
+            .downsampling(size: CGSize(width: width, height: width / aspectRatio))
+            .processingQueue(.dispatch(DispatchQueue.global(qos: .userInitiated)))
+            .resizable()
+            .scaledToFill()
+            .frame(width: width, height: width / aspectRatio)
+            .clipped()
     }
 
     private var placeholder: some View {

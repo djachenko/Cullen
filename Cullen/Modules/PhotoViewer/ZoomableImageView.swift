@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKit
+import Kingfisher
 
 // MARK: - ZoomableImageViewModel
 
@@ -30,41 +31,9 @@ struct ZoomableImageView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = context.coordinator.scrollView
-        scrollView.delegate = context.coordinator
-        scrollView.minimumZoomScale = 1
-        scrollView.maximumZoomScale = viewModel.maxZoomScale
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.bouncesZoom = true
-        scrollView.backgroundColor = .clear
-        scrollView.contentInsetAdjustmentBehavior = .never
-
         let imageView = context.coordinator.imageView
-        imageView.contentMode = .scaleAspectFit
-        imageView.clipsToBounds = true
+
         scrollView.addSubview(imageView)
-
-        let doubleTap = UITapGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(Coordinator.handleDoubleTap(_:))
-        )
-        doubleTap.numberOfTapsRequired = 2
-        scrollView.addGestureRecognizer(doubleTap)
-
-        let singleTap = UITapGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(Coordinator.handleSingleTap)
-        )
-        singleTap.numberOfTapsRequired = 1
-        singleTap.require(toFail: doubleTap)
-        scrollView.addGestureRecognizer(singleTap)
-
-        let pan = UIPanGestureRecognizer(
-            target: context.coordinator,
-            action: #selector(Coordinator.handlePan(_:))
-        )
-        pan.delegate = context.coordinator
-        scrollView.addGestureRecognizer(pan)
 
         context.coordinator.loadImage(url: viewModel.url)
 
@@ -76,6 +45,7 @@ struct ZoomableImageView: UIViewRepresentable {
             context.coordinator.loadImage(url: viewModel.url)
             scrollView.setZoomScale(1, animated: false)
         }
+
         scrollView.maximumZoomScale = viewModel.maxZoomScale
         context.coordinator.viewModel = viewModel
     }
@@ -90,8 +60,62 @@ extension ZoomableImageView {
         var viewModel: ZoomableImageViewModel
         var currentURL: URL?
 
-        let scrollView = UIScrollView()
-        let imageView = UIImageView()
+        private(set) lazy var scrollView = {
+            let scrollView = UIScrollView()
+            scrollView.delegate = self
+            scrollView.minimumZoomScale = 1
+            scrollView.maximumZoomScale = viewModel.maxZoomScale
+            scrollView.showsVerticalScrollIndicator = false
+            scrollView.showsHorizontalScrollIndicator = false
+            scrollView.bouncesZoom = true
+            scrollView.backgroundColor = .clear
+            scrollView.contentInsetAdjustmentBehavior = .never
+
+            scrollView.addGestureRecognizer(singleTap)
+            scrollView.addGestureRecognizer(doubleTap)
+            scrollView.addGestureRecognizer(pan)
+
+            return scrollView
+        }()
+
+        let imageView = {
+            let imageView = UIImageView()
+            imageView.contentMode = .scaleAspectFit
+            imageView.clipsToBounds = true
+
+            return imageView
+        }()
+
+        private lazy var singleTap = {
+            let recognizer = UITapGestureRecognizer(
+                target: self,
+                action: #selector(Coordinator.handleSingleTap)
+            )
+            recognizer.numberOfTapsRequired = 1
+            recognizer.require(toFail: doubleTap)
+
+            return recognizer
+        }()
+
+        private lazy var doubleTap = {
+            let recognizer = UITapGestureRecognizer(
+                target: self,
+                action: #selector(Coordinator.handleDoubleTap(_:))
+            )
+            recognizer.numberOfTapsRequired = 2
+
+            return recognizer
+        }()
+
+        private lazy var pan = {
+            let recognizer = UIPanGestureRecognizer(
+                target: self,
+                action: #selector(Coordinator.handlePan(_:))
+            )
+            recognizer.delegate = self
+
+            return recognizer
+        }()
 
         init(viewModel: ZoomableImageViewModel) {
             self.viewModel = viewModel
@@ -99,22 +123,19 @@ extension ZoomableImageView {
 
         // MARK: - Image Loading
 
+        @MainActor
         func loadImage(url: URL?) {
             currentURL = url
             imageView.image = nil
 
             guard let url else { return }
 
-            Task {
-                guard
-                    let (data, _) = try? await URLSession.shared.data(from: url),
-                    let image = UIImage(data: data)
-                else { return }
-
-                await MainActor.run {
-                    self.imageView.image = image
-                    self.layoutImageView()
+            imageView.kf.setImage(with: url) { [weak self] result in
+                guard case .success = result else {
+                    return
                 }
+
+                self?.layoutImageView()
             }
         }
 
@@ -158,14 +179,17 @@ extension ZoomableImageView {
             } else {
                 let location = recognizer.location(in: imageView)
                 let scale = viewModel.doubleTapZoomScale
+
                 let size = CGSize(
                     width: scrollView.bounds.width / scale,
                     height: scrollView.bounds.height / scale
                 )
+
                 let origin = CGPoint(
                     x: location.x - size.width / 2,
                     y: location.y - size.height / 2
                 )
+
                 scrollView.zoom(to: CGRect(origin: origin, size: size), animated: true)
             }
         }
@@ -183,7 +207,6 @@ extension ZoomableImageView {
 // MARK: - UIScrollViewDelegate
 
 extension ZoomableImageView.Coordinator: UIScrollViewDelegate {
-
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         imageView
     }
@@ -196,7 +219,6 @@ extension ZoomableImageView.Coordinator: UIScrollViewDelegate {
 // MARK: - UIGestureRecognizerDelegate
 
 extension ZoomableImageView.Coordinator: UIGestureRecognizerDelegate {
-
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         scrollView.zoomScale == 1
     }
