@@ -28,6 +28,7 @@ extension Decision: CaseIterable {}
 extension Decision: Equatable {}
 
 extension Decision {
+    @available(*, deprecated)
     static var mock: Decision {
         .allCases.randomElement() ?? .pending
     }

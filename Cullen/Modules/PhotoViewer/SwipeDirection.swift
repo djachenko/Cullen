@@ -50,3 +50,24 @@ enum SwipeDirection {
         }
     }
 }
+
+extension SwipeDirection {
+    private static let angleMapping: [Range<Double>: SwipeDirection] = [
+        0.0..<45.0:    .up,
+        45.0..<135.0:  .right,
+        135.0..<225.0: .down,
+        225.0..<315.0: .left,
+        315.0..<360.0: .up,
+    ]
+
+    init?(angle: Double) {
+        if let value = SwipeDirection
+            .angleMapping
+            .first(where: { $0.key ~= angle })?
+            .value {
+            self = value
+        } else {
+            return nil
+        }
+    }
+}

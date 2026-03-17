@@ -9,11 +9,11 @@ import Foundation
 
 // MARK: - Get Statistics Use Case
 
-protocol GetPhotosetStatisticsUseCaseProtocol {
+protocol GetPhotosetStatisticsUseCase {
     func execute() async throws -> PhotosetStatistics
 }
 
-final class GetPhotosetStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol {
+final class GetPhotosetStatisticsUseCaseImpl: GetPhotosetStatisticsUseCase {
     
     private let repository: PhotosetsRepository
 

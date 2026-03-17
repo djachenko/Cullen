@@ -18,7 +18,7 @@ final class PhotosetFeedViewModel: ObservableObject {
 
     private let coordinator: Coordinator
     private let fetchPhotosetsUseCase: FetchPhotosetInfoUseCase
-    private let getStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol
+    private let getStatisticsUseCase: GetPhotosetStatisticsUseCase
 
     private var cancellables = Set<AnyCancellable>()
     private var photosetInfos: [PhotosetInfo] = []
@@ -30,7 +30,7 @@ final class PhotosetFeedViewModel: ObservableObject {
     init(
         coordinator: Coordinator,
         fetchPhotosetsUseCase: FetchPhotosetInfoUseCase,
-        getStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol,
+        getStatisticsUseCase: GetPhotosetStatisticsUseCase,
     ) {
         self.coordinator = coordinator
         self.fetchPhotosetsUseCase = fetchPhotosetsUseCase

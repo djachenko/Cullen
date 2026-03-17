@@ -17,9 +17,6 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published var activeFilters: Set<PhotoFilter> = Set(PhotoFilter.allCases)
     @Published var aspectRatio: Double = 3.0 / 2.0
 
-
-    private var cancellables = Set<AnyCancellable>()
-
     var filteredPhotos: [Photo] {
         guard let photos else {
             return []
@@ -67,23 +64,20 @@ final class PhotosetDetailViewModel: ObservableObject {
         state = .loading
 
         do {
-            if let photos = try await task.value {
-                self.photos = photos
+            self.photos = try await task.value
 
-                state = .content(
-                    filteredPhotos.map { photo in
-                        PhotoGridCellViewModel(
-                            id: photo.id,
-                            imageURL: photo.url,
-                            decision: Decision.allCases.randomElement() ?? .pending,
-                        ) { [weak self] in
-                            self?.didTap(photo: photo)
-                        }
-                    }
-                )
-            } else {
-                state = .error(message: "No photoset")
-            }
+            state = .content(filteredPhotos.map { photo in
+                PhotoGridCellViewModel(
+                    id: photo.id,
+                    imageURL: photo.url,
+                    decision: .mock,
+                ) { [weak self] in
+                    self?.didTap(photo: photo)
+                }
+            })
+        }
+        catch is FetchPhotosUseCaseImpl.Error {
+            state = .error(message: "No photoset")
         }
         catch {
             state = .error(message: "Exception")

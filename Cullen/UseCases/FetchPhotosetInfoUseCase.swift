@@ -12,7 +12,7 @@ protocol FetchPhotosetInfoUseCase {
     func execute(sortBy: PhotosetSortOption, searchQuery: String?) async throws -> [PhotosetInfo]
 }
 
-final class FetchPhotosetsUseCaseImpl {
+final class FetchPhotosetInfoUseCaseImpl {
 
     private let repository: PhotosetsRepository
 
@@ -21,7 +21,7 @@ final class FetchPhotosetsUseCaseImpl {
     }
 }
 
-extension FetchPhotosetsUseCaseImpl: FetchPhotosetInfoUseCase {
+extension FetchPhotosetInfoUseCaseImpl: FetchPhotosetInfoUseCase {
 
     func execute(
         sortBy: PhotosetSortOption = .recent,

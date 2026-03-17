@@ -21,7 +21,7 @@ struct PhotosetDetailView: View {
         ZStack {
             switch viewModel.state {
                 case .initial, .loading:
-                    loaingView
+                    loadingView
                 case .content(let content):
                     contentView(content: content)
                 case .error(let message):
@@ -62,7 +62,7 @@ struct PhotosetDetailView: View {
 
     // MARK: - Photo Content
 
-    private var loaingView: some View {
+    private var loadingView: some View {
         VStack(spacing: 16) {
             ProgressView()
                 .scaleEffect(1.2)

@@ -60,7 +60,8 @@ struct PhotoViewerView: View {
                     case .changed:
                         viewModel.dragOffset = recognizer.translation(in: recognizer.view)
                     case .ended, .cancelled:
-                        if let direction = swipeHandler.evaluate(recognizer) {
+                        if let angle = swipeHandler.evaluate(recognizer),
+                           let direction = SwipeDirection(angle: angle) {
                             viewModel.commitSwipe(direction)
                         } else {
                             viewModel.cancelSwipe()

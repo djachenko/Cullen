@@ -43,7 +43,7 @@ extension PhotosetDTO {
     }
 }
 
-actor JsonPhotosRepository {
+final class JsonPhotosRepository {
     private lazy var task = Task {
         guard let url = Bundle.main.url(forResource: "cullen", withExtension: "json") else {
             throw URLError(.fileDoesNotExist)
@@ -52,8 +52,6 @@ actor JsonPhotosRepository {
         let data = try Data(contentsOf: url)
         let dtos = try JSONDecoder().decode([PhotosetDTO].self, from: data)
 
-
-        print("toDomain")
         return dtos.map { $0.toDomain() }
     }
 }

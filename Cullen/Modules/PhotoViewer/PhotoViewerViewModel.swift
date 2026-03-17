@@ -26,7 +26,6 @@ final class PhotoViewerViewModel: ObservableObject {
         }
     }
     @Published var dragOffset: CGPoint = .zero
-    @Published var isUIVisible: Bool = true
     @Published var decisions: [PhotoId: Decision] = [:]
 
     // MARK: - Private Properties
@@ -90,12 +89,6 @@ final class PhotoViewerViewModel: ObservableObject {
 
     // MARK: - Public Methods
 
-    func toggleUI() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            isUIVisible.toggle()
-        }
-    }
-
     func commitSwipe(_ direction: SwipeDirection) {
         decisions[currentPhoto.id] = direction.decision
 
@@ -132,64 +125,5 @@ final class PhotoViewerViewModel: ObservableObject {
 
     func decision(for photo: Photo) -> Decision? {
         decisions[photo.id]
-    }
-}
-
-
-extension PhotoViewerViewModel {
-    static let actionMapping = [
-        0.0..<45.0: Action.previous,
-        45.0..<135.0: Action.approve,
-        135.0..<225.0: Action.next,
-        225.0..<315.0: Action.reject,
-        315.0..<360.0: Action.previous,
-        ]
-
-    func didSwipe(angle: Double) {
-        guard let action = PhotoViewerViewModel
-            .actionMapping
-            .first(where: { $0.key ~= angle })?
-            .value else {
-            return
-        }
-
-        let decision: Decision? = switch action {
-            case .approve:
-                    .approved
-            case .reject:
-                    .rejected
-            default:
-                nil
-        }
-
-        if let decision {
-            modifiedDecisions[currentPhoto.id] = decision
-        }
-
-        if action == .previous {
-            currentIndex -= 1
-        } else {
-            currentIndex += 1
-        }
-    }
-}
-
-
-enum Action {
-    case previous
-    case next
-    case approve
-    case reject
-}
-
-extension Int {
-    func clamped(to range: Range<Int>) -> Int {
-        if self < range.lowerBound {
-            range.lowerBound
-        } else if self > range.upperBound {
-            range.upperBound
-        } else {
-            self
-        }
     }
 }

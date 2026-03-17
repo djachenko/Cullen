@@ -23,7 +23,7 @@ struct PhotosetCardViewModel: Identifiable, Hashable {
 extension PhotosetCardViewModel {
     init(from entity: PhotosetInfo) {
         let pendingCount = entity.photosCount - entity.approvedCount - entity.rejectedCount
-        let progress = Double(pendingCount) / Double(entity.photosCount)
+        let progress = 1 - Double(pendingCount) / Double(entity.photosCount)
 
         self.init(
             id: entity.id,

@@ -6,21 +6,34 @@
 //
 
 import SwiftUI
+import Swinject
+import SwinjectAutoregistration
 
 
 struct AppCoordinatorView: View {
     @ObservedObject var coordinator: AppCoordinator
 
+    let root: AppDestination
+    let resolver: Resolver
+
     var body: some View {
         NavigationStack(path: $coordinator.path) {
-            viewBuilder(coordinator.root)
-                .navigationDestination(for: AppDestination.self, destination: viewBuilder)
+            view(for: root)
+                .navigationDestination(for: AppDestination.self) { destination in
+                    view(for: destination)
+                }
         }
     }
-}
 
-private extension AppCoordinatorView {
-    func viewBuilder(_ destination: AppDestination) -> some View {
-        destination.view(from: coordinator.resolver)
+    @ViewBuilder
+    private func view(for destination: AppDestination) -> some View {
+        switch destination {
+            case .photosetFeed:
+                resolver ~> PhotosetFeedView.self
+            case .photosetDetail(let info):
+                resolver ~> (PhotosetDetailView.self, argument: info)
+            case .photoViewer(let photos, let index):
+                resolver ~> (PhotoViewerView.self, arguments: (photos, index))
+        }
     }
 }
