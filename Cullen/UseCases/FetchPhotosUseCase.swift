@@ -34,7 +34,10 @@ extension FetchPhotosUseCaseImpl: FetchPhotosUseCase {
 
         // TODO: load actual decisions from persistence
         return photoset.photos.map {
-            Photo(id: $0.lastPathComponent, url: $0, decision: .pending)
+            Photo(
+                id: $0.lastPathComponent,
+                url: $0
+            )
         }
     }
 }

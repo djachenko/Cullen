@@ -8,66 +8,85 @@
 import SwiftUI
 
 
-enum SwipeDirection {
-    case right  // Approve
-    case left   // Reject
-    case up     // Next
-    case down   // Previous
+struct SwipeDirection: Hashable {
+    let label: String
+    let icon: String
+    let color: Color
+    let decision: Decision?
+    let mainAngle: Double
+}
 
-    var decision: Decision? {
-        switch self {
-        case .right: return .approved
-        case .left:  return .rejected
-        case .up:    return nil
-        case .down:  return nil
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .right: return "Approve"
-        case .left:  return "Reject"
-        case .up:    return "Next"
-        case .down:  return "Prev"
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .right: return "checkmark.circle.fill"
-        case .left:  return "xmark.circle.fill"
-        case .up:    return "arrow.up.circle.fill"
-        case .down:  return "arrow.down.circle.fill"
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .right: return .green
-        case .left:  return .red
-        case .up:    return .blue
-        case .down:  return .orange
-        }
+extension SwipeDirection: Equatable {
+    static func == (lhs: SwipeDirection, rhs: SwipeDirection) -> Bool {
+        lhs.mainAngle == rhs.mainAngle
     }
 }
 
 extension SwipeDirection {
-    private static let angleMapping: [Range<Double>: SwipeDirection] = [
-        0.0..<45.0:    .up,
-        45.0..<135.0:  .right,
-        135.0..<225.0: .down,
-        225.0..<315.0: .left,
-        315.0..<360.0: .up,
+    static let up    = SwipeDirection(
+        label: "Prev",
+        icon: "arrow.up.circle.fill",
+        color: .orange,
+        decision: nil,
+        mainAngle: 0
+    )
+    static let right = SwipeDirection(
+        label: "Approve",
+        icon: "checkmark.circle.fill",
+        color: .green,
+        decision: .approved,
+        mainAngle: 90
+    )
+    static let down  = SwipeDirection(
+        label: "Next",
+        icon: "arrow.down.circle.fill",
+        color: .blue,
+        decision: nil,
+        mainAngle: 180
+    )
+    static let left  = SwipeDirection(
+        label: "Reject",
+        icon: "xmark.circle.fill",
+        color: .red,
+        decision: .rejected,
+        mainAngle: 270
+    )
+    
+    static let allDirections: [SwipeDirection] = [
+        .up,
+        .right,
+        .down,
+        .left
     ]
+}
 
+extension SwipeDirection {
     init?(angle: Double) {
-        if let value = SwipeDirection
-            .angleMapping
-            .first(where: { $0.key ~= angle })?
-            .value {
-            self = value
-        } else {
+        let match = SwipeDirection.allDirections.min(by: { direction in
+            let delta = (angle - direction.mainAngle + 360).truncatingRemainder(dividingBy: 360)
+            return min(delta, 360 - delta)
+        })
+
+        guard let match else {
             return nil
         }
+        
+        self = match
+    }
+}
+
+// MARK: - Collection+KeyPath (временно)
+
+extension Collection {
+    func min(by key: (Element) -> some Comparable) -> Element? {
+        self.min(by: { key($0) < key($1) })
+    }
+
+    func max(by key: (Element) -> some Comparable) -> Element? {
+        self.max(by: { key($0) < key($1) })
+    }
+
+    func sorted(by key: (Element) -> some Comparable) -> [Element] {
+        self.sorted(by: { key($0) < key($1) })
     }
 }

@@ -20,8 +20,5 @@ final class AppAssembly: Assembly {
             argument: AppDestination.self,
             initializer: AppCoordinatorView.init
         )
-
-        container.register(Resolver.self) { $0 }
-            .inObjectScope(.weak)
     }
 }

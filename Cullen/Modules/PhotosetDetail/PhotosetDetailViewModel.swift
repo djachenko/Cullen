@@ -9,107 +9,127 @@ import Foundation
 import SwiftUI
 import Combine
 
-// MARK: - PhotosetDetailViewModel
 
 @MainActor
 final class PhotosetDetailViewModel: ObservableObject {
     @Published var state: PhotosetDetailState = .initial
-    @Published var activeFilters: Set<PhotoFilter> = Set(PhotoFilter.allCases)
     @Published var aspectRatio: Double = 3.0 / 2.0
 
-    var filteredPhotos: [Photo] {
-        guard let photos else {
-            return []
-        }
-
-
-        if activeFilters == Set(PhotoFilter.allCases) {
-            return photos
-        }
-
-        return photos.filter { photo in
-            activeFilters.contains { $0.matches(decision: photo.decision) }
-        }
-    }
-
     var title: String {
-        photosetInfo.title
-    }
-
-    var coverImageURL: URL? {
-        photosetInfo.coverUrl
+        cachedPhotoset?.name ?? ""
     }
 
     private let coordinator: Coordinator
-    private let photosetInfo: PhotosetInfo
-    private let fetchPhotosetUseCase: FetchPhotosUseCase
+    private let fetchPhotosUseCase: FetchPhotosUseCase
+    private let loadDecisionsUseCase: LoadDecisionsUseCase
 
-    private var photos: [Photo]?
-
-    private lazy var task = Task {
-        try await fetchPhotosetUseCase.execute(id: photosetInfo.id)
+    private let photosetTask: Task<Photoset, Error>
+    private lazy var photosTask = Task {
+        let photoset = try await photosetTask.value
+        return try await fetchPhotosUseCase.execute(id: photoset.id)
+    }
+    private var decisionsTask: Task<[PhotoId: Decision], Error> {
+        Task {
+            let photoset = try await photosetTask.value
+            return try await loadDecisionsUseCase.execute(for: photoset.id)
+        }
     }
 
-    init(
+    private var cachedPhotoset: Photoset?
+    private var photos: [Photo]?
+
+    nonisolated private init(
+        photosetTask: Task<Photoset, Error>,
         coordinator: Coordinator,
-        photosetInfo: PhotosetInfo,
-        fetchPhotosetUseCase: FetchPhotosUseCase
+        fetchPhotosUseCase: FetchPhotosUseCase,
+        loadDecisionsUseCase: LoadDecisionsUseCase
     ) {
+        self.photosetTask = photosetTask
         self.coordinator = coordinator
-        self.photosetInfo = photosetInfo
-        self.fetchPhotosetUseCase = fetchPhotosetUseCase
+        self.fetchPhotosUseCase = fetchPhotosUseCase
+        self.loadDecisionsUseCase = loadDecisionsUseCase
+    }
+
+//    convenience init(
+//        photoset: Photoset,
+//        coordinator: Coordinator,
+//        fetchPhotosUseCase: FetchPhotosUseCase,
+//        loadDecisionsUseCase: LoadDecisionsUseCase
+//    ) {
+//        self.init(
+//            photosetTask: Task { photoset },
+//            coordinator: coordinator,
+//            fetchPhotosUseCase: fetchPhotosUseCase,
+//            loadDecisionsUseCase: loadDecisionsUseCase
+//        )
+//    }
+
+    nonisolated convenience init(
+        id: PhotosetId,
+        coordinator: Coordinator,
+        fetchPhotosetUseCase: FetchPhotosetUseCase,
+        fetchPhotosUseCase: FetchPhotosUseCase,
+        loadDecisionsUseCase: LoadDecisionsUseCase
+    ) {
+        self.init(
+            photosetTask: Task {
+                try await fetchPhotosetUseCase.execute(id: id)
+            },
+            coordinator: coordinator,
+            fetchPhotosUseCase: fetchPhotosUseCase,
+            loadDecisionsUseCase: loadDecisionsUseCase
+        )
     }
 
     func loadPhotos() async {
         state = .loading
 
         do {
-            self.photos = try await task.value
+            async let photosetResult = photosetTask.value
+            async let photosResult = photosTask.value
+            async let decisionsResult = decisionsTask.value
 
-            state = .content(filteredPhotos.map { photo in
+            let (photoset, photos, decisions) = try await (photosetResult, photosResult, decisionsResult)
+            cachedPhotoset = photoset
+            self.photos = photos
+
+            state = .content(photos.map { photo in
                 PhotoGridCellViewModel(
                     id: photo.id,
                     imageURL: photo.url,
-                    decision: .mock,
+                    decision: decisions[photo.id] ?? .pending,
                 ) { [weak self] in
                     self?.didTap(photo: photo)
                 }
             })
-        }
-        catch is FetchPhotosUseCaseImpl.Error {
+        } catch is FetchPhotosUseCaseImpl.Error {
             state = .error(message: "No photoset")
-        }
-        catch {
-            state = .error(message: "Exception")
+        } catch {
+            state = .error(message: error.localizedDescription)
         }
     }
 
     func toggleFilter(_ filter: PhotoFilter) {
-        if activeFilters.contains(filter) {
-            guard activeFilters.count > 1 else { return }
-            activeFilters.remove(filter)
-        } else {
-            activeFilters.insert(filter)
-        }
+        // TODO: restore filtering
     }
 
     func isFilterActive(_ filter: PhotoFilter) -> Bool {
-        activeFilters.contains(filter)
+        true
     }
 }
 
 private extension PhotosetDetailViewModel {
     func didTap(photo: Photo) {
+        guard let photos, let photoset = cachedPhotoset else { return }
         coordinator.show(
             .photoViewer(
-                photos: filteredPhotos,
-                startIndex: filteredPhotos.firstIndex(of: photo) ?? .zero
+                photos: photos,
+                startIndex: photos.firstIndex(of: photo) ?? .zero,
+                photosetId: photoset.id
             )
         )
     }
 }
-
-// MARK: - Supporting Types
 
 enum PhotosetDetailState {
     case initial

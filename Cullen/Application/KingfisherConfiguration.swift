@@ -13,6 +13,7 @@ enum KingfisherConfiguration {
         let config = URLSessionConfiguration.default
         config.httpMaximumConnectionsPerHost = 4
         KingfisherManager.shared.downloader.sessionConfiguration = config
+        KingfisherManager.shared.downloader.downloadTimeout = .minutes(2)
 
         KingfisherManager.shared.defaultOptions = [
             .processingQueue(.dispatch(DispatchQueue.global(qos: .userInitiated))),

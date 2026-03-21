@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D002A4842F6DC9040053419C /* PopGestureRecognizerSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */; };
 		D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D055F2F22F66A1F900380F46 /* Kingfisher */; };
 		D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */ = {isa = PBXBuildFile; productRef = D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */; };
 /* End PBXBuildFile section */
@@ -46,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D002A4842F6DC9040053419C /* PopGestureRecognizerSwiftUI in Frameworks */,
 				D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */,
 				D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */,
 			);
@@ -92,6 +94,7 @@
 			packageProductDependencies = (
 				D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */,
 				D055F2F22F66A1F900380F46 /* Kingfisher */,
+				D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */,
 			);
 			productName = Cullen;
 			productReference = D0C3DE7B2EDD91AD0068307C /* Cullen.app */;
@@ -125,6 +128,7 @@
 				D043D9B52EDD9F37009F2100 /* XCRemoteSwiftPackageReference "SwiftLint" */,
 				D0999ED42F4645E100D352C3 /* XCRemoteSwiftPackageReference "SwinjectAutoregistration" */,
 				D055F2F12F66A1F900380F46 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				D002A4822F6DC9040053419C /* XCRemoteSwiftPackageReference "PopGestureRecognizerSwiftUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D0C3DE7C2EDD91AD0068307C /* Products */;
@@ -370,6 +374,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		D002A4822F6DC9040053419C /* XCRemoteSwiftPackageReference "PopGestureRecognizerSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hayek/PopGestureRecognizerSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		D043D9B52EDD9F37009F2100 /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/realm/SwiftLint";
@@ -397,6 +409,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D002A4822F6DC9040053419C /* XCRemoteSwiftPackageReference "PopGestureRecognizerSwiftUI" */;
+			productName = PopGestureRecognizerSwiftUI;
+		};
 		D055F2F22F66A1F900380F46 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D055F2F12F66A1F900380F46 /* XCRemoteSwiftPackageReference "Kingfisher" */;

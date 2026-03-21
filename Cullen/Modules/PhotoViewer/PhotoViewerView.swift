@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PopGestureRecognizerSwiftUI
 
 // MARK: - PhotoViewerView
 
@@ -32,16 +33,24 @@ struct PhotoViewerView: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-
             photoView
-
-            swipeOverlay
+            viewModel.compassViewModel.map {
+                SwipeCompassView(viewModel: $0)
+                    .allowsHitTesting(false)
+            }
+        }
+        .background {
+            NavigationBackSwipeDisabler()
         }
         .navigationBarHidden(!isUIVisible)
         .navigationTitle("\(viewModel.currentIndex + 1) / \(viewModel.totalCount)")
         .navigationBarTitleDisplayMode(.inline)
         .statusBarHidden(!isUIVisible)
+        .swipeBackGestureDisabled()
         .animation(.easeInOut(duration: 0.2), value: isUIVisible)
+        .task {
+            await viewModel.loadDecisions()
+        }
     }
 
     // MARK: - Photo View
@@ -55,37 +64,25 @@ struct PhotoViewerView: View {
                 onSingleTap: {
                     isUIVisible.toggle()
                 },
-                onPan: { recognizer in
-                    switch recognizer.state {
-                    case .changed:
-                        viewModel.dragOffset = recognizer.translation(in: recognizer.view)
-                    case .ended, .cancelled:
-                        if let angle = swipeHandler.evaluate(recognizer),
-                           let direction = SwipeDirection(angle: angle) {
-                            viewModel.commitSwipe(direction)
-                        } else {
-                            viewModel.cancelSwipe()
-                        }
-                    default:
-                        break
-                    }
-                }
+                onPan: viewModel.handle(recognizer:)
             )
         )
         .ignoresSafeArea()
         .id(viewModel.currentIndex)
         .transition(.opacity)
     }
+}
 
-    // MARK: - Swipe Overlay
-
-    private var swipeOverlay: some View {
-        SwipeCompassView(
-            activeDirection: viewModel.activeSwipeDirection,
-            progress: viewModel.swipeProgress
-        )
-        .allowsHitTesting(false)
+struct NavigationBackSwipeDisabler: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        let vc = UIViewController()
+        DispatchQueue.main.async {
+            vc.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        }
+        return vc
     }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
 // MARK: - Preview
@@ -101,7 +98,6 @@ import SwinjectAutoregistration
                     Photo(
                         id: "test",
                         url: URL(string: "https://sun9-38.userapi.com/s/v1/ig2/cMnRR4FQ4-IhOlY8sj-ZfVH4pdnmvAg0gVwruqXyfzWIpl8c3lxQaqzmz5Y_ff0f2SjiIm79NPZAv2DBZ8ErOuHW.jpg?quality=95&as=32x21,48x32,72x48,108x72,160x106,240x160,360x239,480x319,540x359,640x426,720x479,1080x718,1280x851,1440x958,2560x1703&from=bu&cs=2560x0"),
-                        decision: .pending
                     )
                 ],
                 0

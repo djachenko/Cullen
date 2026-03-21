@@ -39,6 +39,7 @@ struct PhotoGridCell: View {
             .placeholder { placeholder }
             .cancelOnDisappear(true)
             .downsampling(size: CGSize(width: width, height: width / aspectRatio))
+            .cacheOriginalImage()
             .processingQueue(.dispatch(DispatchQueue.global(qos: .userInitiated)))
             .resizable()
             .scaledToFill()

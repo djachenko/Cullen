@@ -17,6 +17,18 @@ enum PhotosetId {
 
 extension PhotosetId: Hashable {}
 
+extension PhotosetId {
+    var stringValue: String {
+        switch self {
+            case .int(let id):
+                "\(id)"
+            case .string(let id):
+                id
+            case .uuid(let id):
+                id.uuidString
+        }
+    }
+}
 
 struct Photoset: Identifiable, Hashable {
     let id: PhotosetId
@@ -34,12 +46,15 @@ struct Photoset: Identifiable, Hashable {
     var pendingCount: Int {
         photosCount - approvedCount - rejectedCount
     }
-    
+
     var progressPercentage: Double {
-        guard photosCount > 0 else { return 0 }
+        guard photosCount > 0 else {
+            return 0
+        }
+        
         return Double(approvedCount + rejectedCount) / Double(photosCount)
     }
-    
+
     var isCompleted: Bool {
         pendingCount == 0
     }

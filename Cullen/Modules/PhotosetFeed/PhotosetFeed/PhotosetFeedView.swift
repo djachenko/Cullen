@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import Swinject
 
 struct PhotosetFeedView: View {
     @StateObject private var viewModel: PhotosetFeedViewModel
+    let resolver: Resolver
 
-    init(viewModel: PhotosetFeedViewModel) {
+    init(viewModel: PhotosetFeedViewModel, resolver: Resolver) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.resolver = resolver
     }
 
     var body: some View {
@@ -55,14 +58,11 @@ struct PhotosetFeedView: View {
                 statsHeader(content.statistics)
                     .transition(.opacity.combined(with: .move(edge: .top)))
 
-                // Photo Sets List
                 LazyVStack(spacing: 16) {
-                    ForEach(content.photosets) { photoset in
-                        PhotosetCardView(photoset: photoset)
-                            .buttonStyle(CardButtonStyle())
-                            .onTapGesture {
-                                viewModel.didTap(photoset: photoset)
-                            }
+                    ForEach(content.photosetIds, id: \.self) { id in
+                        print("resolve \(id)")
+
+                        return resolver ~> (PhotosetCardView.self, argument: id)
                     }
                 }
             }

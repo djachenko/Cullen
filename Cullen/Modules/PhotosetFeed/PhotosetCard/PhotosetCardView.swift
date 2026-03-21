@@ -8,140 +8,113 @@
 import SwiftUI
 import Kingfisher
 
+
 struct PhotosetCardView: View {
-    let photoset: PhotosetCardViewModel
-    
+    @StateObject private var viewModel: PhotosetCardViewModel
+
+    init(viewModel: PhotosetCardViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
     var body: some View {
+        Group {
+            switch viewModel.state {
+            case .loading:
+                loadingView
+            case .content(let content):
+                contentView(content: content)
+            case .error:
+                errorView
+            }
+        }
+        .task {
+            await viewModel.load()
+        }
+        .onTapGesture {
+            viewModel.didTap()
+        }
+    }
+}
+
+extension PhotosetCardView {
+    private var loadingView: some View {
+        RoundedRectangle(cornerRadius: 16)
+//            .fill(Color(.systemBackground))
+            .fill(.blue)
+            .frame(height: 300)
+            .overlay(ProgressView())
+            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
+    }
+
+    private var errorView: some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(Color(.systemBackground))
+            .frame(height: 300)
+            .overlay(
+                Image(systemName: "exclamationmark.triangle")
+                    .foregroundColor(.secondary)
+            )
+            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
+    }
+
+    private func contentView(content: PhotosetCardViewModel.Content) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Cover Image
-            coverImage
-            
-            // Content
+            coverImage(url: content.coverUrl)
+
             VStack(alignment: .leading, spacing: 12) {
-                // Header
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(photoset.title)
+                    Text(content.title)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.primary)
                         .lineLimit(2)
-                    
+
                     HStack(spacing: 6) {
                         Image(systemName: "photo.stack")
                             .font(.system(size: 11))
-                        
-                        Text(photoset.photosCountText)
+                        Text("\(content.photosCount)")
                             .font(.system(size: 13))
-                        
                         Spacer()
-                        
-                        SyncBadgeView(badge: photoset.syncBadge)
+                        SyncBadgeView(badge: content.syncBadge)
                     }
                     .foregroundColor(.secondary)
                 }
-                
-                // Progress Bar
-                ProgressBarView(progress: photoset.progressPercentage)
-                
-                // Stats
-                statsRow
+
+                ProgressBarView(progress: content.progressPercentage)
+
+                HStack(spacing: 16) {
+                    StatItemView(viewModel: .approved(count: content.approvedCount))
+                    StatItemView(viewModel: .rejected(count: content.rejectedCount))
+                    StatItemView(viewModel: .pending(count: content.pendingCount))
+                    Spacer()
+                }
             }
             .padding(16)
         }
         .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
     }
-    
-    // MARK: - Subviews
-    
-    private var coverImage: some View {
-        KFImage(photoset.coverImageURL)
-            .placeholder { placeholderImage }
+
+    private func coverImage(url: URL?) -> some View {
+        KFImage(url)
+            .placeholder {
+                ZStack {
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.15, green: 0.15, blue: 0.2),
+                            Color(red: 0.1, green: 0.1, blue: 0.15),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.system(size: 48, weight: .ultraLight))
+                        .foregroundColor(.white.opacity(0.3))
+                }
+            }
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(height: 200)
             .clipped()
     }
-
-    private var placeholderImage: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 0.15, green: 0.15, blue: 0.2),
-                    Color(red: 0.1, green: 0.1, blue: 0.15)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            
-            Image(systemName: "photo.on.rectangle.angled")
-                .font(.system(size: 48, weight: .ultraLight))
-                .foregroundColor(.white.opacity(0.3))
-        }
-    }
-    
-    
-    
-    private var statsRow: some View {
-        HStack(spacing: 16) {
-            StatItemView(
-                viewModel: .approved(count: photoset.approvedCount)
-            )
-            
-            StatItemView(
-                viewModel: .rejected(count: photoset.rejectedCount)
-            )
-            
-            StatItemView(
-                viewModel: .pending(count: photoset.pendingCount)
-            )
-            
-            Spacer()
-        }
-    }
-}
-
-// MARK: - Stat Item Component
-
-
-
-// MARK: - Corner Radius Extension
-//
-//extension View {
-//    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-//        clipShape(RoundedCorner(radius: radius, corners: corners))
-//    }
-//}
-
-//struct RoundedCorner: Shape {
-//    var radius: CGFloat = .infinity
-//    var corners: UIRectCorner = .allCorners
-//    
-//    func path(in rect: CGRect) -> Path {
-//        let path = UIBezierPath(
-//            roundedRect: rect,
-//            byRoundingCorners: corners,
-//            cornerRadii: CGSize(width: radius, height: radius)
-//        )
-//        return Path(path.cgPath)
-//    }
-//}
-
-// MARK: - Preview
-
-#Preview {
-    PhotosetCardView(
-        photoset: PhotosetCardViewModel(
-            from: PhotosetInfo(
-                id: .mock,
-                title: "Wedding at Lake Como",
-                coverUrl: URL(string: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800"),
-                photosCount: 342,
-                approvedCount: 128,
-                rejectedCount: 89,
-            )
-        )
-    )
-    .padding()
-    .background(Color(.systemGroupedBackground))
 }

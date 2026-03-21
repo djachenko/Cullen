@@ -30,5 +30,6 @@ extension Cullen {
         PhotosetDetailAssembly(),
         PhotoViewerAssembly(),
         AppAssembly(),
+        SystemAssembly(),
     ]).resolver
 }

@@ -68,6 +68,11 @@ private struct RingSectorShape: Shape {
 
 // MARK: - SwipeCompassView
 
+struct SwipeCompassViewModel {
+    let activeDirection: SwipeDirection
+    let progress: CGFloat
+}
+
 struct SwipeCompassView: View {
 
     private enum Layout {
@@ -78,17 +83,14 @@ struct SwipeCompassView: View {
         static var midRadius:   CGFloat { (outerRadius + innerRadius) / 2 }
     }
 
-    let activeDirection: SwipeDirection?
-    let progress: CGFloat
-    var extraDirections: [SwipeDirection] = [.right, .left]
+    let viewModel: SwipeCompassViewModel
 
     private var sectors: [SwipeCompassSector] {
-        let all: [SwipeDirection] = [.up] + extraDirections + [.down]
-        let n = all.count
-        let span = 2 * Double.pi / Double(n)
-        return all.enumerated().map { i, direction in
-            let angle = -Double.pi / 2 + Double(i) * span
-            return SwipeCompassSector(direction: direction, centerAngle: angle)
+        SwipeDirection.allDirections.map { direction in
+            // mainAngle: 0° наверху, по часовой
+            // CoreGraphics: 0° справа, по часовой → сдвиг на -90°
+            let centerAngle = (direction.mainAngle - 90) * .pi / 180
+            return SwipeCompassSector(direction: direction, centerAngle: centerAngle)
         }
     }
 
@@ -99,7 +101,7 @@ struct SwipeCompassView: View {
     var body: some View {
         ZStack {
             Color.black
-                .opacity(0.3 * progress)
+                .opacity(0.3 * viewModel.progress)
                 .ignoresSafeArea()
 
             ZStack {
@@ -108,15 +110,15 @@ struct SwipeCompassView: View {
                 }
             }
             .frame(width: Layout.diameter, height: Layout.diameter)
-            .scaleEffect(0.5 + 0.5 * progress)
-            .opacity(Double(progress))
+            .scaleEffect(0.5 + 0.5 * viewModel.progress)
+            .opacity(Double(viewModel.progress))
         }
-        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.8), value: progress)
-        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.8), value: activeDirection?.label)
+        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.8), value: viewModel.progress)
+        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.8), value: viewModel.activeDirection.label)
     }
 
     private func sectorView(_ sector: SwipeCompassSector) -> some View {
-        let isActive = activeDirection?.label == sector.direction.label
+        let isActive = viewModel.activeDirection.label == sector.direction.label
 
         return ZStack {
             RingSectorShape(
@@ -171,9 +173,18 @@ struct SwipeCompassView: View {
     ZStack {
         Color.black.ignoresSafeArea()
         VStack(spacing: 48) {
-            SwipeCompassView(activeDirection: .right, progress: 0.9)
-            SwipeCompassView(activeDirection: .up,    progress: 0.6)
-            SwipeCompassView(activeDirection: nil,    progress: 0.3)
+            SwipeCompassView(viewModel: SwipeCompassViewModel(
+                activeDirection: .right,
+                progress: 0.9
+            ))
+            SwipeCompassView(viewModel: SwipeCompassViewModel(
+                activeDirection: .up,
+                progress: 0.6
+            ))
+            SwipeCompassView(viewModel: SwipeCompassViewModel(
+                activeDirection: .down,
+                progress: 0.3
+            ))
         }
     }
 }

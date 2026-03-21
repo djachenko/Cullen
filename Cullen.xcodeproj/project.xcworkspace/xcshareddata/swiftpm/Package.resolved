@@ -1,5 +1,5 @@
 {
-  "originHash" : "b53106556358454f3884b0e5bc723fc7672aa291d199f40d102e4fcf4a21c16d",
+  "originHash" : "ffb8d2c9768c05912d271e3d181031c87de9793be11342b902e984e38f1bff10",
   "pins" : [
     {
       "identity" : "collectionconcurrencykit",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "c92b84898e34ab46ff0dad86c02a0acbe2d87008",
         "version" : "8.8.0"
+      }
+    },
+    {
+      "identity" : "popgesturerecognizerswiftui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hayek/PopGestureRecognizerSwiftUI",
+      "state" : {
+        "revision" : "ca74d8683fd4f62453c670bb7a5d419e2b7a5934",
+        "version" : "2.0.0"
       }
     },
     {

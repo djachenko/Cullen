@@ -34,9 +34,7 @@ struct PhotosetDetailView: View {
             ToolbarItem(placement: .topBarTrailing) { columnPicker }
         }
         .task {
-            if case .initial = viewModel.state {
-                await viewModel.loadPhotos()
-            }
+            await viewModel.loadPhotos()
         }
         .onGeometryChange(for: CGFloat.self) { geometry in
             geometry.size.width

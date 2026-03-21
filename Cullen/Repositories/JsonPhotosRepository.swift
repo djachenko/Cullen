@@ -18,7 +18,6 @@ struct PhotosetDTO: Decodable {
 
     enum CodingKeys: String, CodingKey {
         case id, name, created, photos
-        
         case coverIndex = "cover_index"
         case approvedCount = "approved_count"
         case rejectedCount = "rejected_count"
@@ -51,12 +50,23 @@ final class JsonPhotosRepository {
 
         let data = try Data(contentsOf: url)
         let dtos = try JSONDecoder().decode([PhotosetDTO].self, from: data)
-
         return dtos.map { $0.toDomain() }
     }
 }
 
 extension JsonPhotosRepository: PhotosetsRepository {
+    func getPhotosetIds() async throws -> [PhotosetId] {
+        try await task.value.map { $0.id }
+    }
+
+    func getPhotoset(id: PhotosetId) async throws -> Photoset {
+        let photosets = try await task.value
+        guard let photoset = photosets.first(where: { $0.id == id }) else {
+            throw PhotosetsRepositoryError.notFound(id: id)
+        }
+        return photoset
+    }
+
     func getPhotosets() async throws -> [Photoset] {
         try await task.value
     }

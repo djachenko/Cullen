@@ -10,6 +10,10 @@ import Foundation
 
 enum AppDestination: Hashable {
     case photosetFeed
-    case photosetDetail(PhotosetInfo)
-    case photoViewer(photos: [Photo], startIndex: Int)
+    case photosetDetail(PhotosetId)
+    case photoViewer(
+        photos: [Photo],
+        startIndex: Int,
+        photosetId: PhotosetId
+    )
 }

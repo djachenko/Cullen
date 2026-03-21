@@ -25,12 +25,16 @@ final class PhotoViewerViewModel: ObservableObject {
             }
         }
     }
-    @Published var dragOffset: CGPoint = .zero
+    @Published var compassViewModel: SwipeCompassViewModel?
     @Published var decisions: [PhotoId: Decision] = [:]
 
     // MARK: - Private Properties
 
+    private let photosetId: PhotosetId
     private let photos: [Photo]
+    private let swipeHandler: SwipeGestureHandler
+    private let saveDecisionUseCase: SaveDecisionUseCase
+    private let loadDecisionsUseCase: LoadDecisionsUseCase
 
     // MARK: - Computed Properties
 
@@ -50,71 +54,60 @@ final class PhotoViewerViewModel: ObservableObject {
         currentIndex > 0
     }
 
-    /// Определяет направление свайпа по текущему drag offset
-    var activeSwipeDirection: SwipeDirection? {
-        let threshold: CGFloat = 40
-        let x = dragOffset.x
-        let y = dragOffset.y
-
-        if abs(x) > abs(y) {
-            if x > threshold  { return .right }
-            if x < -threshold { return .left }
-        } else {
-            if y < -threshold { return .up }
-            // Вниз — dismiss, не категория
-        }
-        return nil
-    }
-
-    /// Прогресс свайпа 0→1 для оверлея
-    var swipeProgress: CGFloat {
-        let threshold: CGFloat = 100
-        let x = dragOffset.x
-        let y = dragOffset.y
-        let dominant = abs(x) > abs(y) ? abs(x) : abs(y)
-        return min(1, dominant / threshold)
-    }
-
-    /// Rotation angle при свайпе влево/вправо
-    var swipeRotation: Angle {
-        .degrees(Double(dragOffset.x) / 20)
-    }
-
-    private var modifiedDecisions: [PhotoId: Decision] = [:]
-
-    init(photos: [Photo], startIndex: Int) {
+    init(
+        photos: [Photo],
+        startIndex: Int,
+        photosetId: PhotosetId,
+        swipeHandler: SwipeGestureHandler,
+        saveDecisionUseCase: SaveDecisionUseCase,
+        loadDecisionsUseCase: LoadDecisionsUseCase,
+    ) {
+        self.photosetId = photosetId
         self.photos = photos
         self.currentIndex = startIndex
+        self.swipeHandler = swipeHandler
+        self.saveDecisionUseCase = saveDecisionUseCase
+        self.loadDecisionsUseCase = loadDecisionsUseCase
     }
 
     // MARK: - Public Methods
 
+    func loadDecisions() async {
+        decisions = (try? await loadDecisionsUseCase.execute(for: photosetId)) ?? [:]
+    }
+
     func commitSwipe(_ direction: SwipeDirection) {
-        decisions[currentPhoto.id] = direction.decision
-
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            dragOffset = .zero
-        }
-
-        // Переходим к следующему фото с небольшой задержкой
-        if hasNext {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    self.currentIndex += 1
-                }
+        if let decision = direction.decision {
+            decisions[currentPhoto.id] = decision
+            Task {
+                try? await saveDecisionUseCase.execute(
+                    photoId: currentPhoto.id,
+                    decision: decision,
+                    in: photosetId
+                )
             }
         }
-    }
 
-    func cancelSwipe() {
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-            dragOffset = .zero
+        switch direction {
+            case .up:
+                goToPrevious()
+            case .down:
+                goToNext()
+            default:
+                if hasNext {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            self.currentIndex += 1
+                        }
+                    }
+                }
         }
     }
+
+    func cancelSwipe() {}
 
     func goToNext() {
         guard hasNext else { return }
-//        animation in view model???
         withAnimation(.easeInOut(duration: 0.25)) { currentIndex += 1 }
     }
 
@@ -125,5 +118,31 @@ final class PhotoViewerViewModel: ObservableObject {
 
     func decision(for photo: Photo) -> Decision? {
         decisions[photo.id]
+    }
+}
+
+extension PhotoViewerViewModel {
+    func handle(recognizer: UIPanGestureRecognizer) {
+        switch recognizer.state {
+        case .changed:
+            if let (angle, progress) = swipeHandler.track(recognizer),
+               let direction = SwipeDirection(angle: angle) {
+                compassViewModel = SwipeCompassViewModel(activeDirection: direction, progress: progress)
+            } else {
+                compassViewModel = nil
+            }
+
+        case .ended, .cancelled:
+            if let angle = swipeHandler.evaluate(recognizer),
+               let direction = SwipeDirection(angle: angle) {
+                commitSwipe(direction)
+            } else {
+                cancelSwipe()
+            }
+            compassViewModel = nil
+
+        default:
+            break
+        }
     }
 }
