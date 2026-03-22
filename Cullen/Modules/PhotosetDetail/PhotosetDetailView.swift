@@ -31,7 +31,12 @@ struct PhotosetDetailView: View {
         .navigationTitle(viewModel.title)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { columnPicker }
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack {
+                    exportButton
+                    columnPicker
+                }
+            }
         }
         .task {
             await viewModel.loadPhotos()
@@ -42,8 +47,33 @@ struct PhotosetDetailView: View {
             gridWidth = width
         }
     }
+}
 
-    // MARK: - Column Picker
+extension PhotosetDetailView {
+    private var exportButton: some View {
+        Group {
+            if let export = viewModel.export {
+                ShareLink(
+                    item: export,
+                    preview: SharePreview(
+                        export.filename,
+                        image: Image(systemName: "doc.text")
+                    )
+                ) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20))
+                }
+            } else {
+                Button {
+                    viewModel.exportDecisions()
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20))
+                }
+                .disabled(viewModel.state.isLoading)
+            }
+        }
+    }
 
     private var columnPicker: some View {
         Menu {
@@ -57,8 +87,6 @@ struct PhotosetDetailView: View {
                 .font(.system(size: 20))
         }
     }
-
-    // MARK: - Photo Content
 
     private var loadingView: some View {
         VStack(spacing: 16) {
@@ -133,8 +161,12 @@ struct PhotosetDetailView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
-            Button("Retry") { Task { await viewModel.loadPhotos() } }
-                .buttonStyle(.bordered)
+            Button("Retry") {
+                Task {
+                    await viewModel.loadPhotos()
+                }
+            }
+            .buttonStyle(.bordered)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 80)

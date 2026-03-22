@@ -30,6 +30,7 @@ extension PhotosetDTO {
             id: .int(id),
             name: name,
             remotePath: "/photosets/\(id)",
+            source: .vk,
             syncStatus: SyncStatus.allCases.randomElement() ?? .pending,
             lastSyncDate: Bool.random() ? Date() : nil,
             createdAt: Date(timeIntervalSince1970: created),
@@ -44,7 +45,7 @@ extension PhotosetDTO {
 
 final class JsonPhotosRepository {
     private lazy var task = Task {
-        guard let url = Bundle.main.url(forResource: "cullen", withExtension: "json") else {
+        guard let url = Bundle.main.url(forResource: "cullen_2", withExtension: "json") else {
             throw URLError(.fileDoesNotExist)
         }
 

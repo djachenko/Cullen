@@ -14,6 +14,7 @@ import Combine
 final class PhotosetDetailViewModel: ObservableObject {
     @Published var state: PhotosetDetailState = .initial
     @Published var aspectRatio: Double = 3.0 / 2.0
+    @Published var export: DecisionsExport?
 
     var title: String {
         cachedPhotoset?.name ?? ""
@@ -22,6 +23,7 @@ final class PhotosetDetailViewModel: ObservableObject {
     private let coordinator: Coordinator
     private let fetchPhotosUseCase: FetchPhotosUseCase
     private let loadDecisionsUseCase: LoadDecisionsUseCase
+    private let exportDecisionsUseCase: ExportDecisionsUseCase
 
     private let photosetTask: Task<Photoset, Error>
     private lazy var photosTask = Task {
@@ -42,34 +44,23 @@ final class PhotosetDetailViewModel: ObservableObject {
         photosetTask: Task<Photoset, Error>,
         coordinator: Coordinator,
         fetchPhotosUseCase: FetchPhotosUseCase,
-        loadDecisionsUseCase: LoadDecisionsUseCase
+        loadDecisionsUseCase: LoadDecisionsUseCase,
+        exportDecisionsUseCase: ExportDecisionsUseCase
     ) {
         self.photosetTask = photosetTask
         self.coordinator = coordinator
         self.fetchPhotosUseCase = fetchPhotosUseCase
         self.loadDecisionsUseCase = loadDecisionsUseCase
+        self.exportDecisionsUseCase = exportDecisionsUseCase
     }
-
-//    convenience init(
-//        photoset: Photoset,
-//        coordinator: Coordinator,
-//        fetchPhotosUseCase: FetchPhotosUseCase,
-//        loadDecisionsUseCase: LoadDecisionsUseCase
-//    ) {
-//        self.init(
-//            photosetTask: Task { photoset },
-//            coordinator: coordinator,
-//            fetchPhotosUseCase: fetchPhotosUseCase,
-//            loadDecisionsUseCase: loadDecisionsUseCase
-//        )
-//    }
 
     nonisolated convenience init(
         id: PhotosetId,
         coordinator: Coordinator,
         fetchPhotosetUseCase: FetchPhotosetUseCase,
         fetchPhotosUseCase: FetchPhotosUseCase,
-        loadDecisionsUseCase: LoadDecisionsUseCase
+        loadDecisionsUseCase: LoadDecisionsUseCase,
+        exportDecisionsUseCase: ExportDecisionsUseCase
     ) {
         self.init(
             photosetTask: Task {
@@ -77,7 +68,8 @@ final class PhotosetDetailViewModel: ObservableObject {
             },
             coordinator: coordinator,
             fetchPhotosUseCase: fetchPhotosUseCase,
-            loadDecisionsUseCase: loadDecisionsUseCase
+            loadDecisionsUseCase: loadDecisionsUseCase,
+            exportDecisionsUseCase: exportDecisionsUseCase
         )
     }
 
@@ -109,18 +101,33 @@ final class PhotosetDetailViewModel: ObservableObject {
         }
     }
 
-    func toggleFilter(_ filter: PhotoFilter) {
-        // TODO: restore filtering
-    }
+    func exportDecisions() {
+        guard let photoset = cachedPhotoset else {
+            return
+        }
 
-    func isFilterActive(_ filter: PhotoFilter) -> Bool {
-        true
+        Task {
+            guard let data = try? await exportDecisionsUseCase.execute(
+                photosetId: photoset.id,
+                source: photoset.source
+            ) else {
+                return
+            }
+
+            export = DecisionsExport(
+                filename: "\(photoset.name).json",
+                data: data
+            )
+        }
     }
 }
 
 private extension PhotosetDetailViewModel {
     func didTap(photo: Photo) {
-        guard let photos, let photoset = cachedPhotoset else { return }
+        guard let photos, let photoset = cachedPhotoset else {
+            return
+        }
+
         coordinator.show(
             .photoViewer(
                 photos: photos,
@@ -136,6 +143,15 @@ enum PhotosetDetailState {
     case loading
     case content(PhotosetDetailContent)
     case error(message: String)
+
+    var isLoading: Bool {
+        switch self {
+        case .initial, .loading:
+            true
+        case .content, .error:
+            false
+        }
+    }
 }
 
 typealias PhotosetDetailContent = [PhotoGridCellViewModel]

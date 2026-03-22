@@ -135,10 +135,15 @@ extension ZoomableImageView {
             currentURL = url
             imageView.image = nil
 
-            guard let url else { return }
+            guard let url else {
+                return
+            }
 
             imageView.kf.setImage(with: url) { [weak self] result in
-                guard case .success = result else { return }
+                guard case .success = result else {
+                    return
+                }
+                
                 self?.layoutImageView()
             }
         }
@@ -146,9 +151,19 @@ extension ZoomableImageView {
         // MARK: - Layout
 
         func layoutImageView() {
-            guard let image = imageView.image else { return }
+            guard scrollView.zoomScale == 1 else {
+                return
+            }
+
+            guard let image = imageView.image else {
+                return
+            }
+
             let scrollSize = scrollView.bounds.size
-            guard scrollSize.width > 0, scrollSize.height > 0 else { return }
+
+            guard scrollSize.width > 0, scrollSize.height > 0 else {
+                return
+            }
 
             let scale = min(
                 scrollSize.width / image.size.width,

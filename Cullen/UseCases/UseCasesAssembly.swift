@@ -16,6 +16,7 @@ final class UseCasesAssembly: Assembly {
         container.autoregister(FetchPhotosetInfoUseCase.self, initializer: FetchPhotosetInfoUseCaseImpl.init)
         container.autoregister(GetPhotosetStatisticsUseCase.self, initializer: GetPhotosetStatisticsUseCaseImpl.init)
         container.autoregister(FetchPhotosUseCase.self, initializer: FetchPhotosUseCaseImpl.init)
+        container.autoregister(ExportDecisionsUseCase.self, initializer: ExportDecisionsUseCaseImpl.init)
 
         container.autoregister(DecisionsUseCaseImpl.self, initializer: DecisionsUseCaseImpl.init)
             .inObjectScope(.container)

@@ -23,7 +23,8 @@ final class PhotosetDetailAssembly: Assembly {
                 coordinator: resolver ~> Coordinator.self,
                 fetchPhotosetUseCase: resolver ~> FetchPhotosetUseCase.self,
                 fetchPhotosUseCase: resolver ~> FetchPhotosUseCase.self,
-                loadDecisionsUseCase: resolver ~> LoadDecisionsUseCase.self
+                loadDecisionsUseCase: resolver ~> LoadDecisionsUseCase.self,
+                exportDecisionsUseCase: resolver ~> ExportDecisionsUseCase.self
             )
         }
         .inObjectScope(.weak)

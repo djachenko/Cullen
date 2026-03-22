@@ -22,14 +22,17 @@ extension SwipeDirection: Equatable {
     }
 }
 
+// TODO: Should color, icon and label be here???
+
 extension SwipeDirection {
-    static let up    = SwipeDirection(
-        label: "Prev",
+    static let up = SwipeDirection(
+        label: "Next",
         icon: "arrow.up.circle.fill",
-        color: .orange,
+        color: .blue,
         decision: nil,
         mainAngle: 0
     )
+
     static let right = SwipeDirection(
         label: "Approve",
         icon: "checkmark.circle.fill",
@@ -37,14 +40,16 @@ extension SwipeDirection {
         decision: .approved,
         mainAngle: 90
     )
-    static let down  = SwipeDirection(
-        label: "Next",
+
+    static let down = SwipeDirection(
+        label: "Prev",
         icon: "arrow.down.circle.fill",
-        color: .blue,
+        color: .orange,
         decision: nil,
         mainAngle: 180
     )
-    static let left  = SwipeDirection(
+
+    static let left = SwipeDirection(
         label: "Reject",
         icon: "xmark.circle.fill",
         color: .red,
@@ -62,31 +67,15 @@ extension SwipeDirection {
 
 extension SwipeDirection {
     init?(angle: Double) {
-        let match = SwipeDirection.allDirections.min(by: { direction in
+        let match = SwipeDirection.allDirections.min { direction in
             let delta = (angle - direction.mainAngle + 360).truncatingRemainder(dividingBy: 360)
             return min(delta, 360 - delta)
-        })
+        }
 
         guard let match else {
             return nil
         }
         
         self = match
-    }
-}
-
-// MARK: - Collection+KeyPath (временно)
-
-extension Collection {
-    func min(by key: (Element) -> some Comparable) -> Element? {
-        self.min(by: { key($0) < key($1) })
-    }
-
-    func max(by key: (Element) -> some Comparable) -> Element? {
-        self.max(by: { key($0) < key($1) })
-    }
-
-    func sorted(by key: (Element) -> some Comparable) -> [Element] {
-        self.sorted(by: { key($0) < key($1) })
     }
 }

@@ -34,6 +34,7 @@ struct Photoset: Identifiable, Hashable {
     let id: PhotosetId
     let name: String
     let remotePath: String
+    let source: PhotosetSource
     var syncStatus: SyncStatus
     var lastSyncDate: Date?
     let createdAt: Date
@@ -51,7 +52,7 @@ struct Photoset: Identifiable, Hashable {
         guard photosCount > 0 else {
             return 0
         }
-        
+
         return Double(approvedCount + rejectedCount) / Double(photosCount)
     }
 

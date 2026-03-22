@@ -17,13 +17,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D0D8407E2F5CB3F000DC0CE1 /* Exceptions for "Cullen" folder in "Cullen" target */ = {
+		D002A5C32F6F04410053419C /* Exceptions for "Cullen" folder in "Cullen" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				__trash/BottomBar.swift,
 				__trash/CullenNavigationBar.swift,
 				__trash/MockPhotoRepository.swift,
 				__trash/MockServices.swift,
+				__trash/NavBar.swift,
 				__trash/PhotoDetailDisplayModel.swift,
+				__trash/PhotoFilter.swift,
 				__trash/RepositoryProtocols.swift,
 				__trash/SwipeHintsView.swift,
 			);
@@ -35,7 +38,7 @@
 		D0C3DE7D2EDD91AD0068307C /* Cullen */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D0D8407E2F5CB3F000DC0CE1 /* Exceptions for "Cullen" folder in "Cullen" target */,
+				D002A5C32F6F04410053419C /* Exceptions for "Cullen" folder in "Cullen" target */,
 			);
 			path = Cullen;
 			sourceTree = "<group>";

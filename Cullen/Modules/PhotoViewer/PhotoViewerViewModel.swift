@@ -79,6 +79,7 @@ final class PhotoViewerViewModel: ObservableObject {
     func commitSwipe(_ direction: SwipeDirection) {
         if let decision = direction.decision {
             decisions[currentPhoto.id] = decision
+
             Task {
                 try? await saveDecisionUseCase.execute(
                     photoId: currentPhoto.id,
@@ -88,12 +89,16 @@ final class PhotoViewerViewModel: ObservableObject {
             }
         }
 
+//        TODO: create delay
         switch direction {
             case .up:
-                goToPrevious()
-            case .down:
+//                TODO: Move to default
                 goToNext()
+            case .down:
+                goToPrevious()
             default:
+                
+
                 if hasNext {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                         withAnimation(.easeInOut(duration: 0.25)) {
@@ -118,6 +123,18 @@ final class PhotoViewerViewModel: ObservableObject {
 
     func decision(for photo: Photo) -> Decision? {
         decisions[photo.id]
+    }
+
+    func resetDecision() {
+        decisions[currentPhoto.id] = .pending
+
+        Task {
+            try? await saveDecisionUseCase.execute(
+                photoId: currentPhoto.id,
+                decision: .pending,
+                in: photosetId
+            )
+        }
     }
 }
 

@@ -46,6 +46,11 @@ struct PhotoViewerView: View {
         .navigationTitle("\(viewModel.currentIndex + 1) / \(viewModel.totalCount)")
         .navigationBarTitleDisplayMode(.inline)
         .statusBarHidden(!isUIVisible)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                decisionBadge
+            }
+        }
         .swipeBackGestureDisabled()
         .animation(.easeInOut(duration: 0.2), value: isUIVisible)
         .task {
@@ -70,6 +75,25 @@ struct PhotoViewerView: View {
         .ignoresSafeArea()
         .id(viewModel.currentIndex)
         .transition(.opacity)
+    }
+
+//    @ViewBuilder
+    private var decisionBadge: some View {
+        Button {
+            viewModel.resetDecision()
+        } label: {
+            switch viewModel.decisions[viewModel.currentPhoto.id] {
+                case .approved:
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                case .rejected:
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.red)
+                case .pending, .none:
+                    Image(systemName: "circle.dotted")
+                        .foregroundColor(.secondary)
+            }
+        }
     }
 }
 
