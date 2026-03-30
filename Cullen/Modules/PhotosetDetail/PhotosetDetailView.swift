@@ -10,7 +10,7 @@ import SwiftUI
 
 struct PhotosetDetailView: View {
     @State private var columnCount: Int = 3
-    @State private var gridWidth: CGFloat = 390
+    @State private var gridWidth: CGFloat = 0
     @StateObject private var viewModel: PhotosetDetailViewModel
 
     init(viewModel: PhotosetDetailViewModel) {
@@ -18,14 +18,22 @@ struct PhotosetDetailView: View {
     }
 
     var body: some View {
-        ZStack {
-            switch viewModel.state {
+        GeometryReader { geometry in
+            ZStack {
+                switch viewModel.state {
                 case .initial, .loading:
                     loadingView
                 case .content(let content):
                     contentView(content: content)
                 case .error(let message):
                     errorView(message: message)
+                }
+            }
+            .onAppear {
+                gridWidth = geometry.size.width
+            }
+            .onChange(of: geometry.size.width) { _, width in
+                gridWidth = width
             }
         }
         .navigationTitle(viewModel.title)
@@ -40,11 +48,6 @@ struct PhotosetDetailView: View {
         }
         .task {
             await viewModel.loadPhotos()
-        }
-        .onGeometryChange(for: CGFloat.self) { geometry in
-            geometry.size.width
-        } action: { width in
-            gridWidth = width
         }
     }
 }
