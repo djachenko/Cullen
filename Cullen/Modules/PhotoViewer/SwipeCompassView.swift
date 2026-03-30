@@ -9,64 +9,11 @@ import SwiftUI
 
 // MARK: - SwipeCompassSector
 
-struct SwipeCompassSector {
+private struct SwipeCompassSector {
     let direction: SwipeDirection
-    let centerAngle: Double
+    let centerAngle: Angle
 }
 
-// MARK: - RingSectorShape
-
-private struct RingSectorShape: Shape {
-
-    let centerAngle: Double
-    let spanAngle: Double
-    let innerRadius: CGFloat
-    let outerRadius: CGFloat
-    /// Физический зазор в пикселях — одинаковый по всей высоте сектора
-    let gapPixels: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-
-        // Угловой зазор разный для внешней и внутренней дуги —
-        // чтобы физическое расстояние между секторами было одинаковым везде.
-        // asin(halfGap / r) даёт угол от центра до края зазора.
-        let halfGap = gapPixels / 2
-        let outerGap = 2 * asin(Double(halfGap / outerRadius))
-        let innerGap = 2 * asin(Double(halfGap / innerRadius))
-
-        let outerStart = centerAngle - spanAngle / 2 + outerGap / 2
-        let outerEnd   = centerAngle + spanAngle / 2 - outerGap / 2
-        let innerStart = centerAngle - spanAngle / 2 + innerGap / 2
-        let innerEnd   = centerAngle + spanAngle / 2 - innerGap / 2
-
-        var path = Path()
-        path.addArc(
-            center: center,
-            radius: outerRadius,
-            startAngle: .radians(outerStart),
-            endAngle: .radians(outerEnd),
-            clockwise: false
-        )
-        // Линия от конца внешней дуги к концу внутренней
-        let innerEndPoint = CGPoint(
-            x: center.x + innerRadius * CGFloat(cos(innerEnd)),
-            y: center.y + innerRadius * CGFloat(sin(innerEnd))
-        )
-        path.addLine(to: innerEndPoint)
-        path.addArc(
-            center: center,
-            radius: innerRadius,
-            startAngle: .radians(innerEnd),
-            endAngle: .radians(innerStart),
-            clockwise: true
-        )
-        path.closeSubpath()
-        return path
-    }
-}
-
-// MARK: - SwipeCompassView
 
 struct SwipeCompassViewModel {
     let activeDirection: SwipeDirection
@@ -85,18 +32,15 @@ struct SwipeCompassView: View {
 
     let viewModel: SwipeCompassViewModel
 
-    private var sectors: [SwipeCompassSector] {
-        SwipeDirection.allDirections.map { direction in
-            // mainAngle: 0° наверху, по часовой
-            // CoreGraphics: 0° справа, по часовой → сдвиг на -90°
-            let centerAngle = (direction.mainAngle - 90) * .pi / 180
-            return SwipeCompassSector(direction: direction, centerAngle: centerAngle)
-        }
+    private static let sectors = SwipeDirection.allDirections.map { direction in
+        // mainAngle: 0° наверху, по часовой
+        // CoreGraphics: 0° справа, по часовой → сдвиг на -90°
+        SwipeCompassSector(
+            direction: direction,
+            centerAngle: direction.mainAngleDegrees - .pi / 2
+        )
     }
 
-    private var spanAngle: Double {
-        2 * Double.pi / Double(sectors.count)
-    }
 
     var body: some View {
         ZStack {
@@ -105,8 +49,8 @@ struct SwipeCompassView: View {
                 .ignoresSafeArea()
 
             ZStack {
-                ForEach(sectors, id: \.direction.label) { sector in
-                    sectorView(sector)
+                ForEach(SwipeCompassView.sectors, id: \.direction.label) { sector in
+                    sectorView(sector: sector)
                 }
             }
             .frame(width: Layout.diameter, height: Layout.diameter)
@@ -116,14 +60,18 @@ struct SwipeCompassView: View {
         .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.8), value: viewModel.progress)
         .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.8), value: viewModel.activeDirection.label)
     }
+}
 
-    private func sectorView(_ sector: SwipeCompassSector) -> some View {
+private extension SwipeCompassView {
+    private static let spanAngle = Angle.radians(2 * .pi) / Double(sectors.count)
+
+    func sectorView(sector: SwipeCompassSector) -> some View {
         let isActive = viewModel.activeDirection.label == sector.direction.label
 
         return ZStack {
             RingSectorShape(
                 centerAngle: sector.centerAngle,
-                spanAngle: spanAngle,
+                spanAngle: SwipeCompassView.spanAngle,
                 innerRadius: Layout.innerRadius,
                 outerRadius: Layout.outerRadius,
                 gapPixels: Layout.gapPixels
@@ -132,7 +80,7 @@ struct SwipeCompassView: View {
             .overlay(
                 RingSectorShape(
                     centerAngle: sector.centerAngle,
-                    spanAngle: spanAngle,
+                    spanAngle: SwipeCompassView.spanAngle,
                     innerRadius: Layout.innerRadius,
                     outerRadius: Layout.outerRadius,
                     gapPixels: Layout.gapPixels
@@ -150,10 +98,10 @@ struct SwipeCompassView: View {
         .frame(width: Layout.diameter, height: Layout.diameter)
     }
 
-    private func iconLabel(sector: SwipeCompassSector, isActive: Bool) -> some View {
+    func iconLabel(sector: SwipeCompassSector, isActive: Bool) -> some View {
         let r = Layout.midRadius
-        let x = Layout.outerRadius + CGFloat(cos(sector.centerAngle)) * r
-        let y = Layout.outerRadius + CGFloat(sin(sector.centerAngle)) * r
+        let x = Layout.outerRadius + cos(sector.centerAngle.radians) * r
+        let y = Layout.outerRadius + sin(sector.centerAngle.radians) * r
 
         return VStack(spacing: 3) {
             Image(systemName: sector.direction.icon)
@@ -177,10 +125,12 @@ struct SwipeCompassView: View {
                 activeDirection: .right,
                 progress: 0.9
             ))
+
             SwipeCompassView(viewModel: SwipeCompassViewModel(
                 activeDirection: .up,
                 progress: 0.6
             ))
+
             SwipeCompassView(viewModel: SwipeCompassViewModel(
                 activeDirection: .down,
                 progress: 0.3

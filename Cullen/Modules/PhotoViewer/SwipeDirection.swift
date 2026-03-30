@@ -13,12 +13,12 @@ struct SwipeDirection: Hashable {
     let icon: String
     let color: Color
     let decision: Decision?
-    let mainAngle: Double
+    let mainAngleDegrees: Angle
 }
 
 extension SwipeDirection: Equatable {
     static func == (lhs: SwipeDirection, rhs: SwipeDirection) -> Bool {
-        lhs.mainAngle == rhs.mainAngle
+        lhs.mainAngleDegrees == rhs.mainAngleDegrees
     }
 }
 
@@ -30,7 +30,7 @@ extension SwipeDirection {
         icon: "arrow.up.circle.fill",
         color: .blue,
         decision: nil,
-        mainAngle: 0
+        mainAngleDegrees: .degrees(0)
     )
 
     static let right = SwipeDirection(
@@ -38,7 +38,7 @@ extension SwipeDirection {
         icon: "checkmark.circle.fill",
         color: .green,
         decision: .approved,
-        mainAngle: 90
+        mainAngleDegrees: .degrees(90)
     )
 
     static let down = SwipeDirection(
@@ -46,7 +46,7 @@ extension SwipeDirection {
         icon: "arrow.down.circle.fill",
         color: .orange,
         decision: nil,
-        mainAngle: 180
+        mainAngleDegrees: .degrees(180)
     )
 
     static let left = SwipeDirection(
@@ -54,7 +54,7 @@ extension SwipeDirection {
         icon: "xmark.circle.fill",
         color: .red,
         decision: .rejected,
-        mainAngle: 270
+        mainAngleDegrees: .degrees(270)
     )
     
     static let allDirections: [SwipeDirection] = [
@@ -68,7 +68,7 @@ extension SwipeDirection {
 extension SwipeDirection {
     init?(angle: Double) {
         let match = SwipeDirection.allDirections.min { direction in
-            let delta = (angle - direction.mainAngle + 360).truncatingRemainder(dividingBy: 360)
+            let delta = (angle - direction.mainAngleDegrees.degrees + 360).truncatingRemainder(dividingBy: 360)
             return min(delta, 360 - delta)
         }
 
