@@ -57,15 +57,13 @@ extension JsonDecisionsRepository: DecisionsRepository {
             return [:]
         }
 
-        let data = try Data(contentsOf: url)
-
-        return try JSONDecoder().decode([PhotoId: Decision].self, from: data)
+        return try [PhotoId: Decision].fromJson(at: url)
     }
 
     func save(decisions: [PhotoId: Decision], for photosetId: PhotosetId) async throws {
         let url = try fileURL(for: photosetId)
-        let data = try JSONEncoder().encode(decisions)
-        try data.write(to: url, options: .atomic)
+        try decisions.toJson(at: url)
+    }
 }
 
 private extension JsonDecisionsRepository {

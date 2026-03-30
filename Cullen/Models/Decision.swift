@@ -6,30 +6,14 @@
 //
 
 
-enum Decision: String, Codable {
+enum Decision: String {
     case pending
     case approved
     case rejected
-    
-    var remoteFolderName: String {
-        switch self {
-        case .pending: 
-            ""
-        case .approved:
-            "approved"
-        case .rejected:
-            "rejected"
-        }
-    }
 }
 
 extension Decision: CaseIterable {}
 
 extension Decision: Equatable {}
 
-extension Decision {
-    @available(*, deprecated)
-    static var mock: Decision {
-        .allCases.randomElement() ?? .pending
-    }
-}
+extension Decision: Codable {}

@@ -13,6 +13,10 @@ import SwinjectAutoregistration
 struct Cullen: App {
     init() {
         KingfisherConfiguration.configure()
+
+        Task {
+            await (Cullen.resolver ~> MigrationService.self).runMigrations()
+        }
     }
 
     var body: some Scene {
@@ -31,5 +35,6 @@ extension Cullen {
         PhotoViewerAssembly(),
         AppAssembly(),
         SystemAssembly(),
+        MigrationsAssembly(),
     ]).resolver
 }
