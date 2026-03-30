@@ -39,9 +39,6 @@ struct PhotoViewerView: View {
                     .allowsHitTesting(false)
             }
         }
-        .background {
-            NavigationBackSwipeDisabler()
-        }
         .navigationBarHidden(!isUIVisible)
         .navigationTitle("\(viewModel.currentIndex + 1) / \(viewModel.totalCount)")
         .navigationBarTitleDisplayMode(.inline)
@@ -57,10 +54,10 @@ struct PhotoViewerView: View {
             await viewModel.loadDecisions()
         }
     }
+}
 
-    // MARK: - Photo View
-
-    private var photoView: some View {
+private extension PhotoViewerView {
+    var photoView: some View {
         ZoomableImageView(
             viewModel: ZoomableImageViewModel(
                 url: viewModel.currentPhoto.url,
@@ -77,37 +74,15 @@ struct PhotoViewerView: View {
         .transition(.opacity)
     }
 
-//    @ViewBuilder
-    private var decisionBadge: some View {
+    var decisionBadge: some View {
         Button {
             viewModel.resetDecision()
         } label: {
-            switch viewModel.decisions[viewModel.currentPhoto.id] {
-                case .approved:
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                case .rejected:
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.red)
-                case .pending, .none:
-                    Image(systemName: "circle.dotted")
-                        .foregroundColor(.secondary)
-            }
+            DecisionBadge(decision: viewModel.decisions[viewModel.currentPhoto.id] ?? .pending)
         }
     }
 }
 
-struct NavigationBackSwipeDisabler: UIViewControllerRepresentable {
-    func makeUIViewController(context: Context) -> UIViewController {
-        let vc = UIViewController()
-        DispatchQueue.main.async {
-            vc.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
-        }
-        return vc
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
-}
 
 // MARK: - Preview
 
@@ -121,7 +96,7 @@ import SwinjectAutoregistration
                 [
                     Photo(
                         id: "test",
-                        url: URL(string: "https://sun9-38.userapi.com/s/v1/ig2/cMnRR4FQ4-IhOlY8sj-ZfVH4pdnmvAg0gVwruqXyfzWIpl8c3lxQaqzmz5Y_ff0f2SjiIm79NPZAv2DBZ8ErOuHW.jpg?quality=95&as=32x21,48x32,72x48,108x72,160x106,240x160,360x239,480x319,540x359,640x426,720x479,1080x718,1280x851,1440x958,2560x1703&from=bu&cs=2560x0"),
+                        url: URL(string: "https://sun9-38.userapi.com/s/v1/ig2/cMnRR4FQ4-IhOlY8sj-ZfVH4pdnmvAg0gVwruqXyfzWIpl8c3lxQaqzmz5Y_ff0f2SjiIm79NPZAv2DBZ8ErOuHW.jpg?quality=95&as=32x21,48x32,72x48,108x72,160x106,240x160,360x239,480x319,540x359,640x426,720x479,1080x718,1280x851,1440x958,2560x1703&from=bu&cs=2560x0")!,
                     )
                 ],
                 0

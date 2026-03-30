@@ -25,18 +25,29 @@ struct PhotoGridCell: View {
     let aspectRatio: Double
     let width: CGFloat
 
+    @State var success = false
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             photoImage
-            decisionBadge.padding(6)
+
+            if success {
+                decisionBadge.padding(6)
+            }
         }
         .aspectRatio(aspectRatio, contentMode: .fit)
         .onTapGesture { viewModel.onTap() }
     }
+}
 
-    private var photoImage: some View {
+private extension PhotoGridCell{
+    var photoImage: some View {
         KFImage(viewModel.imageURL)
-            .placeholder { placeholder }
+            .placeholder { loadingView }
+            .onFailureView { failureView }
+            .onSuccess { _ in
+                success = true
+            }
             .cancelOnDisappear(true)
             .downsampling(size: CGSize(width: width, height: width / aspectRatio))
             .cacheOriginalImage()
@@ -47,32 +58,18 @@ struct PhotoGridCell: View {
             .clipped()
     }
 
-    private var placeholder: some View {
-        ZStack {
-            Color(.systemGray5)
-            Image(systemName: "photo")
-                .foregroundColor(.secondary)
-                .font(.system(size: 20))
-        }
+    var loadingView: some View {
+        ProgressView()
     }
 
-    private var decisionBadge: some View {
-        Group {
-            switch viewModel.decision {
-            case .approved:
-                badge(icon: "checkmark.circle.fill", color: .green)
-            case .rejected:
-                badge(icon: "xmark.circle.fill", color: .red)
-            case .pending:
-                EmptyView()
-            }
-        }
+    var failureView: some View {
+        Image(systemName: "exclamationmark.triangle.fill")
+            .font(.system(size: 24))
+            .foregroundColor(.red)
     }
 
-    private func badge(icon: String, color: Color) -> some View {
-        Image(systemName: icon)
-            .font(.system(size: 16, weight: .semibold))
-            .foregroundColor(.white)
-            .shadow(color: .black.opacity(0.4), radius: 2, x: 0, y: 1)
+    var decisionBadge: some View {
+        DecisionBadge(decision: viewModel.decision)
+            .size(16)
     }
 }

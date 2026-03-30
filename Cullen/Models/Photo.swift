@@ -11,5 +11,5 @@ typealias PhotoId = String
 
 struct Photo: Identifiable, Hashable {
     let id: PhotoId
-    let url: URL?
+    let url: URL
 }
