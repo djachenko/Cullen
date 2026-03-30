@@ -30,9 +30,11 @@ final class PhotosetDetailViewModel: ObservableObject {
         let photoset = try await photosetTask.value
         return try await fetchPhotosUseCase.execute(id: photoset.id)
     }
+
     private var decisionsTask: Task<[PhotoId: Decision], Error> {
         Task {
             let photoset = try await photosetTask.value
+
             return try await loadDecisionsUseCase.execute(for: photoset.id)
         }
     }
@@ -74,6 +76,10 @@ final class PhotosetDetailViewModel: ObservableObject {
     }
 
     func loadPhotos() async {
+        guard case .initial = state else {
+            return
+        }
+
         state = .loading
 
         do {
@@ -124,7 +130,8 @@ final class PhotosetDetailViewModel: ObservableObject {
 
 private extension PhotosetDetailViewModel {
     func didTap(photo: Photo) {
-        guard let photos, let photoset = cachedPhotoset else {
+        guard let photos,
+              let photoset = cachedPhotoset else {
             return
         }
 

@@ -184,20 +184,19 @@ import SwinjectAutoregistration
 }
 
 private struct PreviewWrapper: View {
-    @State private var photosetInfo: PhotosetInfo?
+    @State private var photosetId: PhotosetId?
 
     var body: some View {
         Group {
-            if let photosetInfo {
-                Cullen.resolver ~> (PhotosetDetailView.self, argument: photosetInfo)
+            if let photosetId {
+                Cullen.resolver ~> (PhotosetDetailView.self, argument: photosetId)
             } else {
                 ProgressView()
                     .task {
                         let repository = Cullen.resolver ~> PhotosetsRepository.self
+                        let photosetIds = try? await repository.getPhotosetIds()
 
-                        photosetInfo = try? await repository.getPhotosets()
-                            .first
-                            .map { PhotosetInfo(photoset: $0) }
+                        photosetId = photosetIds?.first
                     }
             }
         }
