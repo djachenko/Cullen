@@ -19,14 +19,16 @@ final class JsonDecisionsRepository {
     }
 
     private let directory: URL?
+    private let fileManager: FileManager
 
     init(fileManager: FileManager) {
-        let documents = fileManager.urls(
-            for: .documentDirectory,
-            in: .userDomainMask
-        ).first
+        self.fileManager = fileManager
 
-        let directory = documents?
+        let directory = fileManager
+            .urls(
+                for: .documentDirectory,
+                in: .userDomainMask
+            ).first?
             .appending(component: Constants.directoryName)
             .appending(component: Constants.subdirectory)
 
@@ -45,21 +47,13 @@ final class JsonDecisionsRepository {
             self.directory = nil
         }
     }
-
-    private func fileURL(for photosetId: PhotosetId) throws -> URL {
-        guard let directory else {
-            throw Error.directoryUnavailable
-        }
-
-        return directory.appending(component: "\(photosetId.stringValue).json")
-    }
 }
 
 extension JsonDecisionsRepository: DecisionsRepository {
     func load(for photosetId: PhotosetId) async throws -> [PhotoId: Decision] {
         let url = try fileURL(for: photosetId)
 
-        guard FileManager.default.fileExists(atPath: url.path()) else {
+        guard fileManager.fileExists(atPath: url.path()) else {
             return [:]
         }
 
@@ -72,5 +66,14 @@ extension JsonDecisionsRepository: DecisionsRepository {
         let url = try fileURL(for: photosetId)
         let data = try JSONEncoder().encode(decisions)
         try data.write(to: url, options: .atomic)
+}
+
+private extension JsonDecisionsRepository {
+    func fileURL(for photosetId: PhotosetId) throws -> URL {
+        guard let directory else {
+            throw Error.directoryUnavailable
+        }
+
+        return directory.appending(component: "\(photosetId).json")
     }
 }

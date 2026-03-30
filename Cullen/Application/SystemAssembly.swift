@@ -15,8 +15,12 @@ final class SystemAssembly: Assembly {
         container.register(Resolver.self) { $0 }
             .inObjectScope(.weak)
 
-        container.register(FileManager.self) { _ in 
-            .default
+        container.register(FileManager.self) { _ in
+                .default
+        }.inObjectScope(.weak)
+
+        container.register(UserDefaults.self) { _ in
+                .standard
         }.inObjectScope(.weak)
     }
 }
