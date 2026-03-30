@@ -27,33 +27,19 @@ final class ExportDecisionsUseCaseImpl {
 
 extension ExportDecisionsUseCaseImpl: ExportDecisionsUseCase {
     func execute(photosetId: PhotosetId, source: PhotosetSource) async throws -> Data {
-        let decisions = try await decisionsRepository.load(for: photosetId)
-        let actualDecisions = decisions.filter { $0.value != .pending }
+        let decisions = try await decisionsRepository
+            .load(for: photosetId)
+            .filter { $0.value != .pending }
 
-        let decisionsPayload: [String: [Int]]
+        var decisionsPayload: [String: [PhotoId]] = [:]
 
-        switch source {
-        case .vk:
-            let photoset = try await photosetsRepository.getPhotoset(id: photosetId)
-
-            var grouped: [String: [Int]] = [:]
-
-            photoset.photos
-                .enumerated()
-                .forEach { index, url in
-                    guard let decision = actualDecisions[url.lastPathComponent] else {
-                        return
-                    }
-
-                    grouped[decision.exportKey, default: []].append(index)
-                }
-
-            decisionsPayload = grouped
+        decisions.forEach { photoId, decision in
+            decisionsPayload[decision.exportKey, default: []].append(photoId)
         }
 
         let export: [String: Any] = [
-            "key_strategy": source.keyStrategy,
             "decisions": decisionsPayload,
+            "name": String(describing: photosetId),
         ]
 
         return try JSONSerialization.data(withJSONObject: export, options: .prettyPrinted)

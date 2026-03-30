@@ -18,19 +18,22 @@ protocol LoadDecisionsUseCase {
 
 actor DecisionsUseCaseImpl {
     private let repository: DecisionsRepository
+    private let photosetsRepository: PhotosetsRepository
+
     private var cache: [PhotosetId: [PhotoId: Decision]] = [:]
 
-    init(repository: DecisionsRepository) {
+    init(repository: DecisionsRepository, photosetsRepository: PhotosetsRepository) {
         self.repository = repository
+        self.photosetsRepository = photosetsRepository
     }
 }
 
 extension DecisionsUseCaseImpl: SaveDecisionUseCase {
     func execute(photoId: PhotoId, decision: Decision, in photosetId: PhotosetId) async throws {
-        if cache[photosetId] == nil {
-            cache[photosetId] = (try? await repository.load(for: photosetId)) ?? [:]
-        }
-        cache[photosetId]?[photoId] = decision
+        var decisions = try await warmedUp(photosetId: photosetId)
+
+        decisions[photoId] = decision
+        cache[photosetId] = decisions
 
         try await repository.save(decisions: cache[photosetId] ?? [:], for: photosetId)
     }
@@ -38,10 +41,18 @@ extension DecisionsUseCaseImpl: SaveDecisionUseCase {
 
 extension DecisionsUseCaseImpl: LoadDecisionsUseCase {
     func execute(for photosetId: PhotosetId) async throws -> [PhotoId: Decision] {
+        try await warmedUp(photosetId: photosetId)
+    }
+}
+
+private extension DecisionsUseCaseImpl {
+    func warmedUp(photosetId: PhotosetId) async throws -> [PhotoId: Decision] {
         if let cached = cache[photosetId] {
             return cached
         }
+
         let loaded = try await repository.load(for: photosetId)
+
         cache[photosetId] = loaded
         return loaded
     }
