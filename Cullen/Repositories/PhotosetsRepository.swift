@@ -11,6 +11,8 @@ import Foundation
 protocol PhotosetsRepository {
     func getPhotosetIds() async throws -> [PhotosetId]
     func getPhotoset(id: PhotosetId) async throws -> Photoset
+
+    @available(*, deprecated, renamed: "getPhotosetIds()")
     func getPhotosets() async throws -> [Photoset]
 }
 
@@ -27,16 +29,5 @@ struct PhotosetModel {
 
     var coverUrl: String? {
         cover_index.map { photos[$0] }
-    }
-}
-
-final class MockPhotosetsRepository {}
-
-extension MockPhotosetsRepository: PhotosetsRepository {
-    func getPhotosetIds() async throws -> [PhotosetId] { [] }
-    func getPhotoset(id: PhotosetId) async throws -> Photoset { throw PhotosetsRepositoryError.notFound(id: id) }
-    func getPhotosets() async throws -> [Photoset] {
-        try await Task.sleep(nanoseconds: 500_000_000)
-        return []
     }
 }

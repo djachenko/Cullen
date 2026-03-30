@@ -7,28 +7,6 @@
 
 import Foundation
 
-enum PhotosetId {
-    case int(Int)
-    case string(String)
-    case uuid(UUID)
-
-    static let mock: PhotosetId = .uuid(UUID())
-}
-
-extension PhotosetId: Hashable {}
-
-extension PhotosetId {
-    var stringValue: String {
-        switch self {
-            case .int(let id):
-                "\(id)"
-            case .string(let id):
-                id
-            case .uuid(let id):
-                id.uuidString
-        }
-    }
-}
 
 struct Photoset: Identifiable, Hashable {
     let id: PhotosetId
@@ -42,8 +20,10 @@ struct Photoset: Identifiable, Hashable {
     let photosCount: Int
     let approvedCount: Int
     let rejectedCount: Int
-    let photos: [URL]
+    let photos: [Photo]
+}
 
+extension Photoset {
     var pendingCount: Int {
         photosCount - approvedCount - rejectedCount
     }

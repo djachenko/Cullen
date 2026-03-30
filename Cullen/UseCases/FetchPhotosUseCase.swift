@@ -26,18 +26,8 @@ final class FetchPhotosUseCaseImpl {
 
 extension FetchPhotosUseCaseImpl: FetchPhotosUseCase {
     func execute(id: PhotosetId) async throws -> [Photo] {
-        let photosets = try await repository.getPhotosets()
-
-        guard let photoset = photosets.first(where: { $0.id == id }) else {
-            throw Error.photosetNotFound(id: id)
-        }
-
-        // TODO: load actual decisions from persistence
-        return photoset.photos.map {
-            Photo(
-                id: $0.lastPathComponent,
-                url: $0
-            )
-        }
+        try await repository
+            .getPhotoset(id: id)
+            .photos
     }
 }
