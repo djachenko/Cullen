@@ -9,7 +9,7 @@ import Foundation
 
 
 protocol ExportDecisionsUseCase {
-    func execute(photosetId: PhotosetId, source: PhotosetSource) async throws -> Data
+    func execute(photosetId: PhotosetId) async throws -> Data
 }
 
 final class ExportDecisionsUseCaseImpl {
@@ -26,7 +26,7 @@ final class ExportDecisionsUseCaseImpl {
 }
 
 extension ExportDecisionsUseCaseImpl: ExportDecisionsUseCase {
-    func execute(photosetId: PhotosetId, source: PhotosetSource) async throws -> Data {
+    func execute(photosetId: PhotosetId) async throws -> Data {
         let decisions = try await decisionsRepository
             .load(for: photosetId)
             .filter { $0.value != .pending }

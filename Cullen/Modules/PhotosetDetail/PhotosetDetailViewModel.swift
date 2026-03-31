@@ -119,10 +119,7 @@ extension PhotosetDetailViewModel {
         }
 
         Task {
-            guard let data = try? await exportDecisionsUseCase.execute(
-                photosetId: photoset.id,
-                source: photoset.source
-            ) else {
+            guard let data = try? await exportDecisionsUseCase.execute(photosetId: photoset.id) else {
                 return
             }
 
