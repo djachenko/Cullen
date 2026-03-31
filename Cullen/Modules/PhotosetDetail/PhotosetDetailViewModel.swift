@@ -82,11 +82,9 @@ final class PhotosetDetailViewModel: ObservableObject {
 
 extension PhotosetDetailViewModel {
     func loadPhotos() async {
-        guard case .initial = state else {
-            return
+        if case .initial = state {
+            state = .loading
         }
-
-        state = .loading
 
         do {
             async let photosetResult = photosetTask.value
