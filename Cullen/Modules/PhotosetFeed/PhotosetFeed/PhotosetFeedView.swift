@@ -60,9 +60,7 @@ struct PhotosetFeedView: View {
 
                 LazyVStack(spacing: 16) {
                     ForEach(content.photosetIds, id: \.self) { id in
-                        print("resolve \(id)")
-
-                        return resolver ~> (PhotosetCardView.self, argument: id)
+                        resolver ~> (PhotosetCardView.self, argument: id)
                     }
                 }
             }
@@ -152,15 +150,6 @@ struct PhotosetFeedView: View {
     }
 }
 
-// MARK: - Card Button Style
-
-struct CardButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
-    }
-}
 
 // MARK: - Preview
 

@@ -18,13 +18,11 @@ protocol LoadDecisionsUseCase {
 
 actor DecisionsUseCaseImpl {
     private let repository: DecisionsRepository
-    private let photosetsRepository: PhotosetsRepository
 
     private var cache: [PhotosetId: [PhotoId: Decision]] = [:]
 
-    init(repository: DecisionsRepository, photosetsRepository: PhotosetsRepository) {
+    init(repository: DecisionsRepository) {
         self.repository = repository
-        self.photosetsRepository = photosetsRepository
     }
 }
 

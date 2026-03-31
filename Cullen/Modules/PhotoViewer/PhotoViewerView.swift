@@ -22,11 +22,8 @@ struct PhotoViewerView: View {
     // MARK: - Properties
 
     @ObservedObject var viewModel: PhotoViewerViewModel
-    @Environment(\.dismiss) private var dismiss
 
     @State private var isUIVisible = true
-
-    private let swipeHandler = SwipeGestureHandler()
 
     // MARK: - Body
 

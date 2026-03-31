@@ -16,7 +16,6 @@ final class PhotosetFeedViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedSortOption: PhotosetSortOption = .recent
 
-    private let coordinator: Coordinator
     private let fetchPhotosetsUseCase: FetchPhotosetsUseCase
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCase
 
@@ -27,11 +26,9 @@ final class PhotosetFeedViewModel: ObservableObject {
     }
 
     init(
-        coordinator: Coordinator,
         fetchPhotosetsUseCase: FetchPhotosetsUseCase,
         getStatisticsUseCase: GetPhotosetStatisticsUseCase,
     ) {
-        self.coordinator = coordinator
         self.fetchPhotosetsUseCase = fetchPhotosetsUseCase
         self.getStatisticsUseCase = getStatisticsUseCase
 

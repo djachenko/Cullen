@@ -106,8 +106,6 @@ extension PhotosetDetailViewModel {
                     self?.didTap(photo: photo)
                 }
             })
-        } catch is FetchPhotosUseCaseImpl.Error {
-            state = .error(message: "No photoset")
         } catch {
             state = .error(message: error.localizedDescription)
         }

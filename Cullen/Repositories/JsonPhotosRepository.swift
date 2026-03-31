@@ -90,15 +90,9 @@ private extension Photoset {
         self.init(
             id: .string(filename),
             name: filename,
-            remotePath: "/photosets/\(filename)",
-            source: .vk,
             syncStatus: .synced,
-            lastSyncDate: nil,
-            createdAt: Photoset.date(filename: filename) ?? Date(),
             coverImageURL: photos.first?.url,
             photosCount: photos.count,
-            approvedCount: 0,
-            rejectedCount: 0,
             photos: photos
         )
     }

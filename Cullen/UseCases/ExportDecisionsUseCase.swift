@@ -14,14 +14,11 @@ protocol ExportDecisionsUseCase {
 
 final class ExportDecisionsUseCaseImpl {
     private let decisionsRepository: DecisionsRepository
-    private let photosetsRepository: PhotosetsRepository
 
     init(
         decisionsRepository: DecisionsRepository,
-        photosetsRepository: PhotosetsRepository
     ) {
         self.decisionsRepository = decisionsRepository
-        self.photosetsRepository = photosetsRepository
     }
 }
 

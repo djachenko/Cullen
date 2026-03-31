@@ -121,10 +121,6 @@ final class PhotoViewerViewModel: ObservableObject {
         withAnimation(.easeInOut(duration: 0.25)) { currentIndex -= 1 }
     }
 
-    func decision(for photo: Photo) -> Decision? {
-        decisions[photo.id]
-    }
-
     func resetDecision() {
         decisions[currentPhoto.id] = .pending
 

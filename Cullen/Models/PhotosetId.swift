@@ -12,8 +12,6 @@ enum PhotosetId {
     case int(Int)
     case string(String)
     case uuid(UUID)
-
-    static let mock: PhotosetId = .uuid(UUID())
 }
 
 extension PhotosetId: Hashable {}

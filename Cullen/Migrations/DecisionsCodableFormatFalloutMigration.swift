@@ -29,7 +29,6 @@ final class DecisionsCodableFormatFalloutMigration: Migration {
         .appending(component: Constants.subdirectory)
 
     init(
-        decisionsRepository: DecisionsRepository,
         photosetsRepository: PhotosetsRepository
     ) {
         self.photosetsRepository = photosetsRepository

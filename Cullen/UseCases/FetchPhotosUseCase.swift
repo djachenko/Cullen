@@ -13,10 +13,6 @@ protocol FetchPhotosUseCase {
 }
 
 final class FetchPhotosUseCaseImpl {
-    enum Error: Swift.Error {
-        case photosetNotFound(id: PhotosetId)
-    }
-
     private let repository: PhotosetsRepository
 
     init(repository: PhotosetsRepository) {

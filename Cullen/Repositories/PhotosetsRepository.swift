@@ -19,15 +19,3 @@ protocol PhotosetsRepository {
 enum PhotosetsRepositoryError: Error {
     case notFound(id: PhotosetId)
 }
-
-struct PhotosetModel {
-    let id: Int
-    let name: String
-    let created: Int
-    let cover_index: Int?
-    let photos: [String]
-
-    var coverUrl: String? {
-        cover_index.map { photos[$0] }
-    }
-}
