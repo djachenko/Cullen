@@ -13,6 +13,8 @@ struct PhotosetDetailView: View {
     @State private var gridWidth: CGFloat = 0
     @StateObject private var viewModel: PhotosetDetailViewModel
 
+    @State private var scrollTarget: PhotoId? = nil
+
     init(viewModel: PhotosetDetailViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
@@ -131,8 +133,19 @@ extension PhotosetDetailView {
                         aspectRatio: viewModel.aspectRatio,
                         width: columnWidth
                     )
+                    .id(photo.id)
                 }
             }
+            .scrollTargetLayout()
+        }
+        .scrollPosition(id: $scrollTarget, anchor: .center)
+        .overlay(alignment: .bottomTrailing) {
+            viewModel.nextPendingId.map {
+                scrollToNextButton(nextId: $0)
+            }
+        }
+        .onScrollTargetVisibilityChange(idType: PhotoId.self) {
+            viewModel.didShow(photoIds: $0)
         }
     }
 
@@ -174,7 +187,23 @@ extension PhotosetDetailView {
         .frame(maxWidth: .infinity)
         .padding(.top, 80)
     }
+
+    private func scrollToNextButton(nextId: PhotoId) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                scrollTarget = nextId
+            }
+        } label: {
+            Image(systemName: "arrow.down.circle.fill")
+                .font(.system(size: 44))
+                .foregroundStyle(.white, .blue)
+                .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
+        }
+        .padding(.bottom, 24)
+        .padding(.trailing, 20)
+    }
 }
+
 
 // MARK: - Preview
 

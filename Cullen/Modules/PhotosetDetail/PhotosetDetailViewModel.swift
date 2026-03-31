@@ -15,9 +15,10 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published var state: PhotosetDetailState = .initial
     @Published var aspectRatio: Double = 3.0 / 2.0
     @Published var export: DecisionsExport?
+    @Published var nextPendingId: PhotoId? = nil
 
     var title: String {
-        cachedPhotoset?.name ?? ""
+        photoset?.name ?? ""
     }
 
     private let coordinator: Coordinator
@@ -39,8 +40,10 @@ final class PhotosetDetailViewModel: ObservableObject {
         }
     }
 
-    private var cachedPhotoset: Photoset?
-    private var photos: [Photo]?
+    private var photoset: Photoset?
+    private var photos: [Photo] = []
+    private var decisions: [PhotoId: Decision] = [:]
+
 
     nonisolated private init(
         photosetTask: Task<Photoset, Error>,
@@ -74,7 +77,10 @@ final class PhotosetDetailViewModel: ObservableObject {
             exportDecisionsUseCase: exportDecisionsUseCase
         )
     }
+}
 
+
+extension PhotosetDetailViewModel {
     func loadPhotos() async {
         guard case .initial = state else {
             return
@@ -88,8 +94,10 @@ final class PhotosetDetailViewModel: ObservableObject {
             async let decisionsResult = decisionsTask.value
 
             let (photoset, photos, decisions) = try await (photosetResult, photosResult, decisionsResult)
-            cachedPhotoset = photoset
+
+            self.photoset = photoset
             self.photos = photos
+            self.decisions = decisions
 
             state = .content(photos.map { photo in
                 PhotoGridCellViewModel(
@@ -108,7 +116,7 @@ final class PhotosetDetailViewModel: ObservableObject {
     }
 
     func exportDecisions() {
-        guard let photoset = cachedPhotoset else {
+        guard let photoset else {
             return
         }
 
@@ -126,12 +134,25 @@ final class PhotosetDetailViewModel: ObservableObject {
             )
         }
     }
+
+    func didShow(photoIds: [PhotoId]) {
+        guard let last = photoIds.last else {
+            return
+        }
+
+        nextPendingId = photos
+            .drop { $0.id <= last }
+            .drop { decisions[$0.id].isUndecided }
+            .drop { !decisions[$0.id].isUndecided }
+            .first?
+            .id
+    }
 }
+
 
 private extension PhotosetDetailViewModel {
     func didTap(photo: Photo) {
-        guard let photos,
-              let photoset = cachedPhotoset else {
+        guard let photoset else {
             return
         }
 
@@ -144,6 +165,7 @@ private extension PhotosetDetailViewModel {
         )
     }
 }
+
 
 enum PhotosetDetailState {
     case initial
@@ -161,4 +183,17 @@ enum PhotosetDetailState {
     }
 }
 
+
 typealias PhotosetDetailContent = [PhotoGridCellViewModel]
+
+
+private extension Decision? {
+    var isUndecided: Bool {
+        switch self {
+        case .approved, .rejected:
+            false
+        case .pending, nil:
+            true
+        }
+    }
+}
