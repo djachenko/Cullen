@@ -82,6 +82,7 @@ private extension PhotosetDetailView {
                         .foregroundStyle(.green)
             }
         }
+        .disabled(viewModel.state.isLoading)
     }
 
     //    TODO: viewbuilder
