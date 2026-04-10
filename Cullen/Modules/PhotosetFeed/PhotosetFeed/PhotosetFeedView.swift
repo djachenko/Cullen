@@ -60,7 +60,7 @@ struct PhotosetFeedView: View {
 
                 LazyVStack(spacing: 16) {
                     ForEach(content.photosetIds, id: \.self) { id in
-                        resolver ~> (PhotosetCardView.self, argument: id)
+                        resolver ~> (PhotosetCardView.self, with: id)
                     }
                 }
             }

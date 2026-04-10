@@ -15,6 +15,6 @@ final class RepositoriesAssembly: Assembly {
             .inObjectScope(.container)
 
         container.autoregister(DecisionsRepository.self, initializer: JsonDecisionsRepository.init)
-                    .inObjectScope(.container)
+            .inObjectScope(.container)
     }
 }
