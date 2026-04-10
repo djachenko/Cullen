@@ -70,13 +70,11 @@ private extension PhotosetDetailView {
                 case .notCached:
                     Image(systemName: "arrow.down.circle")
                         .font(.system(size: 20))
-                case .partial:
-                    Image(systemName: "arrow.down.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.yellow)
+                case .partial(let ratio):
+                    CircularProgress(value: ratio, color: .yellow)
+                        .frame(width: 20, height: 20)
                 case .prefetching(let progress):
-                    ProgressView(value: progress)
-                        .progressViewStyle(.circular)
+                    CircularProgress(value: progress, color: .accentColor)
                         .frame(width: 20, height: 20)
                 case .full:
                     Image(systemName: "checkmark.circle.fill")

@@ -8,7 +8,7 @@
 
 enum PhotosetDetailPrefetchState: Equatable {
     case notCached
-    case partial
+    case partial(ratio: Double)
     case prefetching(progress: Double)
     case full
 }

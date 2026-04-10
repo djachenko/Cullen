@@ -10,6 +10,8 @@ import Foundation
 
 protocol CacheUseCase {
     func prefetch(photoset: PhotosetId) async throws -> AsyncStream<PrefetchEvent>
+
+    func cacheRatio(photoset: PhotosetId) async throws -> Double
 }
 
 
@@ -29,6 +31,26 @@ extension CacheUseCaseImpl: CacheUseCase {
         let urls = try await photoURLs(for: photoset)
 
         return cacheService.startPrefetch(urls: urls)
+    }
+
+    func cacheRatio(photoset: PhotosetId) async throws -> Double {
+        let urls = try await photoURLs(for: photoset)
+
+        guard !urls.isEmpty else {
+            return 0
+        }
+
+        let cachedCount = await withTaskGroup(of: Bool.self) { group in
+            for url in urls {
+                group.addTask { [cacheService] in
+                    cacheService.isCached(url: url)
+                }
+            }
+
+            return await group.reduce(0) { $0 + ($1 ? 1 : 0) }
+        }
+
+        return Double(cachedCount) / Double(urls.count)
     }
 }
 

@@ -104,6 +104,8 @@ extension PhotosetDetailViewModel {
             self.photos = photos
             self.decisions = decisions
 
+            prefetchState = await countPrefetchState()
+
             state = .content(photos.map { photo in
                 PhotoGridCellViewModel(
                     id: photo.id,
@@ -206,7 +208,7 @@ private extension PhotosetDetailViewModel {
                         let progress = Double(done) / Double(total)
                         prefetchState = .prefetching(progress: progress)
                     case .finished:
-                        prefetchState = .full
+                        prefetchState = await countPrefetchState()
                 }
             }
         }
@@ -215,10 +217,29 @@ private extension PhotosetDetailViewModel {
     func cancelPrefetch() {
         prefetchTask?.cancel()
         prefetchTask = nil
-        prefetchState = .notCached
+
+        Task { [weak self] in
+            guard let self else {
+                return
+            }
+
+            prefetchState = await countPrefetchState()
+        }
     }
 
     func clearCache() {}
+}
+
+
+private extension PhotosetDetailViewModel {
+    func countPrefetchState() async -> PhotosetDetailPrefetchState {
+        if let photosetId = photoset?.id,
+           let ratio = try? await cacheUseCase.cacheRatio(photoset: photosetId) {
+            PhotosetDetailPrefetchState(ratio: ratio)
+        } else {
+            .notCached
+        }
+    }
 }
 
 
@@ -229,6 +250,20 @@ private extension Decision? {
                 false
             case .pending, nil:
                 true
+        }
+    }
+}
+
+
+private extension PhotosetDetailPrefetchState {
+    init(ratio: Double) {
+        self = switch ratio {
+            case 0:
+                .notCached
+            case 1:
+                .full
+            default:
+                .partial(ratio: ratio)
         }
     }
 }

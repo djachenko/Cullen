@@ -20,6 +20,8 @@ typealias CacheKey = URL
 
 protocol ImageCacheService {
     func startPrefetch(urls: [CacheKey]) -> AsyncStream<PrefetchEvent>
+
+    func isCached(url: CacheKey) -> Bool
 }
 
 
@@ -75,6 +77,10 @@ extension KingfisherImageCacheService: ImageCacheService {
 
             prefetcher.start()
         }
+    }
+
+    func isCached(url: CacheKey) -> Bool {
+        cache.isCached(forKey: url.cacheKey)
     }
 }
 
