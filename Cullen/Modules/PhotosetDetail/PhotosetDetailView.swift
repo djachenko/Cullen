@@ -43,6 +43,7 @@ struct PhotosetDetailView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
+                    prefetchButton
                     exportButton
                     columnPicker
                 }
@@ -51,11 +52,42 @@ struct PhotosetDetailView: View {
         .task {
             await viewModel.loadPhotos()
         }
+        .onDisappear {
+            viewModel.onDisappear()
+        }
     }
 }
 
-extension PhotosetDetailView {
-    private var exportButton: some View {
+// MARK: Toolbar items
+
+private extension PhotosetDetailView {
+    @ViewBuilder
+    var prefetchButton: some View {
+        Button {
+            viewModel.didTapPrefetchButton()
+        } label: {
+            switch viewModel.prefetchState {
+                case .notCached:
+                    Image(systemName: "arrow.down.circle")
+                        .font(.system(size: 20))
+                case .partial:
+                    Image(systemName: "arrow.down.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.yellow)
+                case .prefetching(let progress):
+                    ProgressView(value: progress)
+                        .progressViewStyle(.circular)
+                        .frame(width: 20, height: 20)
+                case .full:
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.green)
+            }
+        }
+    }
+
+    //    TODO: viewbuilder
+    var exportButton: some View {
         Group {
             if let export = viewModel.export {
                 ShareLink(
@@ -80,7 +112,7 @@ extension PhotosetDetailView {
         }
     }
 
-    private var columnPicker: some View {
+    var columnPicker: some View {
         Menu {
             Picker("Columns", selection: $columnCount) {
                 Label("2 Columns", systemImage: "square.grid.2x2").tag(2)
@@ -92,7 +124,9 @@ extension PhotosetDetailView {
                 .font(.system(size: 20))
         }
     }
+}
 
+extension PhotosetDetailView {
     private var loadingView: some View {
         VStack(spacing: 16) {
             ProgressView()
@@ -144,8 +178,9 @@ extension PhotosetDetailView {
                 scrollToNextButton(nextId: $0)
             }
         }
-        .onScrollTargetVisibilityChange(idType: PhotoId.self) {
-            viewModel.didShow(photoIds: $0)
+        .onScrollTargetVisibilityChange(idType: PhotoId.self) { visibleIds in
+            viewModel.didShow(photoIds: visibleIds)
+//            viewModel.prefetchAhead(after: visibleIds.last)
         }
     }
 
