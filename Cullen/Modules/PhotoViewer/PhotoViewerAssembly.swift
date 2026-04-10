@@ -6,7 +6,6 @@
 //
 
 import Swinject
-import SwinjectAutoregistration
 
 
 final class PhotoViewerAssembly: Assembly {
