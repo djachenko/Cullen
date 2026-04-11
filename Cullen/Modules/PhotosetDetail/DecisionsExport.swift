@@ -11,13 +11,13 @@ import UniformTypeIdentifiers
 
 struct DecisionsExport {
     let filename: String
-    let data: Data
+    let dataProvider: () async throws -> Data
 }
 
 extension DecisionsExport: Transferable {
     static var transferRepresentation: some TransferRepresentation {
         DataRepresentation(exportedContentType: .json) { export in
-            export.data
+            try await export.dataProvider()
         }
         .suggestedFileName { export in
             export.filename

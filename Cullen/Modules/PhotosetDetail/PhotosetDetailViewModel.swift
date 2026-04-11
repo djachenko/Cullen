@@ -106,25 +106,16 @@ extension PhotosetDetailViewModel {
                     self?.didTap(photo: photo)
                 }
             })
-        } catch {
-            state = .error(message: error.localizedDescription)
-        }
-    }
 
-    func exportDecisions() {
-        guard let photoset else {
-            return
-        }
-
-        Task {
-            guard let data = try? await exportDecisionsUseCase.execute(photosetId: photoset.id) else {
-                return
-            }
+            let photosetId = photoset.id
 
             export = DecisionsExport(
-                filename: "\(photoset.name).json",
-                data: data
-            )
+                filename: "\(photoset.name).json"
+            ) { [weak self] in
+                try await self?.exportDecisionsUseCase.execute(photosetId: photosetId) ?? Data()
+            }
+        } catch {
+            state = .error(message: error.localizedDescription)
         }
     }
 

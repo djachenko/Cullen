@@ -55,28 +55,21 @@ struct PhotosetDetailView: View {
 }
 
 extension PhotosetDetailView {
-    private var exportButton: some View {
-        Group {
-            if let export = viewModel.export {
-                ShareLink(
-                    item: export,
-                    preview: SharePreview(
-                        export.filename,
-                        image: Image(systemName: "doc.text")
-                    )
-                ) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 20))
-                }
-            } else {
-                Button {
-                    viewModel.exportDecisions()
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 20))
-                }
-                .disabled(viewModel.state.isLoading)
+    @ViewBuilder
+    var exportButton: some View {
+        if let export = viewModel.export {
+            ShareLink(
+                item: export,
+                preview: SharePreview(
+                    export.filename,
+                    image: Image(systemName: "doc.text")
+                )
+            ) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 20))
             }
+        } else {
+            EmptyView()
         }
     }
 
