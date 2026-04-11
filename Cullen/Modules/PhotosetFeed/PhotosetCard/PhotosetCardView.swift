@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PhotosetCardView: View {
-    let photoSet: PhotosetCardViewModel
+    let photoset: PhotosetCardViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -19,7 +19,7 @@ struct PhotosetCardView: View {
             VStack(alignment: .leading, spacing: 12) {
                 // Header
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(photoSet.name)
+                    Text(photoset.title)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.primary)
                         .lineLimit(2)
@@ -28,18 +28,18 @@ struct PhotosetCardView: View {
                         Image(systemName: "photo.stack")
                             .font(.system(size: 11))
                         
-                        Text(photoSet.photosCountText)
+                        Text(photoset.photosCountText)
                             .font(.system(size: 13))
                         
                         Spacer()
                         
-                        SyncBadgeView(badge: photoSet.syncBadge)
+                        SyncBadgeView(badge: photoset.syncBadge)
                     }
                     .foregroundColor(.secondary)
                 }
                 
                 // Progress Bar
-                ProgressBarView(progress: photoSet.progressPercentage)
+                ProgressBarView(progress: photoset.progressPercentage)
                 
                 // Stats
                 statsRow
@@ -55,7 +55,7 @@ struct PhotosetCardView: View {
     
     private var coverImage: some View {
         Group {
-            if let imageURL = photoSet.coverImageURL {
+            if let imageURL = photoset.coverImageURL {
                 AsyncImage(url: imageURL) { phase in
                     switch phase {
                     case .empty:
@@ -100,15 +100,15 @@ struct PhotosetCardView: View {
     private var statsRow: some View {
         HStack(spacing: 16) {
             StatItemView(
-                viewModel: .approved(count: photoSet.approvedCount)
+                viewModel: .approved(count: photoset.approvedCount)
             )
             
             StatItemView(
-                viewModel: .rejected(count: photoSet.rejectedCount)
+                viewModel: .rejected(count: photoset.rejectedCount)
             )
             
             StatItemView(
-                viewModel: .pending(count: photoSet.pendingCount)
+                viewModel: .pending(count: photoset.pendingCount)
             )
             
             Spacer()
@@ -146,18 +146,14 @@ struct PhotosetCardView: View {
 
 #Preview {
     PhotosetCardView(
-        photoSet: PhotosetCardViewModel(
-            from: Photoset(
-                id: UUID(),
-                name: "Wedding at Lake Como",
-                remotePath: "/photosets/wedding",
-                syncStatus: .error,
-                lastSyncDate: Date(),
-                createdAt: Date(),
-                coverImageURL: URL(string: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800"),
+        photoset: PhotosetCardViewModel(
+            from: PhotosetInfo(
+                id: .mock,
+                title: "Wedding at Lake Como",
+                coverUrl: URL(string: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800"),
                 photosCount: 342,
                 approvedCount: 128,
-                rejectedCount: 89
+                rejectedCount: 89,
             )
         )
     )

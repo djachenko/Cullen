@@ -17,11 +17,11 @@ final class PhotosetFeedViewModel: ObservableObject {
     @Published var selectedSortOption: PhotosetSortOption = .recent
 
     private let coordinator: Coordinator
-
-    private let fetchPhotosetsUseCase: FetchPhotosetsUseCaseProtocol
+    private let fetchPhotosetsUseCase: FetchPhotosetInfoUseCase
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol
 
     private var cancellables = Set<AnyCancellable>()
+    private var photosetInfos: [PhotosetInfo] = []
 
     var sortOptions: [SortOptionDisplayModel] {
         PhotosetSortOption.allCases.map { SortOptionDisplayModel(option: $0) }
@@ -29,7 +29,7 @@ final class PhotosetFeedViewModel: ObservableObject {
 
     init(
         coordinator: Coordinator,
-        fetchPhotosetsUseCase: FetchPhotosetsUseCaseProtocol,
+        fetchPhotosetsUseCase: FetchPhotosetInfoUseCase,
         getStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol,
     ) {
         self.coordinator = coordinator
@@ -38,9 +38,7 @@ final class PhotosetFeedViewModel: ObservableObject {
 
         setupBindings()
     }
-    
-    // MARK: - Actions (UI Events)
-    
+
     func loadPhotosets() async {
         state = .loading
 
@@ -54,6 +52,7 @@ final class PhotosetFeedViewModel: ObservableObject {
 
             let (photosets, statistics) = try await (photosetsTask, statisticsTask)
 
+            photosetInfos = photosets
             state = .content(
                 content: PhotosetFeedContent(
                     photosets: photosets.map { PhotosetCardViewModel(from: $0) },
@@ -68,7 +67,9 @@ final class PhotosetFeedViewModel: ObservableObject {
 
 extension PhotosetFeedViewModel {
     func didTap(photoset: PhotosetCardViewModel) {
-        coordinator.show(.photosetDetail(photoset))
+        if let info = photosetInfos.first(where: { $0.id == photoset.id }) {
+            coordinator.show(.photosetDetail(info))
+        }
     }
 }
 

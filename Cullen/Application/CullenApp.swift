@@ -24,6 +24,7 @@ extension Cullen {
         UseCasesAssembly(),
         PhotosetFeedAssembly(),
         PhotosetDetailAssembly(),
+        PhotoViewerAssembly(),
         AppAssembly(),
     ]).resolver
 }

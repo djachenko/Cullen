@@ -14,9 +14,27 @@
 		D0C3DE7B2EDD91AD0068307C /* Cullen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cullen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D0D8407E2F5CB3F000DC0CE1 /* Exceptions for "Cullen" folder in "Cullen" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				__trash/CullenNavigationBar.swift,
+				__trash/MockPhotoRepository.swift,
+				__trash/MockServices.swift,
+				__trash/PhotoDetailDisplayModel.swift,
+				__trash/RepositoryProtocols.swift,
+				__trash/SwipeHintsView.swift,
+			);
+			target = D0C3DE7A2EDD91AD0068307C /* Cullen */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D0C3DE7D2EDD91AD0068307C /* Cullen */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D0D8407E2F5CB3F000DC0CE1 /* Exceptions for "Cullen" folder in "Cullen" target */,
+			);
 			path = Cullen;
 			sourceTree = "<group>";
 		};

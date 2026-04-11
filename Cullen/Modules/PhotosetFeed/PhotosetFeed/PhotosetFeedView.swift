@@ -8,11 +8,7 @@
 import SwiftUI
 
 struct PhotosetFeedView: View {
-    @StateObject private var viewModel: PhotosetFeedViewModel
-
-    init(viewModel: PhotosetFeedViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
-    }
+    @ObservedObject var viewModel: PhotosetFeedViewModel
 
     var body: some View {
         ZStack {
@@ -58,7 +54,7 @@ struct PhotosetFeedView: View {
                 // Photo Sets List
                 LazyVStack(spacing: 16) {
                     ForEach(content.photosets) { photoset in
-                        PhotosetCardView(photoSet: photoset)
+                        PhotosetCardView(photoset: photoset)
                             .buttonStyle(CardButtonStyle())
                             .onTapGesture {
                                 viewModel.didTap(photoset: photoset)

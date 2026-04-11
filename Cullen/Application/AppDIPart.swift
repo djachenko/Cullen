@@ -8,12 +8,13 @@
 import Swinject
 import SwinjectAutoregistration
 
+
 final class AppAssembly: Assembly {
     private var currentCoordinator: AppCoordinator?
 
     func assemble(container: Container) {
-        container.register(Coordinator.self) { [weak self] resover -> Coordinator in
-            self?.currentCoordinator ?? (resover ~> MockCoordinator.self)
+        container.register(Coordinator.self) {  resover -> Coordinator in
+            return self.currentCoordinator ?? (resover ~> MockCoordinator.self)
         }
 
         container.autoregister(
@@ -22,8 +23,8 @@ final class AppAssembly: Assembly {
             initializer: AppCoordinator.init
         )
         .inObjectScope(.weak)
-        .initCompleted { [weak self] in
-            self?.currentCoordinator = $1
+        .initCompleted {
+            self.currentCoordinator = $1
         }
 
         container.autoregister(MockCoordinator.self, initializer: MockCoordinator.init)
