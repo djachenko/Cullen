@@ -227,7 +227,20 @@ private extension PhotosetDetailViewModel {
         }
     }
 
-    func clearCache() {}
+    func clearCache() {
+        guard let photosetId = photoset?.id else {
+            return
+        }
+
+        Task { [weak self] in
+            guard let self else {
+                return
+            }
+
+            try? await cacheUseCase.removeFromCache(photoset: photosetId)
+            prefetchState = await countPrefetchState()
+        }
+    }
 }
 
 

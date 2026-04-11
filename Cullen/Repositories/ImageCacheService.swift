@@ -22,6 +22,8 @@ protocol ImageCacheService {
     func startPrefetch(urls: [CacheKey]) -> AsyncStream<PrefetchEvent>
 
     func isCached(url: CacheKey) -> Bool
+
+    func removeFromCache(url: CacheKey) async
 }
 
 
@@ -81,6 +83,14 @@ extension KingfisherImageCacheService: ImageCacheService {
 
     func isCached(url: CacheKey) -> Bool {
         cache.isCached(forKey: url.cacheKey)
+    }
+
+    func removeFromCache(url: CacheKey) async {
+        await withCheckedContinuation { continuation in
+            cache.removeImage(forKey: url.cacheKey) {
+                continuation.resume()
+            }
+        }
     }
 }
 
