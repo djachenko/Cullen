@@ -11,19 +11,22 @@ import SwinjectAutoregistration
 
 final class PhotoViewerAssembly: Assembly {
     func assemble(container: Container) {
-//        container.autoregister(PhotoViewerView.self, initializer: PhotoViewerView.init)
-        container.register(PhotoViewerView.self) { (resover, photos: [Photo], startIndex: Int) in
+        //        container.autoregister(PhotoViewerView.self, initializer: PhotoViewerView.init)
+        container.register(PhotoViewerView.self) { (resover, photos: [Photo], startIndex: Int, photosetId: PhotosetId) in
             PhotoViewerView(
-                viewModel: resover ~> (PhotoViewerViewModel.self, arguments: (photos, startIndex))
+                viewModel: resover ~> (PhotoViewerViewModel.self, arguments: (photos, startIndex, photosetId))
             )
         }
 
         container.autoregister(
             PhotoViewerViewModel.self,
             arguments:
-                [Photo].self,
-                Int.self,
+            [Photo].self,
+            Int.self,
+            PhotosetId.self,
             initializer: PhotoViewerViewModel.init
         )
+
+        container.autoregister(SwipeGestureHandler.self, initializer: SwipeGestureHandler.init)
     }
 }

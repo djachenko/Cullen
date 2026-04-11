@@ -10,42 +10,75 @@ import SwiftUI
 
 struct PhotosetDetailView: View {
     @State private var columnCount: Int = 3
-    @State private var gridWidth: CGFloat = 390
+    @State private var gridWidth: CGFloat = 0
     @StateObject private var viewModel: PhotosetDetailViewModel
+
+    @State private var scrollTarget: PhotoId? = nil
 
     init(viewModel: PhotosetDetailViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
-        ZStack {
-            switch viewModel.state {
+        GeometryReader { geometry in
+            ZStack {
+                switch viewModel.state {
                 case .initial, .loading:
                     loadingView
                 case .content(let content):
                     contentView(content: content)
                 case .error(let message):
                     errorView(message: message)
+                }
+            }
+            .onAppear {
+                gridWidth = geometry.size.width
+            }
+            .onChange(of: geometry.size.width) { _, width in
+                gridWidth = width
             }
         }
         .navigationTitle(viewModel.title)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { columnPicker }
-        }
-        .task {
-            if case .initial = viewModel.state {
-                await viewModel.loadPhotos()
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack {
+                    exportButton
+                    columnPicker
+                }
             }
         }
-        .onGeometryChange(for: CGFloat.self) { geometry in
-            geometry.size.width
-        } action: { width in
-            gridWidth = width
+        .task {
+            await viewModel.loadPhotos()
         }
     }
+}
 
-    // MARK: - Column Picker
+extension PhotosetDetailView {
+    private var exportButton: some View {
+        Group {
+            if let export = viewModel.export {
+                ShareLink(
+                    item: export,
+                    preview: SharePreview(
+                        export.filename,
+                        image: Image(systemName: "doc.text")
+                    )
+                ) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20))
+                }
+            } else {
+                Button {
+                    viewModel.exportDecisions()
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20))
+                }
+                .disabled(viewModel.state.isLoading)
+            }
+        }
+    }
 
     private var columnPicker: some View {
         Menu {
@@ -59,8 +92,6 @@ struct PhotosetDetailView: View {
                 .font(.system(size: 20))
         }
     }
-
-    // MARK: - Photo Content
 
     private var loadingView: some View {
         VStack(spacing: 16) {
@@ -102,8 +133,19 @@ struct PhotosetDetailView: View {
                         aspectRatio: viewModel.aspectRatio,
                         width: columnWidth
                     )
+                    .id(photo.id)
                 }
             }
+            .scrollTargetLayout()
+        }
+        .scrollPosition(id: $scrollTarget, anchor: .center)
+        .overlay(alignment: .bottomTrailing) {
+            viewModel.nextPendingId.map {
+                scrollToNextButton(nextId: $0)
+            }
+        }
+        .onScrollTargetVisibilityChange(idType: PhotoId.self) {
+            viewModel.didShow(photoIds: $0)
         }
     }
 
@@ -135,13 +177,33 @@ struct PhotosetDetailView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
-            Button("Retry") { Task { await viewModel.loadPhotos() } }
-                .buttonStyle(.bordered)
+            Button("Retry") {
+                Task {
+                    await viewModel.loadPhotos()
+                }
+            }
+            .buttonStyle(.bordered)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 80)
     }
+
+    private func scrollToNextButton(nextId: PhotoId) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                scrollTarget = nextId
+            }
+        } label: {
+            Image(systemName: "arrow.down.circle.fill")
+                .font(.system(size: 44))
+                .foregroundStyle(.white, .blue)
+                .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
+        }
+        .padding(.bottom, 24)
+        .padding(.trailing, 20)
+    }
 }
+
 
 // MARK: - Preview
 
@@ -154,20 +216,19 @@ import SwinjectAutoregistration
 }
 
 private struct PreviewWrapper: View {
-    @State private var photosetInfo: PhotosetInfo?
+    @State private var photosetId: PhotosetId?
 
     var body: some View {
         Group {
-            if let photosetInfo {
-                Cullen.resolver ~> (PhotosetDetailView.self, argument: photosetInfo)
+            if let photosetId {
+                Cullen.resolver ~> (PhotosetDetailView.self, argument: photosetId)
             } else {
                 ProgressView()
                     .task {
                         let repository = Cullen.resolver ~> PhotosetsRepository.self
+                        let photosetIds = try? await repository.getPhotosetIds()
 
-                        photosetInfo = try? await repository.getPhotosets()
-                            .first
-                            .map { PhotosetInfo(photoset: $0) }
+                        photosetId = photosetIds?.first
                     }
             }
         }

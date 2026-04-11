@@ -2,3 +2,10 @@
 Cullen.xcodeproj/xcuserdata/
 
 Cullen.xcodeproj/project.xcworkspace/xcuserdata/
+
+Cullen/Resources/photosets/
+
+CLI/.idea/
+
+.claude/worktrees/
+.claude/settings.local.json

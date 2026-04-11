@@ -13,5 +13,8 @@ final class RepositoriesAssembly: Assembly {
     func assemble(container: Container) {
         container.autoregister(PhotosetsRepository.self, initializer: JsonPhotosRepository.init)
             .inObjectScope(.container)
+
+        container.autoregister(DecisionsRepository.self, initializer: JsonDecisionsRepository.init)
+                    .inObjectScope(.container)
     }
 }

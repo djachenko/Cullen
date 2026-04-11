@@ -19,6 +19,17 @@ struct ZoomableImageViewModel {
     var onPan: (_ recognizer: UIPanGestureRecognizer) -> Void = { _ in }
 }
 
+// MARK: - LayoutAwareScrollView
+
+final class LayoutAwareScrollView: UIScrollView {
+    var onLayout: (() -> Void)?
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        onLayout?()
+    }
+}
+
 // MARK: - ZoomableImageView
 
 struct ZoomableImageView: UIViewRepresentable {
@@ -29,18 +40,14 @@ struct ZoomableImageView: UIViewRepresentable {
         Coordinator(viewModel: viewModel)
     }
 
-    func makeUIView(context: Context) -> UIScrollView {
+    func makeUIView(context: Context) -> LayoutAwareScrollView {
         let scrollView = context.coordinator.scrollView
-        let imageView = context.coordinator.imageView
-
-        scrollView.addSubview(imageView)
-
+        scrollView.addSubview(context.coordinator.imageView)
         context.coordinator.loadImage(url: viewModel.url)
-
         return scrollView
     }
 
-    func updateUIView(_ scrollView: UIScrollView, context: Context) {
+    func updateUIView(_ scrollView: LayoutAwareScrollView, context: Context) {
         if context.coordinator.currentURL != viewModel.url {
             context.coordinator.loadImage(url: viewModel.url)
             scrollView.setZoomScale(1, animated: false)
@@ -60,8 +67,8 @@ extension ZoomableImageView {
         var viewModel: ZoomableImageViewModel
         var currentURL: URL?
 
-        private(set) lazy var scrollView = {
-            let scrollView = UIScrollView()
+        private(set) lazy var scrollView: LayoutAwareScrollView = {
+            let scrollView = LayoutAwareScrollView()
             scrollView.delegate = self
             scrollView.minimumZoomScale = 1
             scrollView.maximumZoomScale = viewModel.maxZoomScale
@@ -75,45 +82,45 @@ extension ZoomableImageView {
             scrollView.addGestureRecognizer(doubleTap)
             scrollView.addGestureRecognizer(pan)
 
+            scrollView.onLayout = { [weak self] in
+                self?.layoutImageView()
+            }
+
             return scrollView
         }()
 
-        let imageView = {
+        let imageView: UIImageView = {
             let imageView = UIImageView()
             imageView.contentMode = .scaleAspectFit
             imageView.clipsToBounds = true
-
             return imageView
         }()
 
-        private lazy var singleTap = {
+        private lazy var singleTap: UITapGestureRecognizer = {
             let recognizer = UITapGestureRecognizer(
                 target: self,
                 action: #selector(Coordinator.handleSingleTap)
             )
             recognizer.numberOfTapsRequired = 1
             recognizer.require(toFail: doubleTap)
-
             return recognizer
         }()
 
-        private lazy var doubleTap = {
+        private lazy var doubleTap: UITapGestureRecognizer = {
             let recognizer = UITapGestureRecognizer(
                 target: self,
                 action: #selector(Coordinator.handleDoubleTap(_:))
             )
             recognizer.numberOfTapsRequired = 2
-
             return recognizer
         }()
 
-        private lazy var pan = {
+        private lazy var pan: UIPanGestureRecognizer = {
             let recognizer = UIPanGestureRecognizer(
                 target: self,
                 action: #selector(Coordinator.handlePan(_:))
             )
             recognizer.delegate = self
-
             return recognizer
         }()
 
@@ -128,13 +135,15 @@ extension ZoomableImageView {
             currentURL = url
             imageView.image = nil
 
-            guard let url else { return }
+            guard let url else {
+                return
+            }
 
             imageView.kf.setImage(with: url) { [weak self] result in
                 guard case .success = result else {
                     return
                 }
-
+                
                 self?.layoutImageView()
             }
         }
@@ -142,9 +151,19 @@ extension ZoomableImageView {
         // MARK: - Layout
 
         func layoutImageView() {
-            guard let image = imageView.image else { return }
+            guard scrollView.zoomScale == 1 else {
+                return
+            }
+
+            guard let image = imageView.image else {
+                return
+            }
+
             let scrollSize = scrollView.bounds.size
-            guard scrollSize.width > 0, scrollSize.height > 0 else { return }
+
+            guard scrollSize.width > 0, scrollSize.height > 0 else {
+                return
+            }
 
             let scale = min(
                 scrollSize.width / image.size.width,
@@ -179,17 +198,14 @@ extension ZoomableImageView {
             } else {
                 let location = recognizer.location(in: imageView)
                 let scale = viewModel.doubleTapZoomScale
-
                 let size = CGSize(
                     width: scrollView.bounds.width / scale,
                     height: scrollView.bounds.height / scale
                 )
-
                 let origin = CGPoint(
                     x: location.x - size.width / 2,
                     y: location.y - size.height / 2
                 )
-
                 scrollView.zoom(to: CGRect(origin: origin, size: size), animated: true)
             }
         }

@@ -14,5 +14,18 @@ final class PhotosetFeedAssembly: Assembly {
         container.autoregister(PhotosetFeedView.self, initializer: PhotosetFeedView.init)
         container.autoregister(PhotosetFeedViewModel.self, initializer: PhotosetFeedViewModel.init)
             .inObjectScope(.weak)
+
+        container.register(PhotosetCardView.self) { (resolver, id: PhotosetId) in
+            PhotosetCardView(
+                viewModel: resolver ~> (PhotosetCardViewModel.self, argument: id)
+            )
+        }
+
+        container.autoregister(
+            PhotosetCardViewModel.self,
+            argument: PhotosetId.self,
+            initializer: PhotosetCardViewModel.init
+        )
+//        .inObjectScope(.weak)
     }
 }

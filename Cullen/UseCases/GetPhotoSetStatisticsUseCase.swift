@@ -29,13 +29,11 @@ final class GetPhotosetStatisticsUseCaseImpl: GetPhotosetStatisticsUseCase {
         let totalPhotos = photosets
             .map { $0.photosCount }
             .reduce(0, +)
-        let completedSets = photosets.count { $0.isCompleted }
         let pendingSyncCount = photosets.count { $0.syncStatus == .pending }
 
         return PhotosetStatistics(
             totalSets: totalSets,
             totalPhotos: totalPhotos,
-            completedSets: completedSets,
             pendingSyncCount: pendingSyncCount
         )
     }

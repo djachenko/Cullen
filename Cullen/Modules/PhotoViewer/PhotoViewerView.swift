@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PopGestureRecognizerSwiftUI
 
 // MARK: - PhotoViewerView
 
@@ -21,32 +22,39 @@ struct PhotoViewerView: View {
     // MARK: - Properties
 
     @ObservedObject var viewModel: PhotoViewerViewModel
-    @Environment(\.dismiss) private var dismiss
 
     @State private var isUIVisible = true
-
-    private let swipeHandler = SwipeGestureHandler()
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-
             photoView
-
-            swipeOverlay
+            viewModel.compassViewModel.map {
+                SwipeCompassView(viewModel: $0)
+                    .allowsHitTesting(false)
+            }
         }
         .navigationBarHidden(!isUIVisible)
         .navigationTitle("\(viewModel.currentIndex + 1) / \(viewModel.totalCount)")
         .navigationBarTitleDisplayMode(.inline)
         .statusBarHidden(!isUIVisible)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                decisionBadge
+            }
+        }
+        .swipeBackGestureDisabled()
         .animation(.easeInOut(duration: 0.2), value: isUIVisible)
+        .task {
+            await viewModel.loadDecisions()
+        }
     }
+}
 
-    // MARK: - Photo View
-
-    private var photoView: some View {
+private extension PhotoViewerView {
+    var photoView: some View {
         ZoomableImageView(
             viewModel: ZoomableImageViewModel(
                 url: viewModel.currentPhoto.url,
@@ -55,21 +63,7 @@ struct PhotoViewerView: View {
                 onSingleTap: {
                     isUIVisible.toggle()
                 },
-                onPan: { recognizer in
-                    switch recognizer.state {
-                    case .changed:
-                        viewModel.dragOffset = recognizer.translation(in: recognizer.view)
-                    case .ended, .cancelled:
-                        if let angle = swipeHandler.evaluate(recognizer),
-                           let direction = SwipeDirection(angle: angle) {
-                            viewModel.commitSwipe(direction)
-                        } else {
-                            viewModel.cancelSwipe()
-                        }
-                    default:
-                        break
-                    }
-                }
+                onPan: viewModel.handle(recognizer:)
             )
         )
         .ignoresSafeArea()
@@ -77,16 +71,15 @@ struct PhotoViewerView: View {
         .transition(.opacity)
     }
 
-    // MARK: - Swipe Overlay
-
-    private var swipeOverlay: some View {
-        SwipeCompassView(
-            activeDirection: viewModel.activeSwipeDirection,
-            progress: viewModel.swipeProgress
-        )
-        .allowsHitTesting(false)
+    var decisionBadge: some View {
+        Button {
+            viewModel.resetDecision()
+        } label: {
+            DecisionBadge(decision: viewModel.decisions[viewModel.currentPhoto.id] ?? .pending)
+        }
     }
 }
+
 
 // MARK: - Preview
 
@@ -100,8 +93,7 @@ import SwinjectAutoregistration
                 [
                     Photo(
                         id: "test",
-                        url: URL(string: "https://sun9-38.userapi.com/s/v1/ig2/cMnRR4FQ4-IhOlY8sj-ZfVH4pdnmvAg0gVwruqXyfzWIpl8c3lxQaqzmz5Y_ff0f2SjiIm79NPZAv2DBZ8ErOuHW.jpg?quality=95&as=32x21,48x32,72x48,108x72,160x106,240x160,360x239,480x319,540x359,640x426,720x479,1080x718,1280x851,1440x958,2560x1703&from=bu&cs=2560x0"),
-                        decision: .pending
+                        url: URL(string: "https://sun9-38.userapi.com/s/v1/ig2/cMnRR4FQ4-IhOlY8sj-ZfVH4pdnmvAg0gVwruqXyfzWIpl8c3lxQaqzmz5Y_ff0f2SjiIm79NPZAv2DBZ8ErOuHW.jpg?quality=95&as=32x21,48x32,72x48,108x72,160x106,240x160,360x239,480x319,540x359,640x426,720x479,1080x718,1280x851,1440x958,2560x1703&from=bu&cs=2560x0")!,
                     )
                 ],
                 0

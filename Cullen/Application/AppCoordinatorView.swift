@@ -30,10 +30,14 @@ struct AppCoordinatorView: View {
         switch destination {
             case .photosetFeed:
                 resolver ~> PhotosetFeedView.self
-            case .photosetDetail(let info):
-                resolver ~> (PhotosetDetailView.self, argument: info)
-            case .photoViewer(let photos, let index):
-                resolver ~> (PhotoViewerView.self, arguments: (photos, index))
+            case .photosetDetail(let id):
+                resolver ~> (PhotosetDetailView.self, argument: id)
+            case .photoViewer(
+                let photos,
+                let index,
+                let photosetId
+            ):
+                resolver ~> (PhotoViewerView.self, arguments: (photos, index, photosetId))
         }
     }
 }

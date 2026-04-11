@@ -9,113 +9,184 @@ import Foundation
 import SwiftUI
 import Combine
 
-// MARK: - PhotosetDetailViewModel
 
 @MainActor
 final class PhotosetDetailViewModel: ObservableObject {
     @Published var state: PhotosetDetailState = .initial
-    @Published var activeFilters: Set<PhotoFilter> = Set(PhotoFilter.allCases)
     @Published var aspectRatio: Double = 3.0 / 2.0
-
-    var filteredPhotos: [Photo] {
-        guard let photos else {
-            return []
-        }
-
-
-        if activeFilters == Set(PhotoFilter.allCases) {
-            return photos
-        }
-
-        return photos.filter { photo in
-            activeFilters.contains { $0.matches(decision: photo.decision) }
-        }
-    }
+    @Published var export: DecisionsExport?
+    @Published var nextPendingId: PhotoId? = nil
 
     var title: String {
-        photosetInfo.title
-    }
-
-    var coverImageURL: URL? {
-        photosetInfo.coverUrl
+        photoset?.name ?? ""
     }
 
     private let coordinator: Coordinator
-    private let photosetInfo: PhotosetInfo
-    private let fetchPhotosetUseCase: FetchPhotosUseCase
+    private let fetchPhotosUseCase: FetchPhotosUseCase
+    private let loadDecisionsUseCase: LoadDecisionsUseCase
+    private let exportDecisionsUseCase: ExportDecisionsUseCase
 
-    private var photos: [Photo]?
-
-    private lazy var task = Task {
-        try await fetchPhotosetUseCase.execute(id: photosetInfo.id)
+    private let photosetTask: Task<Photoset, Error>
+    private lazy var photosTask = Task {
+        let photoset = try await photosetTask.value
+        return try await fetchPhotosUseCase.execute(id: photoset.id)
     }
 
-    init(
+    private var decisionsTask: Task<[PhotoId: Decision], Error> {
+        Task {
+            let photoset = try await photosetTask.value
+
+            return try await loadDecisionsUseCase.execute(for: photoset.id)
+        }
+    }
+
+    private var photoset: Photoset?
+    private var photos: [Photo] = []
+    private var decisions: [PhotoId: Decision] = [:]
+
+
+    nonisolated private init(
+        photosetTask: Task<Photoset, Error>,
         coordinator: Coordinator,
-        photosetInfo: PhotosetInfo,
-        fetchPhotosetUseCase: FetchPhotosUseCase
+        fetchPhotosUseCase: FetchPhotosUseCase,
+        loadDecisionsUseCase: LoadDecisionsUseCase,
+        exportDecisionsUseCase: ExportDecisionsUseCase
     ) {
+        self.photosetTask = photosetTask
         self.coordinator = coordinator
-        self.photosetInfo = photosetInfo
-        self.fetchPhotosetUseCase = fetchPhotosetUseCase
+        self.fetchPhotosUseCase = fetchPhotosUseCase
+        self.loadDecisionsUseCase = loadDecisionsUseCase
+        self.exportDecisionsUseCase = exportDecisionsUseCase
     }
 
+    nonisolated convenience init(
+        id: PhotosetId,
+        coordinator: Coordinator,
+        fetchPhotosetUseCase: FetchPhotosetUseCase,
+        fetchPhotosUseCase: FetchPhotosUseCase,
+        loadDecisionsUseCase: LoadDecisionsUseCase,
+        exportDecisionsUseCase: ExportDecisionsUseCase
+    ) {
+        self.init(
+            photosetTask: Task {
+                try await fetchPhotosetUseCase.execute(id: id)
+            },
+            coordinator: coordinator,
+            fetchPhotosUseCase: fetchPhotosUseCase,
+            loadDecisionsUseCase: loadDecisionsUseCase,
+            exportDecisionsUseCase: exportDecisionsUseCase
+        )
+    }
+}
+
+
+extension PhotosetDetailViewModel {
     func loadPhotos() async {
-        state = .loading
+        if case .initial = state {
+            state = .loading
+        }
 
         do {
-            self.photos = try await task.value
+            async let photosetResult = photosetTask.value
+            async let photosResult = photosTask.value
+            async let decisionsResult = decisionsTask.value
 
-            state = .content(filteredPhotos.map { photo in
+            let (photoset, photos, decisions) = try await (photosetResult, photosResult, decisionsResult)
+
+            self.photoset = photoset
+            self.photos = photos
+            self.decisions = decisions
+
+            state = .content(photos.map { photo in
                 PhotoGridCellViewModel(
                     id: photo.id,
                     imageURL: photo.url,
-                    decision: .mock,
+                    decision: decisions[photo.id] ?? .pending,
                 ) { [weak self] in
                     self?.didTap(photo: photo)
                 }
             })
-        }
-        catch is FetchPhotosUseCaseImpl.Error {
-            state = .error(message: "No photoset")
-        }
-        catch {
-            state = .error(message: "Exception")
+        } catch {
+            state = .error(message: error.localizedDescription)
         }
     }
 
-    func toggleFilter(_ filter: PhotoFilter) {
-        if activeFilters.contains(filter) {
-            guard activeFilters.count > 1 else { return }
-            activeFilters.remove(filter)
-        } else {
-            activeFilters.insert(filter)
+    func exportDecisions() {
+        guard let photoset else {
+            return
+        }
+
+        Task {
+            guard let data = try? await exportDecisionsUseCase.execute(photosetId: photoset.id) else {
+                return
+            }
+
+            export = DecisionsExport(
+                filename: "\(photoset.name).json",
+                data: data
+            )
         }
     }
 
-    func isFilterActive(_ filter: PhotoFilter) -> Bool {
-        activeFilters.contains(filter)
+    func didShow(photoIds: [PhotoId]) {
+        guard let last = photoIds.last else {
+            return
+        }
+
+        nextPendingId = photos
+            .drop { $0.id <= last }
+            .drop { decisions[$0.id].isUndecided }
+            .drop { !decisions[$0.id].isUndecided }
+            .first?
+            .id
     }
 }
 
+
 private extension PhotosetDetailViewModel {
     func didTap(photo: Photo) {
+        guard let photoset else {
+            return
+        }
+
         coordinator.show(
             .photoViewer(
-                photos: filteredPhotos,
-                startIndex: filteredPhotos.firstIndex(of: photo) ?? .zero
+                photos: photos,
+                startIndex: photos.firstIndex(of: photo) ?? .zero,
+                photosetId: photoset.id
             )
         )
     }
 }
 
-// MARK: - Supporting Types
 
 enum PhotosetDetailState {
     case initial
     case loading
     case content(PhotosetDetailContent)
     case error(message: String)
+
+    var isLoading: Bool {
+        switch self {
+        case .initial, .loading:
+            true
+        case .content, .error:
+            false
+        }
+    }
 }
 
+
 typealias PhotosetDetailContent = [PhotoGridCellViewModel]
+
+
+private extension Decision? {
+    var isUndecided: Bool {
+        switch self {
+        case .approved, .rejected:
+            false
+        case .pending, nil:
+            true
+        }
+    }
+}

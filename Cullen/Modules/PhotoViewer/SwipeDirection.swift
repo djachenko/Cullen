@@ -8,66 +8,74 @@
 import SwiftUI
 
 
-enum SwipeDirection {
-    case right  // Approve
-    case left   // Reject
-    case up     // Next
-    case down   // Previous
+struct SwipeDirection: Hashable {
+    let label: String
+    let icon: String
+    let color: Color
+    let decision: Decision?
+    let mainAngleDegrees: Angle
+}
 
-    var decision: Decision? {
-        switch self {
-        case .right: return .approved
-        case .left:  return .rejected
-        case .up:    return nil
-        case .down:  return nil
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .right: return "Approve"
-        case .left:  return "Reject"
-        case .up:    return "Next"
-        case .down:  return "Prev"
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .right: return "checkmark.circle.fill"
-        case .left:  return "xmark.circle.fill"
-        case .up:    return "arrow.up.circle.fill"
-        case .down:  return "arrow.down.circle.fill"
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .right: return .green
-        case .left:  return .red
-        case .up:    return .blue
-        case .down:  return .orange
-        }
+extension SwipeDirection: Equatable {
+    static func == (lhs: SwipeDirection, rhs: SwipeDirection) -> Bool {
+        lhs.mainAngleDegrees == rhs.mainAngleDegrees
     }
 }
 
-extension SwipeDirection {
-    private static let angleMapping: [Range<Double>: SwipeDirection] = [
-        0.0..<45.0:    .up,
-        45.0..<135.0:  .right,
-        135.0..<225.0: .down,
-        225.0..<315.0: .left,
-        315.0..<360.0: .up,
-    ]
+// TODO: Should color, icon and label be here???
 
+extension SwipeDirection {
+    static let up = SwipeDirection(
+        label: "Next",
+        icon: "arrow.up.circle.fill",
+        color: .blue,
+        decision: nil,
+        mainAngleDegrees: .degrees(0)
+    )
+
+    static let right = SwipeDirection(
+        label: "Approve",
+        icon: "checkmark.circle.fill",
+        color: .green,
+        decision: .approved,
+        mainAngleDegrees: .degrees(90)
+    )
+
+    static let down = SwipeDirection(
+        label: "Prev",
+        icon: "arrow.down.circle.fill",
+        color: .orange,
+        decision: nil,
+        mainAngleDegrees: .degrees(180)
+    )
+
+    static let left = SwipeDirection(
+        label: "Reject",
+        icon: "xmark.circle.fill",
+        color: .red,
+        decision: .rejected,
+        mainAngleDegrees: .degrees(270)
+    )
+    
+    static let allDirections: [SwipeDirection] = [
+        .up,
+        .right,
+        .down,
+        .left
+    ]
+}
+
+extension SwipeDirection {
     init?(angle: Double) {
-        if let value = SwipeDirection
-            .angleMapping
-            .first(where: { $0.key ~= angle })?
-            .value {
-            self = value
-        } else {
+        let match = SwipeDirection.allDirections.min { direction in
+            let delta = (angle - direction.mainAngleDegrees.degrees + 360).truncatingRemainder(dividingBy: 360)
+            return min(delta, 360 - delta)
+        }
+
+        guard let match else {
             return nil
         }
+        
+        self = match
     }
 }

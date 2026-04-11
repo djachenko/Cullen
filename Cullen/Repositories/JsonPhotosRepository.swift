@@ -7,57 +7,107 @@
 
 import Foundation
 
-struct PhotosetDTO: Decodable {
-    let id: Int
-    let name: String
-    let created: TimeInterval
-    let coverIndex: Int?
-    let photos: [URL]
-    let approvedCount: Int
-    let rejectedCount: Int
 
-    enum CodingKeys: String, CodingKey {
-        case id, name, created, photos
-        
-        case coverIndex = "cover_index"
-        case approvedCount = "approved_count"
-        case rejectedCount = "rejected_count"
-    }
-}
+actor JsonPhotosRepository {
+    private var photosetCache: [PhotosetId: Task<Photoset, Error>] = [:]
 
-extension PhotosetDTO {
-    func toDomain() -> Photoset {
-        Photoset(
-            id: .int(id),
-            name: name,
-            remotePath: "/photosets/\(id)",
-            syncStatus: SyncStatus.allCases.randomElement() ?? .pending,
-            lastSyncDate: Bool.random() ? Date() : nil,
-            createdAt: Date(timeIntervalSince1970: created),
-            coverImageURL: coverIndex.map { photos[$0] },
-            photosCount: photos.count,
-            approvedCount: approvedCount,
-            rejectedCount: rejectedCount,
-            photos: photos
-        )
-    }
-}
-
-final class JsonPhotosRepository {
-    private lazy var task = Task {
-        guard let url = Bundle.main.url(forResource: "cullen", withExtension: "json") else {
-            throw URLError(.fileDoesNotExist)
-        }
-
-        let data = try Data(contentsOf: url)
-        let dtos = try JSONDecoder().decode([PhotosetDTO].self, from: data)
-
-        return dtos.map { $0.toDomain() }
+    private lazy var indexTask = Task<[PhotosetId], Error> {
+        try [String]
+            .fromJson(name: "index")
+            .map { $0.removing(suffix: ".json") }
+            .map { .string($0) }
     }
 }
 
 extension JsonPhotosRepository: PhotosetsRepository {
+    func getPhotosetIds() async throws -> [PhotosetId] {
+        try await indexTask.value
+    }
+
+    func getPhotoset(id: PhotosetId) async throws -> Photoset {
+        guard case .string(let filename) = id else {
+            throw PhotosetsRepositoryError.notFound(id: id)
+        }
+
+        let task = photosetCache[id] ?? Task {
+            Photoset(
+                filename: filename,
+                photos: try [PhotoEntry]
+                    .fromJson(name: filename)
+                    .map { Photo(entry: $0) }
+            )
+        }
+
+        photosetCache[id] = task
+
+        return try await task.value
+    }
+
     func getPhotosets() async throws -> [Photoset] {
-        try await task.value
+        let ids = try await getPhotosetIds()
+
+        return try await withThrowingTaskGroup(of: (Int, Photoset?).self, returning: [Photoset].self) { group in
+            for (index, id) in ids.enumerated() {
+                group.addTask { [weak self] in
+                    (index, try await self?.getPhotoset(id: id))
+                }
+            }
+
+            var results = [(Int, Photoset?)]()
+
+            for try await (index, photoset) in group {
+                results.append((index, photoset))
+            }
+
+            return results
+                .sorted { $0.0 }
+                .compactMap { $0.1 }
+        }
+    }
+}
+
+
+private struct PhotoEntry {
+    let name: String
+    let url: URL
+}
+
+extension PhotoEntry: Decodable {}
+
+
+private extension Photo {
+    init(entry: PhotoEntry) {
+        self.init(
+            id: entry.name,
+            url: entry.url
+        )
+    }
+}
+
+
+private extension Photoset {
+    init(filename: String, photos: [Photo]) {
+        self.init(
+            id: .string(filename),
+            name: filename,
+            syncStatus: .synced,
+            coverImageURL: photos.first?.url,
+            photosCount: photos.count,
+            photos: photos
+        )
+    }
+
+    private static func date(filename: String) -> Date? {
+        let components = filename.split(separator: ".")
+
+        guard components.count >= 3 else {
+            return nil
+        }
+
+        let dateString = "\(components[0]).\(components[1]).\(components[2])"
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yy.MM.dd"
+
+        return formatter.date(from: dateString)
     }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D002A4842F6DC9040053419C /* PopGestureRecognizerSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */; };
 		D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D055F2F22F66A1F900380F46 /* Kingfisher */; };
 		D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */ = {isa = PBXBuildFile; productRef = D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */; };
 /* End PBXBuildFile section */
@@ -16,13 +17,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D0D8407E2F5CB3F000DC0CE1 /* Exceptions for "Cullen" folder in "Cullen" target */ = {
+		D002A5C32F6F04410053419C /* Exceptions for "Cullen" folder in "Cullen" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				__trash/BottomBar.swift,
 				__trash/CullenNavigationBar.swift,
 				__trash/MockPhotoRepository.swift,
 				__trash/MockServices.swift,
+				__trash/NavBar.swift,
 				__trash/PhotoDetailDisplayModel.swift,
+				__trash/PhotoFilter.swift,
 				__trash/RepositoryProtocols.swift,
 				__trash/SwipeHintsView.swift,
 			);
@@ -34,7 +38,7 @@
 		D0C3DE7D2EDD91AD0068307C /* Cullen */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D0D8407E2F5CB3F000DC0CE1 /* Exceptions for "Cullen" folder in "Cullen" target */,
+				D002A5C32F6F04410053419C /* Exceptions for "Cullen" folder in "Cullen" target */,
 			);
 			path = Cullen;
 			sourceTree = "<group>";
@@ -46,6 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D002A4842F6DC9040053419C /* PopGestureRecognizerSwiftUI in Frameworks */,
 				D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */,
 				D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */,
 			);
@@ -92,6 +97,7 @@
 			packageProductDependencies = (
 				D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */,
 				D055F2F22F66A1F900380F46 /* Kingfisher */,
+				D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */,
 			);
 			productName = Cullen;
 			productReference = D0C3DE7B2EDD91AD0068307C /* Cullen.app */;
@@ -125,6 +131,7 @@
 				D043D9B52EDD9F37009F2100 /* XCRemoteSwiftPackageReference "SwiftLint" */,
 				D0999ED42F4645E100D352C3 /* XCRemoteSwiftPackageReference "SwinjectAutoregistration" */,
 				D055F2F12F66A1F900380F46 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				D002A4822F6DC9040053419C /* XCRemoteSwiftPackageReference "PopGestureRecognizerSwiftUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D0C3DE7C2EDD91AD0068307C /* Products */;
@@ -287,18 +294,19 @@
 				DEVELOPMENT_TEAM = 2T7P8BR7NV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = CULLEN_DEV;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.Cullen2;
+				PRODUCT_BUNDLE_IDENTIFIER = "ru.djachenko.ios.Cullen-dev";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -322,18 +330,19 @@
 				DEVELOPMENT_TEAM = 2T7P8BR7NV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Cullen;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.Cullen2;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.Cullen;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -370,6 +379,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		D002A4822F6DC9040053419C /* XCRemoteSwiftPackageReference "PopGestureRecognizerSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hayek/PopGestureRecognizerSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		D043D9B52EDD9F37009F2100 /* XCRemoteSwiftPackageReference "SwiftLint" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/realm/SwiftLint";
@@ -397,6 +414,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D002A4822F6DC9040053419C /* XCRemoteSwiftPackageReference "PopGestureRecognizerSwiftUI" */;
+			productName = PopGestureRecognizerSwiftUI;
+		};
 		D055F2F22F66A1F900380F46 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D055F2F12F66A1F900380F46 /* XCRemoteSwiftPackageReference "Kingfisher" */;
