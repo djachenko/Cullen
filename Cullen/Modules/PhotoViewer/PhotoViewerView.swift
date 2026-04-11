@@ -83,21 +83,19 @@ private extension PhotoViewerView {
 
 // MARK: - Preview
 
-import SwinjectAutoregistration
-
 #Preview {
     NavigationStack {
         Cullen.resolver ~> (
             PhotoViewerView.self,
-            arguments: (
+            with:
                 [
                     Photo(
                         id: "test",
                         url: URL(string: "https://sun9-38.userapi.com/s/v1/ig2/cMnRR4FQ4-IhOlY8sj-ZfVH4pdnmvAg0gVwruqXyfzWIpl8c3lxQaqzmz5Y_ff0f2SjiIm79NPZAv2DBZ8ErOuHW.jpg?quality=95&as=32x21,48x32,72x48,108x72,160x106,240x160,360x239,480x319,540x359,640x426,720x479,1080x718,1280x851,1440x958,2560x1703&from=bu&cs=2560x0")!,
                     )
                 ],
-                0
-            )
+            0,
+            PhotosetId.int(0)
         )
     }
 }

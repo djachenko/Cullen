@@ -21,7 +21,7 @@ struct Cullen: App {
 
     var body: some Scene {
         WindowGroup {
-            Cullen.resolver ~> (AppCoordinatorView.self, argument: AppDestination.photosetFeed)
+            Cullen.resolver ~> (AppCoordinatorView.self, with: AppDestination.photosetFeed)
         }
     }
 }
