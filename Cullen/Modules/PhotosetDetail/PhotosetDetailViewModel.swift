@@ -115,39 +115,17 @@ extension PhotosetDetailViewModel {
                     self?.didTap(photo: photo)
                 }
             })
+
+            let photosetId = photoset.id
+
+            export = DecisionsExport(
+                filename: "\(photoset.name).json"
+            ) { [weak self] in
+                try await self?.exportDecisionsUseCase.execute(photosetId: photosetId) ?? Data()
+            }
         } catch {
             state = .error(message: error.localizedDescription)
         }
-    }
-
-    func exportDecisions() {
-        guard let photoset else {
-            return
-        }
-
-        Task {
-            guard let data = try? await exportDecisionsUseCase.execute(photosetId: photoset.id) else {
-                return
-            }
-
-            export = DecisionsExport(
-                filename: "\(photoset.name).json",
-                data: data
-            )
-        }
-    }
-
-    func didShow(photoIds: [PhotoId]) {
-        guard let last = photoIds.last else {
-            return
-        }
-
-        nextPendingId = photos
-            .drop { $0.id <= last }
-            .drop { decisions[$0.id].isUndecided }
-            .drop { !decisions[$0.id].isUndecided }
-            .first?
-            .id
     }
 }
 
@@ -167,6 +145,19 @@ extension PhotosetDetailViewModel {
             case .prefetching:
                 cancelPrefetch()
         }
+    }
+
+    func didShow(photoIds: [PhotoId]) {
+        guard let last = photoIds.last else {
+            return
+        }
+
+        nextPendingId = photos
+            .drop { $0.id <= last }
+            .drop { decisions[$0.id].isUndecided }
+            .drop { !decisions[$0.id].isUndecided }
+            .first?
+            .id
     }
 }
 
