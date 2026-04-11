@@ -9,6 +9,10 @@ import Swinject
 struct ParaMap {
     private var registrators: [(Container) -> Void] = []
 
+    init<each A>(_ values: repeat each A) {
+        repeat set(each values)
+    }
+
     mutating func set<T>(_ value: T) {
         registrators.append { container in
             container.register(T.self) { _ in value }
@@ -45,46 +49,61 @@ private func resolved<T>(_ type: T.Type, from resolver: Resolver, params: ParaMa
 }
 
 func ~> <T, A>(resolver: Resolver, pair: (T.Type, with: A)) -> T {
-    var params = ParaMap()
-    params.set(pair.1)
-
-    return resolved(pair.0, from: resolver, params: params)
+    resolved(
+        pair.0,
+        from: resolver,
+        params: ParaMap(
+            pair.1
+        )
+    )
 }
 
 func ~> <T, A, B>(resolver: Resolver, pair: (T.Type, with: A, B)) -> T {
-    var params = ParaMap()
-    params.set(pair.1)
-    params.set(pair.2)
-
-    return resolved(pair.0, from: resolver, params: params)
+    resolved(
+        pair.0,
+        from: resolver,
+        params: ParaMap(
+            pair.1,
+            pair.2
+        )
+    )
 }
 
 func ~> <T, A, B, C>(resolver: Resolver, pair: (T.Type, with: A, B, C)) -> T {
-    var params = ParaMap()
-    params.set(pair.1)
-    params.set(pair.2)
-    params.set(pair.3)
-
-    return resolved(pair.0, from: resolver, params: params)
+    resolved(
+        pair.0,
+        from: resolver,
+        params: ParaMap(
+            pair.1,
+            pair.2,
+            pair.3
+        )
+    )
 }
 
 func ~> <T, A, B, C, D>(resolver: Resolver, pair: (T.Type, with: A, B, C, D)) -> T {
-    var params = ParaMap()
-    params.set(pair.1)
-    params.set(pair.2)
-    params.set(pair.3)
-    params.set(pair.4)
-
-    return resolved(pair.0, from: resolver, params: params)
+    resolved(
+        pair.0,
+        from: resolver,
+        params: ParaMap(
+            pair.1,
+            pair.2,
+            pair.3,
+            pair.4
+        )
+    )
 }
 
 func ~> <T, A, B, C, D, E>(resolver: Resolver, pair: (T.Type, with: A, B, C, D, E)) -> T {
-    var params = ParaMap()
-    params.set(pair.1)
-    params.set(pair.2)
-    params.set(pair.3)
-    params.set(pair.4)
-    params.set(pair.5)
-
-    return resolved(pair.0, from: resolver, params: params)
+    resolved(
+        pair.0,
+        from: resolver,
+        params: ParaMap(
+            pair.1,
+            pair.2,
+            pair.3,
+            pair.4,
+            pair.5
+        )
+    )
 }
