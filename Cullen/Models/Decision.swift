@@ -22,3 +22,13 @@ enum Decision: String, Codable {
         }
     }
 }
+
+extension Decision: CaseIterable {}
+
+extension Decision: Equatable {}
+
+extension Decision {
+    static var mock: Decision {
+        .allCases.randomElement() ?? .pending
+    }
+}

@@ -11,10 +11,11 @@ import SwinjectAutoregistration
 
 final class UseCasesAssembly: Assembly {
     func assemble(container: Container) {
-        container.autoregister(FetchPhotosetsUseCaseProtocol.self, initializer: FetchPhotosetsUseCase.init)
+        container.autoregister(FetchPhotosetInfoUseCase.self, initializer: FetchPhotosetsUseCaseImpl.init)
         container.autoregister(
             GetPhotosetStatisticsUseCaseProtocol.self,
             initializer: GetPhotosetStatisticsUseCase.init
         )
+        container.autoregister(FetchPhotosUseCase.self, initializer: FetchPhotosUseCaseImpl.init)
     }
 }

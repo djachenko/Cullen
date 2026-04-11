@@ -11,3 +11,5 @@ enum SyncStatus: String, Codable {
     case pending
     case error
 }
+
+extension SyncStatus: CaseIterable {}

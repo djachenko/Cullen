@@ -11,6 +11,7 @@ import SwinjectAutoregistration
 
 final class RepositoriesAssembly: Assembly {
     func assemble(container: Container) {
-        container.autoregister(PhotosetsRepository.self, initializer: MockPhotosetsRepository.init)
+        container.autoregister(PhotosetsRepository.self, initializer: JsonPhotosRepository.init)
+            .inObjectScope(.container)
     }
 }

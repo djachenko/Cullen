@@ -7,18 +7,19 @@
 
 import Foundation
 
+typealias PhotoId = String
 
 struct Photo: Identifiable, Hashable {
-    let id: UUID
-    let fileName: String
-    let localPath: URL?
-    let remotePath: String
+    let id: PhotoId
+//    let fileName: String
+    let url: URL?
+//    let remotePath: String
     var decision: Decision
-    var syncStatus: SyncStatus
-    let modifiedAt: Date
-    let photoSetId: UUID
-    
-    var needsSync: Bool {
-        syncStatus == .pending
-    }
+//    var syncStatus: SyncStatus
+//    let modifiedAt: Date
+//    let photosetId: PhotosetId
+//    
+//    var needsSync: Bool {
+//        syncStatus == .pending
+//    }
 }

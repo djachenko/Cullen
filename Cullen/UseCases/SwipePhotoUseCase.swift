@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Swipe Photo Use Case
 //
 //protocol SwipePhotoUseCaseProtocol {
-//    func execute(photoId: UUID, decision: Decision) async throws
+//    func execute(photoId: PhotosetId, decision: Decision) async throws
 //}
 
 //final class SwipePhotoUseCase: SwipePhotoUseCaseProtocol {
@@ -23,7 +23,7 @@ import Foundation
 //        self.syncService = syncService
 //    }
 //    
-//    func execute(photoId: UUID, decision: Decision) async throws {
+//    func execute(photoId: PhotosetId, decision: Decision) async throws {
 //        // Business Logic:
 //        // 1. Update decision locally (offline-first)
 //        try await repository.updatePhotoDecision(photoId, decision: decision)

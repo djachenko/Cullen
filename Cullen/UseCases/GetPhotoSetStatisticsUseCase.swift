@@ -22,15 +22,15 @@ final class GetPhotosetStatisticsUseCase: GetPhotosetStatisticsUseCaseProtocol {
     }
     
     func execute() async throws -> PhotosetStatistics {
-        let photoSets = try await repository.getPhotosets()
+        let photosets = try await repository.getPhotosets()
 
         // Business Logic: Calculate statistics
-        let totalSets = photoSets.count
-        let totalPhotos = photoSets
+        let totalSets = photosets.count
+        let totalPhotos = photosets
             .map { $0.photosCount }
             .reduce(0, +)
-        let completedSets = photoSets.count { $0.isCompleted }
-        let pendingSyncCount = photoSets.count { $0.syncStatus == .pending }
+        let completedSets = photosets.count { $0.isCompleted }
+        let pendingSyncCount = photosets.count { $0.syncStatus == .pending }
 
         return PhotosetStatistics(
             totalSets: totalSets,
