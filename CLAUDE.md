@@ -34,6 +34,39 @@ Cullen — инструмент для отбора фотографий со с
 
 ---
 
+## DI-соглашения
+
+Поверх Swinject написаны два расширения в `Utils/`.
+
+**Autoregistration** — `autoregister` без явного `.self`, тип выводится из инициализатора:
+```swift
+container.autoregister(PhotosetFeedViewModel.init)
+    .inObjectScope(.weak)
+
+// Если тип регистрируется под протоколом — оставляем явный .self:
+container.autoregister(JsonPhotosRepository.self, initializer: JsonPhotosRepository.init)
+    .inObjectScope(.container)
+
+// Если конкретный тип + протоколы-алиасы — .implements:
+container.autoregister(DecisionsUseCaseImpl.init)
+    .implements(SaveDecisionUseCase.self)
+    .implements(LoadDecisionsUseCase.self)
+```
+
+**ParaMap** — передача параметров вглубь иерархии резолва через child container. Вместо `argument:` в регистрации:
+```swift
+// Call site:
+resolver ~> (PhotosetDetailView.self, with: photosetId)
+resolver ~> (PhotoViewerView.self, with: photos, startIndex, photosetId)
+
+// Assembly — без argument:, параметры приходят из ParaMap:
+container.autoregister(PhotosetDetailViewModel.init) // PhotosetId резолвится из child
+```
+
+Параметры кладутся в child container по типу — не использовать примитивные типы (`Int`, `String`) как единственный параметр экрана, если в том же поддереве резолва есть другие зависимости того же типа.
+
+---
+
 ## Структура проекта
 
 ```
@@ -106,3 +139,27 @@ Presentation → Domain ← Data
 **Use Case** — одна операция, одна ответственность, метод `execute()`.  
 **Repository** — протокол в Domain, реализация в Data.
 
+---
+
+## Скиллы (детальные гайды)
+
+### Архитектура
+- `/di` — Swinject DI: scopes, autoregister, ParaMap, child container resolution
+- `/navigation` — Coordinator pattern, AppDestination, добавление нового экрана
+- `/patterns` — Repository, UseCase, Decisions, Export — детали реализации
+- `/migration` — MigrationService: паттерн, существующие миграции, как добавить новую
+- `/observable` — план миграции на @Observable
+
+### Стиль & Качество
+- `/style` — Naming conventions, code style, pre-commit checklist
+- `/issues` — Known bugs и структурные ограничения
+
+### Фичи & Эпики
+- `/backlog` — текущий фокус, что в работе, что следующее
+- `/connectors` — архитектура коннекторов и источников данных, планируемые источники
+- `/prefetch` — PrefetchManager, оффлайн-кэш, стратегии разрешения
+
+### Инфраструктура
+- `/cli` — Python CLI: cullen.py, формат данных, sources.py
+- `/spm` — план SPM-пакетов (CullenUI, SwiftFoundationExtensions, CullenDesignSystem)
+- `/distribution` — AltStore, индикатор срока подписи
