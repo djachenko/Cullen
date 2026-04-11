@@ -163,3 +163,4 @@ Presentation → Domain ← Data
 - `/cli` — Python CLI: cullen.py, формат данных, sources.py
 - `/spm` — план SPM-пакетов (CullenUI, SwiftFoundationExtensions, CullenDesignSystem)
 - `/distribution` — AltStore, индикатор срока подписи
+- `/git` — GitHub Flow, именование веток, semantic commits, merge-соглашения
