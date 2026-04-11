@@ -6,26 +6,15 @@
 //
 
 import Swinject
-import SwinjectAutoregistration
 
 
 final class PhotosetFeedAssembly: Assembly {
     func assemble(container: Container) {
-        container.autoregister(PhotosetFeedView.self, initializer: PhotosetFeedView.init)
-        container.autoregister(PhotosetFeedViewModel.self, initializer: PhotosetFeedViewModel.init)
+        container.autoregister(PhotosetFeedView.init)
+        container.autoregister(PhotosetFeedViewModel.init)
             .inObjectScope(.weak)
 
-        container.register(PhotosetCardView.self) { (resolver, id: PhotosetId) in
-            PhotosetCardView(
-                viewModel: resolver ~> (PhotosetCardViewModel.self, argument: id)
-            )
-        }
-
-        container.autoregister(
-            PhotosetCardViewModel.self,
-            argument: PhotosetId.self,
-            initializer: PhotosetCardViewModel.init
-        )
-//        .inObjectScope(.weak)
+        container.autoregister(PhotosetCardView.init)
+        container.autoregister(PhotosetCardViewModel.init)
     }
 }

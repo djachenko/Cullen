@@ -207,13 +207,13 @@ extension PhotosetDetailView {
 
 // MARK: - Preview
 
-import SwinjectAutoregistration
-
 #Preview {
     NavigationStack {
         PreviewWrapper()
     }
 }
+
+import SwinjectAutoregistration
 
 private struct PreviewWrapper: View {
     @State private var photosetId: PhotosetId?
@@ -221,7 +221,7 @@ private struct PreviewWrapper: View {
     var body: some View {
         Group {
             if let photosetId {
-                Cullen.resolver ~> (PhotosetDetailView.self, argument: photosetId)
+                Cullen.resolver ~> (PhotosetDetailView.self, with: photosetId)
             } else {
                 ProgressView()
                     .task {

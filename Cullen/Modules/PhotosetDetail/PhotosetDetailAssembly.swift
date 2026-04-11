@@ -6,27 +6,13 @@
 //
 
 import Swinject
-import SwinjectAutoregistration
 
 
 final class PhotosetDetailAssembly: Assembly {
     func assemble(container: Container) {
-        container.register(PhotosetDetailView.self) { (resolver, id: PhotosetId) in
-            PhotosetDetailView(
-                viewModel: resolver ~> (PhotosetDetailViewModel.self, argument: id)
-            )
-        }
+        container.autoregister(PhotosetDetailView.init)
 
-        container.register(PhotosetDetailViewModel.self) { (resolver, id: PhotosetId) in
-            PhotosetDetailViewModel(
-                id: id,
-                coordinator: resolver ~> Coordinator.self,
-                fetchPhotosetUseCase: resolver ~> FetchPhotosetUseCase.self,
-                fetchPhotosUseCase: resolver ~> FetchPhotosUseCase.self,
-                loadDecisionsUseCase: resolver ~> LoadDecisionsUseCase.self,
-                exportDecisionsUseCase: resolver ~> ExportDecisionsUseCase.self
-            )
-        }
-        .inObjectScope(.weak)
+        container.autoregister(PhotosetDetailViewModel.init)
+            .inObjectScope(.weak)
     }
 }

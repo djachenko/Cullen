@@ -18,10 +18,10 @@ final class MigrationsAssembly: Assembly {
             ]
         }
 
-        container.autoregister(MigrationService.self, initializer: MigrationService.init)
+        container.autoregister(MigrationService.init)
             .inObjectScope(.container)
 
-        container.autoregister(DecisionsUrlToNameIdMigration.self, initializer: DecisionsUrlToNameIdMigration.init)
-        container.autoregister(DecisionsCodableFormatFalloutMigration.self, initializer: DecisionsCodableFormatFalloutMigration.init)
+        container.autoregister(DecisionsUrlToNameIdMigration.init)
+        container.autoregister(DecisionsCodableFormatFalloutMigration.init)
     }
 }

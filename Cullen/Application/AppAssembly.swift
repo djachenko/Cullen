@@ -6,19 +6,14 @@
 //
 
 import Swinject
-import SwinjectAutoregistration
 
 
 final class AppAssembly: Assembly {
     func assemble(container: Container) {
-        container.autoregister(AppCoordinator.self, initializer: AppCoordinator.init)
+        container.autoregister(AppCoordinator.init)
             .implements(Coordinator.self)
             .inObjectScope(.container)
 
-        container.autoregister(
-            AppCoordinatorView.self,
-            argument: AppDestination.self,
-            initializer: AppCoordinatorView.init
-        )
+        container.autoregister(AppCoordinatorView.init)
     }
 }
