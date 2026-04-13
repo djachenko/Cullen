@@ -52,7 +52,7 @@ style: Dropped redundant imports
 - Строчная буква после `:`
 - Без точки в конце
 - Без `Co-Authored-By:` и других мета-строк от инструментов
-- Императив: *Add*, *Fix*, *Refactor* — не *Added*, не *Fixing*
+- Императив, совершенный вид: *Added*, *Fixed*, *Refactored* — не *Add*, не *Adding*, не *Fixing*
 
 ## Автор
 
