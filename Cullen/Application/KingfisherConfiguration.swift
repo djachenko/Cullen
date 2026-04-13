@@ -17,6 +17,11 @@ enum KingfisherConfiguration {
 
         KingfisherManager.shared.defaultOptions = [
             .processingQueue(.dispatch(DispatchQueue.global(qos: .userInitiated))),
+            .cacheOriginalImage,
+            .transition(.fade(0.15)),
         ]
+
+        ImageCache.default.diskStorage.config.expiration = .days(30)
+        ImageCache.default.diskStorage.config.sizeLimit = 2 * 1024 * 1024 * 1024  // 2 GB
     }
 }

@@ -139,11 +139,7 @@ extension ZoomableImageView {
                 return
             }
 
-            imageView.kf.setImage(with: url) { [weak self] result in
-                guard case .success = result else {
-                    return
-                }
-                
+            imageView.setCullenImage(with: url) { [weak self] in
                 self?.layoutImageView()
             }
         }

@@ -92,26 +92,23 @@ extension PhotosetCardView {
         }
         .background(Color(.systemBackground))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(
+                    Color(.separator).opacity(0.5),
+                    lineWidth: 2
+                )
+        )
+        .shadow(
+            color: .black.opacity(0.08),
+            radius: 12,
+            x: 0,
+            y: 4
+        )
     }
 
     private func coverImage(url: URL?) -> some View {
-        KFImage(url)
-            .placeholder {
-                ZStack {
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.15, green: 0.15, blue: 0.2),
-                            Color(red: 0.1, green: 0.1, blue: 0.15),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    Image(systemName: "photo.on.rectangle.angled")
-                        .font(.system(size: 48, weight: .ultraLight))
-                        .foregroundColor(.white.opacity(0.3))
-                }
-            }
+        CullenImage(url)
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(height: 200)
