@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "closure #1 in DecisionsMigration2.run():DecisionsMigration 2.swift">
+      </ContextState>
+      <ContextState
+         contextName = "Photo.init(entry:):JsonPhotosRepository.swift">
+      </ContextState>
+      <ContextState
+         contextName = "GetPhotosetStatisticsUseCaseImpl.execute():GetPhotoSetStatisticsUseCase.swift">
+      </ContextState>
+      <ContextState
+         contextName = "static Decodable.fromJson(name:):JsonPhotosRepository.swift">
+      </ContextState>
+      <ContextState
+         contextName = "PhotoViewerViewModel.init(photos:startIndex:photosetId:swipeHandler:saveDecisionUseCase:loadDecisionsUseCase:):PhotoViewerViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "MigrationService.runMigrations():MigrationService.swift">
+      </ContextState>
+      <ContextState
+         contextName = "static Decodable.fromJson(name:bundle:):Decodable+Extensions.swift">
+      </ContextState>
+      <ContextState
+         contextName = "JsonDecisionsRepository.load(for:) [inlined]:JsonDecisionsRepository.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "url">
+            </PersistentString>
+            <PersistentString
+               value = "try? JSONDecoder().decode([String: Any].self, from: data)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "PhotosetFeedViewModel.loadPhotosets():PhotosetFeedViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in PhotoViewerViewModel.commitSwipe(_:):PhotoViewerViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "Photoset.init(filename:content:):JsonPhotosRepository.swift">
+      </ContextState>
+      <ContextState
+         contextName = "DecisionsMigration.run():DecisionsMigration.swift">
+      </ContextState>
+      <ContextState
+         contextName = "PhotosetDetailViewModel.didShow(photoIds:):PhotosetDetailViewModel.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "prev.map { decisions[$0.id] }">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "PhotosetCardViewModel.load():PhotosetCardViewModel.swift">
+      </ContextState>
+      <ContextState
+         contextName = "JsonDecisionsRepository.save(decisions:for:):JsonDecisionsRepository.swift">
+      </ContextState>
+      <ContextState
+         contextName = "JsonDecisionsRepository.load(for:):JsonDecisionsRepository.swift">
+      </ContextState>
+      <ContextState
+         contextName = "DecisionsMigration2.run():DecisionsMigration 2.swift">
+      </ContextState>
+      <ContextState
+         contextName = "DecisionsUseCaseImpl.migrated(decisions:photosetId:):DecisionsUseCase.swift">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

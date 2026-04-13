@@ -9,3 +9,5 @@ CLI/.idea/
 
 .claude/worktrees/
 .claude/settings.local.json
+
+cli_/.idea/
