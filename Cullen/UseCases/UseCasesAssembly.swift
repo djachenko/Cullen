@@ -16,9 +16,10 @@ final class UseCasesAssembly: Assembly {
         container.autoregister(GetPhotosetStatisticsUseCase.self, initializer: GetPhotosetStatisticsUseCaseImpl.init)
         container.autoregister(FetchPhotosUseCase.self, initializer: FetchPhotosUseCaseImpl.init)
         container.autoregister(ExportDecisionsUseCase.self, initializer: ExportDecisionsUseCaseImpl.init)
+        container.autoregister(CacheUseCase.self, initializer: CacheUseCaseImpl.init)
 
         container.autoregister(DecisionsUseCaseImpl.init)
-            .inObjectScope(.container)
+            .inObjectScope(.container) // shared state: decisions cache is shared across screens
             .implements(SaveDecisionUseCase.self)
             .implements(LoadDecisionsUseCase.self)
     }

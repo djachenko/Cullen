@@ -16,5 +16,8 @@ final class RepositoriesAssembly: Assembly {
 
         container.autoregister(DecisionsRepository.self, initializer: JsonDecisionsRepository.init)
             .inObjectScope(.container)
+
+        container.autoregister(ImageCacheService.self, initializer: KingfisherImageCacheService.init)
+            .inObjectScope(.container)
     }
 }

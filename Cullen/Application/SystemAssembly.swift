@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Kingfisher
 import Swinject
 
 
@@ -15,11 +16,15 @@ final class SystemAssembly: Assembly {
             .inObjectScope(.weak)
 
         container.register(FileManager.self) { _ in
-                .default
+            .default
         }.inObjectScope(.weak)
 
         container.register(UserDefaults.self) { _ in
-                .standard
+            .standard
+        }.inObjectScope(.weak)
+
+        container.register(ImageCache.self) { _ in
+            .default
         }.inObjectScope(.weak)
     }
 }

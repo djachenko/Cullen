@@ -42,30 +42,15 @@ struct PhotoGridCell: View {
 
 private extension PhotoGridCell{
     var photoImage: some View {
-        KFImage(viewModel.imageURL)
-            .placeholder { loadingView }
-            .onFailureView { failureView }
+        CullenImage(viewModel.imageURL)
             .onSuccess { _ in
                 success = true
             }
-            .cancelOnDisappear(true)
             .downsampling(size: CGSize(width: width, height: width / aspectRatio))
-            .cacheOriginalImage()
-            .processingQueue(.dispatch(DispatchQueue.global(qos: .userInitiated)))
             .resizable()
             .scaledToFill()
             .frame(width: width, height: width / aspectRatio)
             .clipped()
-    }
-
-    var loadingView: some View {
-        ProgressView()
-    }
-
-    var failureView: some View {
-        Image(systemName: "exclamationmark.triangle.fill")
-            .font(.system(size: 24))
-            .foregroundColor(.red)
     }
 
     var decisionBadge: some View {
