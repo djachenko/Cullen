@@ -12,7 +12,7 @@ struct StripV4View: View {
 
     @ObservedObject var viewModel: PhotoViewerViewModel
 
-    @State private var scrollPosition: PhotoId?
+    @State private var activeId: PhotoId?
 
     private enum Layout {
         static let cardSpacing: CGFloat = 20
@@ -36,7 +36,10 @@ struct StripV4View: View {
                             decision: viewModel.decisions[photo.id] ?? .pending,
                             width: cardWidth,
                             height: cardHeight,
-                            isActive: scrollPosition == photo.id
+                            isActive: activeId == photo.id,
+                            onSwipe: { direction in
+                                viewModel.commitSwipe(direction)
+                            }
                         )
                         .id(photo.id)
                     }
@@ -47,7 +50,7 @@ struct StripV4View: View {
             }
             .background(Color.black)
             .scrollTargetBehavior(.viewAligned)
-            .scrollPosition(id: $scrollPosition, anchor: .center)
+            .scrollPosition(id: $activeId, anchor: .center)
             .onAppear {
                 UIScrollView.appearance().decelerationRate = .fast
 
@@ -55,19 +58,20 @@ struct StripV4View: View {
                     return
                 }
 
-                scrollPosition = viewModel.photos[viewModel.currentIndex].id
+                activeId = viewModel.photos[viewModel.currentIndex].id
             }
             .onDisappear {
                 UIScrollView.appearance().decelerationRate = .normal
             }
         }
         .ignoresSafeArea()
-        .onChange(of: scrollPosition) { _, id in
+        .onChange(of: activeId) { _, id in
             guard let id,
                   let index = viewModel.photos.firstIndex(where: { $0.id == id }),
                   viewModel.currentIndex != index else {
                 return
             }
+
             viewModel.currentIndex = index
         }
         .onChange(of: viewModel.currentIndex) { _, newIndex in
@@ -77,37 +81,11 @@ struct StripV4View: View {
 
             let id = viewModel.photos[newIndex].id
 
-            guard id != scrollPosition else {
+            guard id != activeId else {
                 return
             }
 
-            scrollPosition = id
+            activeId = id
         }
-    }
-}
-
-// MARK: - Card View
-
-private struct StripV4CardView: View {
-    let photo: Photo
-    let decision: Decision
-    let width: CGFloat
-    let height: CGFloat
-    let isActive: Bool
-
-    var body: some View {
-        ZStack(alignment: .topTrailing) {
-            CullenImage(photo.url)
-                .resizable()
-                .scaledToFill()
-                .frame(width: width, height: height)
-                .clipped()
-
-            DecisionBadge(decision: decision)
-                .size(22)
-                .padding(16)
-        }
-        .frame(width: width, height: height)
-        .shadow(color: .black.opacity(isActive ? 0.24 : 0.12), radius: 18, x: 0, y: 10)
     }
 }
