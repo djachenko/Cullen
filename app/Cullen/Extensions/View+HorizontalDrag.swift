@@ -37,14 +37,17 @@ private struct HorizontalPanGestureView: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {}
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.onChanged = onChanged
+        context.coordinator.onEnded = onEnded
+    }
 }
 
 extension HorizontalPanGestureView {
     final class Coordinator: NSObject, UIGestureRecognizerDelegate {
 
-        let onChanged: (CGFloat) -> Void
-        let onEnded: (CGFloat, CGFloat) -> Void
+        var onChanged: (CGFloat) -> Void
+        var onEnded: (CGFloat, CGFloat) -> Void
 
         init(onChanged: @escaping (CGFloat) -> Void, onEnded: @escaping (CGFloat, CGFloat) -> Void) {
             self.onChanged = onChanged
