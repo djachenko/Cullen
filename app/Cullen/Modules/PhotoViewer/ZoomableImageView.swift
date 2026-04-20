@@ -15,8 +15,12 @@ struct ZoomableImageViewModel {
     let url: URL?
     var maxZoomScale: CGFloat = 5
     var doubleTapZoomScale: CGFloat = 3
+    var panRequiresHorizontal: Bool = false
+    var bouncesZoom: Bool = true
     var onSingleTap: () -> Void = {}
     var onPan: (_ recognizer: UIPanGestureRecognizer) -> Void = { _ in }
+    var onZoomScaleChange: (CGFloat) -> Void = { _ in }
+    var onAspectRatioChange: (CGFloat) -> Void = { _ in }
 }
 
 // MARK: - LayoutAwareScrollView
@@ -74,7 +78,8 @@ extension ZoomableImageView {
             scrollView.maximumZoomScale = viewModel.maxZoomScale
             scrollView.showsVerticalScrollIndicator = false
             scrollView.showsHorizontalScrollIndicator = false
-            scrollView.bouncesZoom = true
+            scrollView.bouncesZoom = viewModel.bouncesZoom
+            scrollView.clipsToBounds = false
             scrollView.backgroundColor = .clear
             scrollView.contentInsetAdjustmentBehavior = .never
 
@@ -141,6 +146,10 @@ extension ZoomableImageView {
 
             imageView.setCullenImage(with: url) { [weak self] in
                 self?.layoutImageView()
+
+                if let image = self?.imageView.image, image.size.height > 0 {
+                    self?.viewModel.onAspectRatioChange(image.size.width / image.size.height)
+                }
             }
         }
 
@@ -225,6 +234,11 @@ extension ZoomableImageView.Coordinator: UIScrollViewDelegate {
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         centerImageView()
+        viewModel.onZoomScaleChange(scrollView.zoomScale)
+    }
+
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+        viewModel.onZoomScaleChange(scale)
     }
 }
 
@@ -232,7 +246,14 @@ extension ZoomableImageView.Coordinator: UIScrollViewDelegate {
 
 extension ZoomableImageView.Coordinator: UIGestureRecognizerDelegate {
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        scrollView.zoomScale == 1
+        guard scrollView.zoomScale == 1 else {
+            return false
+        }
+        guard viewModel.panRequiresHorizontal else {
+            return true
+        }
+        let velocity = pan.velocity(in: scrollView)
+        return abs(velocity.x) > abs(velocity.y)
     }
 
     func gestureRecognizer(

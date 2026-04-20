@@ -27,14 +27,19 @@ final class PhotoViewerViewModel: ObservableObject {
     }
     @Published var compassViewModel: SwipeCompassViewModel?
     @Published var decisions: [PhotoId: Decision] = [:]
+    @Published var settings: ViewerSettings
+
+    // MARK: - Internal Properties
+
+    let photos: [Photo]
 
     // MARK: - Private Properties
 
     private let photosetId: PhotosetId
-    private let photos: [Photo]
     private let swipeHandler: SwipeGestureHandler
     private let saveDecisionUseCase: SaveDecisionUseCase
     private let loadDecisionsUseCase: LoadDecisionsUseCase
+    private let viewerSettingsRepository: ViewerSettingsRepository
 
     // MARK: - Computed Properties
 
@@ -61,6 +66,7 @@ final class PhotoViewerViewModel: ObservableObject {
         swipeHandler: SwipeGestureHandler,
         saveDecisionUseCase: SaveDecisionUseCase,
         loadDecisionsUseCase: LoadDecisionsUseCase,
+        viewerSettingsRepository: ViewerSettingsRepository,
     ) {
         self.photosetId = photosetId
         self.photos = photos
@@ -68,6 +74,8 @@ final class PhotoViewerViewModel: ObservableObject {
         self.swipeHandler = swipeHandler
         self.saveDecisionUseCase = saveDecisionUseCase
         self.loadDecisionsUseCase = loadDecisionsUseCase
+        self.viewerSettingsRepository = viewerSettingsRepository
+        self.settings = viewerSettingsRepository.load(for: photosetId)
     }
 
     // MARK: - Public Methods
@@ -77,35 +85,15 @@ final class PhotoViewerViewModel: ObservableObject {
     }
 
     func commitSwipe(_ direction: SwipeDirection) {
-        if let decision = direction.decision {
-            decisions[currentPhoto.id] = decision
-
-            Task {
-                try? await saveDecisionUseCase.execute(
-                    photoId: currentPhoto.id,
-                    decision: decision,
-                    in: photosetId
-                )
-            }
-        }
-
-//        TODO: create delay
         switch direction {
-            case .up:
-//                TODO: Move to default
-                goToNext()
-            case .down:
-                goToPrevious()
-            default:
-                
-
-                if hasNext {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            self.currentIndex += 1
-                        }
-                    }
-                }
+        case .up:
+            goToNext()
+        case .down:
+            goToPrevious()
+        default:
+            if let decision = Decision(direction: direction) {
+                applyDecision(decision)
+            }
         }
     }
 
@@ -132,7 +120,21 @@ final class PhotoViewerViewModel: ObservableObject {
             )
         }
     }
+
+    func cycleViewerMode() {
+        let modes = ViewerMode.allCases
+
+        guard let currentModeIndex = modes.firstIndex(of: settings.mode) else {
+            return
+        }
+
+        let nextIndex = (currentModeIndex + 1) % modes.count
+
+        settings.mode = modes[nextIndex]
+        viewerSettingsRepository.save(settings, for: photosetId)
+    }
 }
+
 
 extension PhotoViewerViewModel {
     func handle(recognizer: UIPanGestureRecognizer) {
@@ -156,6 +158,45 @@ extension PhotoViewerViewModel {
 
         default:
             break
+        }
+    }
+}
+
+
+private extension PhotoViewerViewModel {
+    func applyDecision(_ decision: Decision) {
+        decisions[currentPhoto.id] = decision
+
+        Task {
+            try? await saveDecisionUseCase.execute(
+                photoId: currentPhoto.id,
+                decision: decision,
+                in: photosetId
+            )
+        }
+
+        guard hasNext else {
+            return
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+            withAnimation(.easeInOut(duration: 0.25)) {
+                self?.currentIndex += 1
+            }
+        }
+    }
+}
+
+
+extension Decision {
+    init?(direction: SwipeDirection) {
+        switch direction {
+            case .left:
+                self = .rejected
+            case .right:
+                self = .approved
+            default:
+                return nil
         }
     }
 }
