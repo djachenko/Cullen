@@ -13,11 +13,13 @@ struct StripV4View: View {
     @ObservedObject var viewModel: PhotoViewerViewModel
 
     @State private var activeId: PhotoId?
+    @State private var dragOffset: CGFloat = 0
 
     private enum Layout {
         static let cardSpacing: CGFloat = 20
         static let defaultAspectRatio: CGFloat = 3.0 / 2.0
-        static let cornerRadius: CGFloat = 4
+        static let swipeFraction: CGFloat = 1.0 / 3.0
+        static let velocityWeight: CGFloat = 0.1
     }
 
     var body: some View {
@@ -31,17 +33,11 @@ struct StripV4View: View {
                     Color.clear.frame(height: edgeInset)
 
                     ForEach(viewModel.photos) { photo in
-                        StripV4CardView(
+                        cardView(
                             photo: photo,
-                            decision: viewModel.decisions[photo.id] ?? .pending,
-                            width: cardWidth,
-                            height: cardHeight,
-                            isActive: activeId == photo.id,
-                            onSwipe: { direction in
-                                viewModel.commitSwipe(direction)
-                            }
+                            cardWidth: cardWidth,
                         )
-                        .id(photo.id)
+                        .frame(height: cardHeight)
                     }
 
                     Color.clear.frame(height: edgeInset)
@@ -86,6 +82,97 @@ struct StripV4View: View {
             }
 
             activeId = id
+        }
+    }
+}
+
+// MARK: - Card
+
+private extension StripV4View {
+    @ViewBuilder
+    func cardView(photo: Photo, cardWidth: CGFloat) -> some View {
+        let isActive = photo.id == activeId
+        let swipeThreshold = cardWidth * Layout.swipeFraction
+
+        let cardDragOffset: CGFloat = if isActive {
+            dragOffset
+        } else {
+            0
+        }
+
+        let swipeProgress = min(abs(cardDragOffset) / swipeThreshold, 1)
+
+        ZStack {
+            underlay
+                .opacity(swipeProgress)
+
+            StripV4CardView(
+                photo: photo,
+                decision: viewModel.decisions[photo.id] ?? .pending,
+            )
+            .offset(x: cardDragOffset)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+        .id(photo.id)
+        .onHorizontalDrag(
+            onChanged: { x in
+                guard photo.id == activeId else {
+                    return
+                }
+
+                dragOffset = x
+            },
+            onEnded: { translation, velocity in
+                guard photo.id == activeId else {
+                    return
+                }
+                
+                handleSwipeEnd(
+                    translation: translation,
+                    velocity: velocity,
+                    threshold: swipeThreshold
+                )
+            }
+        )
+    }
+
+    var underlay: some View {
+        HStack {
+            StripV4UnderlayView(decision: .approved)
+                .frame(maxWidth: .infinity)
+
+            Color.clear
+                .frame(maxWidth: .infinity)
+
+            StripV4UnderlayView(decision: .rejected)
+                .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+// MARK: - Swipe
+
+private extension StripV4View {
+    func handleSwipeEnd(translation: CGFloat, velocity: CGFloat, threshold: CGFloat) {
+        let projected = translation + velocity * Layout.velocityWeight
+
+        snapBack()
+
+        guard abs(projected) > threshold else {
+            return
+        }
+
+        let direction: SwipeDirection = if projected > 0 {
+            .right
+        } else {
+            .left
+        }
+        viewModel.commitSwipe(direction)
+    }
+
+    func snapBack() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            dragOffset = 0
         }
     }
 }
