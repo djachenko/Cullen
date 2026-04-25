@@ -8,11 +8,16 @@ import UIKit
 
 extension View {
     func onHorizontalDrag(
+        enabled: @escaping () -> Bool,
         onChanged: @escaping (CGFloat) -> Void,
         onEnded: @escaping (_ translation: CGFloat, _ velocity: CGFloat) -> Void
     ) -> some View {
         overlay(
-            HorizontalPanGestureView(onChanged: onChanged, onEnded: onEnded)
+            HorizontalPanGestureView(
+                enabled: enabled,
+                onChanged: onChanged,
+                onEnded: onEnded
+            )
         )
     }
 }
@@ -21,59 +26,90 @@ extension View {
 
 private struct HorizontalPanGestureView: UIViewRepresentable {
 
+    let enabled: () -> Bool
     let onChanged: (CGFloat) -> Void
     let onEnded: (_ translation: CGFloat, _ velocity: CGFloat) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onChanged: onChanged, onEnded: onEnded)
+        Coordinator(
+            isEnabled: enabled,
+            onChanged: onChanged,
+            onEnded: onEnded
+        )
     }
 
     func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        view.backgroundColor = .clear
-        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))
-        pan.delegate = context.coordinator
-        view.addGestureRecognizer(pan)
-        return view
+        context.coordinator.view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
         context.coordinator.onChanged = onChanged
         context.coordinator.onEnded = onEnded
+        context.coordinator.isEnabled = enabled
     }
 }
 
 extension HorizontalPanGestureView {
-    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
-
+    final class Coordinator: NSObject {
+        var isEnabled: () -> Bool
         var onChanged: (CGFloat) -> Void
         var onEnded: (CGFloat, CGFloat) -> Void
 
-        init(onChanged: @escaping (CGFloat) -> Void, onEnded: @escaping (CGFloat, CGFloat) -> Void) {
+        lazy var view = {
+            let view = UIView()
+            view.backgroundColor = .clear
+            view.addGestureRecognizer(pan)
+
+            return view
+        }()
+
+        private lazy var pan = {
+            let pan = UIPanGestureRecognizer(target: self, action: #selector(Coordinator.handlePan(_:)))
+            pan.delegate = self
+
+            return pan
+        }()
+
+        init(
+            isEnabled: @escaping () -> Bool,
+            onChanged: @escaping (CGFloat) -> Void,
+            onEnded: @escaping (CGFloat, CGFloat) -> Void
+        ) {
+            self.isEnabled = isEnabled
             self.onChanged = onChanged
             self.onEnded = onEnded
         }
+    }
+}
 
-        @objc func handlePan(_ recognizer: UIPanGestureRecognizer) {
-            let translation = recognizer.translation(in: recognizer.view?.superview).x
+extension HorizontalPanGestureView.Coordinator: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard isEnabled() else {
+            return false
+        }
 
-            switch recognizer.state {
+        guard let pan = gestureRecognizer as? UIPanGestureRecognizer,
+              pan == self.pan else {
+            return true
+        }
+
+        return pan.isHorizontal
+    }
+}
+
+private extension HorizontalPanGestureView.Coordinator {
+    @objc func handlePan(_ recognizer: UIPanGestureRecognizer) {
+        let translation = recognizer.translation(in: recognizer.view?.superview).x
+
+        switch recognizer.state {
             case .changed:
                 onChanged(translation)
             case .ended, .cancelled:
                 let velocity = recognizer.velocity(in: recognizer.view?.superview).x
+
                 onEnded(translation, velocity)
             default:
                 break
-            }
-        }
-
-        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-            guard let pan = gestureRecognizer as? UIPanGestureRecognizer else {
-                return true
-            }
-
-            return pan.isHorizontal
         }
     }
 }

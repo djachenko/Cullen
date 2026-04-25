@@ -100,13 +100,23 @@ final class PhotoViewerViewModel: ObservableObject {
     func cancelSwipe() {}
 
     func goToNext() {
-        guard hasNext else { return }
-        withAnimation(.easeInOut(duration: 0.25)) { currentIndex += 1 }
+        guard hasNext else {
+            return
+        }
+
+        withAnimation(.easeInOut(duration: 0.25)) {
+            currentIndex += 1
+        }
     }
 
     func goToPrevious() {
-        guard hasPrevious else { return }
-        withAnimation(.easeInOut(duration: 0.25)) { currentIndex -= 1 }
+        guard hasPrevious else {
+            return
+        }
+
+        withAnimation(.easeInOut(duration: 0.25)) {
+            currentIndex -= 1
+        }
     }
 
     func resetDecision() {

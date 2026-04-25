@@ -71,12 +71,15 @@ private extension PhotoViewerView {
                     url: viewModel.currentPhoto.url,
                     maxZoomScale: Layout.maxZoomScale,
                     doubleTapZoomScale: Layout.doubleTapZoomScale,
-                    onSingleTap: {
-                        isUIVisible.toggle()
-                    },
+//                    onSingleTap: {
+//                        isUIVisible.toggle()
+//                    },
                     onPan: viewModel.handle(recognizer:)
                 )
             )
+            .onTap {
+                isUIVisible.toggle()
+            }
             .ignoresSafeArea()
             .id(viewModel.currentIndex)
             .transition(.opacity)
@@ -89,7 +92,7 @@ private extension PhotoViewerView {
     }
 
     var stripView: some View {
-        StripV4View(viewModel: viewModel)
+        StripV5View(viewModel: viewModel)
     }
 }
 
