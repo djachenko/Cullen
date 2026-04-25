@@ -170,7 +170,9 @@ private extension StripV5View {
             viewModel: ZoomableImageViewModel(
                 url: viewModel.currentPhoto.url,
                 onZoomScaleChange: { scale in
-                    zoomScale = scale
+                    withAnimation(scale == 1 ? .easeInOut(duration: 0.25) : nil) {
+                        zoomScale = scale
+                    }
                 }
             ),
             externalControl: zoomControl
