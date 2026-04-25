@@ -16,6 +16,16 @@ struct StripV5View: View {
 
     @StateObject private var zoomControl = ZoomControl()
 
+    init(viewModel: PhotoViewerViewModel) {
+        self.viewModel = viewModel
+
+        let initialId: PhotoId? = viewModel.photos.indices.contains(viewModel.currentIndex)
+            ? viewModel.photos[viewModel.currentIndex].id
+            : nil
+
+        self._activeId = State(initialValue: initialId)
+    }
+
     private enum Layout {
         static let cardSpacing: CGFloat = 20
         static let defaultAspectRatio: CGFloat = 3.0 / 2.0
