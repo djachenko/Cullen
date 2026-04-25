@@ -43,9 +43,13 @@ struct StripV5View: View {
 
             viewModel.currentIndex = index
         }
-        .onChange(of: viewModel.currentIndex) { _, _ in
-            withAnimation(.easeInOut(duration: 0.25)) {
+        .onChange(of: viewModel.currentIndex, initial: true) { old, _ in
+            if old == viewModel.currentIndex {
                 activeId = viewModel.currentPhoto.id
+            } else {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    activeId = viewModel.currentPhoto.id
+                }
             }
         }
     }
@@ -77,12 +81,6 @@ private extension StripV5View {
         }
         .onAppear {
             UIScrollView.appearance().decelerationRate = .fast
-
-            guard viewModel.photos.indices.contains(viewModel.currentIndex) else {
-                return
-            }
-
-            activeId = viewModel.photos[viewModel.currentIndex].id
         }
         .onDisappear {
             UIScrollView.appearance().decelerationRate = .normal
