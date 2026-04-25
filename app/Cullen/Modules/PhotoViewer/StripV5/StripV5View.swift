@@ -128,9 +128,8 @@ private extension StripV5View {
             .offset(x: threshold * swipeProgress)
         }
         .gestureLayer(captures: { _ in zoomScale == 1 }) {
-            GestureTap(count: 2) {
-                zoomControl.zoom(to: 3)
-                zoomScale = 3
+            GestureTap(count: 2) { location in
+                zoomControl.zoom(to: 3, screenAnchor: location, animated: true)
             }
             GesturePan(
                 filter: .horizontal,

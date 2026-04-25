@@ -14,12 +14,12 @@ protocol GestureDescriptor {}
 struct GestureTap: GestureDescriptor {
     var count: Int
     var when: () -> Bool
-    var action: () -> Void
+    var action: (CGPoint) -> Void
 
     init(
         count: Int = 1,
         when: @escaping () -> Bool = { true },
-        action: @escaping () -> Void
+        action: @escaping (CGPoint) -> Void
     ) {
         self.count = count
         self.when = when

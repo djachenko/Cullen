@@ -15,7 +15,7 @@ final class ZoomControl: ObservableObject {
     }
 
     // screenAnchor: nil → zoom to content center
-    func zoom(to scale: CGFloat, screenAnchor: CGPoint? = nil) {
+    func zoom(to scale: CGFloat, screenAnchor: CGPoint? = nil, animated: Bool = false) {
         guard let scrollView else { return }
 
         let imagePoint: CGPoint
@@ -43,7 +43,7 @@ final class ZoomControl: ObservableObject {
             width: w,
             height: h
         )
-        scrollView.zoom(to: rect, animated: false)
+        scrollView.zoom(to: rect, animated: animated)
     }
 
     func reset(animated: Bool = true) {

@@ -12,7 +12,7 @@ final class GestureLayerCoordinator: NSObject {
     private struct TapEntry {
         let recognizer: UITapGestureRecognizer
         var when: () -> Bool
-        var action: () -> Void
+        var action: (CGPoint) -> Void
     }
 
     private struct PanEntry {
@@ -124,7 +124,8 @@ final class GestureLayerCoordinator: NSObject {
             return
         }
 
-        entry.action()
+        let location = r.location(in: r.view?.window)
+        entry.action(location)
     }
 
     @objc private func handlePan(_ r: UIPanGestureRecognizer) {
