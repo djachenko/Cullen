@@ -30,11 +30,8 @@ struct PhotoViewerView: View {
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            photoView
-            viewModel.compassViewModel.map {
-                SwipeCompassView(viewModel: $0)
-                    .allowsHitTesting(false)
-            }
+
+            modeView
         }
         .navigationBarHidden(!isUIVisible)
         .navigationTitle("\(viewModel.currentIndex + 1) / \(viewModel.totalCount)")
@@ -42,7 +39,10 @@ struct PhotoViewerView: View {
         .statusBarHidden(!isUIVisible)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                decisionBadge
+                HStack(spacing: 16) {
+                    modeSwitchButton
+                    decisionBadge
+                }
             }
         }
         .swipeBackGestureDisabled()
@@ -54,21 +54,57 @@ struct PhotoViewerView: View {
 }
 
 private extension PhotoViewerView {
-    var photoView: some View {
-        ZoomableImageView(
-            viewModel: ZoomableImageViewModel(
-                url: viewModel.currentPhoto.url,
-                maxZoomScale: Layout.maxZoomScale,
-                doubleTapZoomScale: Layout.doubleTapZoomScale,
-                onSingleTap: {
-                    isUIVisible.toggle()
-                },
-                onPan: viewModel.handle(recognizer:)
+    @ViewBuilder
+    var modeView: some View {
+        switch viewModel.settings.mode {
+            case .compass:
+                compassView
+            case .strip:
+                stripView
+        }
+    }
+
+    var compassView: some View {
+        ZStack {
+            ZoomableImageView(
+                viewModel: ZoomableImageViewModel(
+                    url: viewModel.currentPhoto.url,
+                    maxZoomScale: Layout.maxZoomScale,
+                    doubleTapZoomScale: Layout.doubleTapZoomScale,
+//                    onSingleTap: {
+//                        isUIVisible.toggle()
+//                    },
+                    onPan: viewModel.handle(recognizer:)
+                )
             )
-        )
-        .ignoresSafeArea()
-        .id(viewModel.currentIndex)
-        .transition(.opacity)
+            .onTap {
+                isUIVisible.toggle()
+            }
+            .ignoresSafeArea()
+            .id(viewModel.currentIndex)
+            .transition(.opacity)
+
+            viewModel.compassViewModel.map {
+                SwipeCompassView(viewModel: $0)
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+
+    var stripView: some View {
+        StripView(viewModel: viewModel)
+    }
+}
+
+// MARK: Toolbar
+
+extension PhotoViewerView {
+    var modeSwitchButton: some View {
+        Button {
+            viewModel.cycleViewerMode()
+        } label: {
+            Image(systemName: viewModel.settings.mode.icon)
+        }
     }
 
     var decisionBadge: some View {

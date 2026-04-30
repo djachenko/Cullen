@@ -28,7 +28,7 @@ struct PhotoGridCell: View {
     @State var success = false
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
+        ZStack(alignment: .topTrailing) {
             photoImage
 
             if success {

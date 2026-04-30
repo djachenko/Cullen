@@ -13,5 +13,8 @@ final class PhotoViewerAssembly: Assembly {
         container.autoregister(PhotoViewerView.init)
         container.autoregister(PhotoViewerViewModel.init)
         container.autoregister(SwipeGestureHandler.init)
+        container.autoregister(UserDefaultsViewerSettingsRepository.init)
+            .implements(ViewerSettingsRepository.self)
+            .inObjectScope(.container)
     }
 }
