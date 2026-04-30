@@ -32,9 +32,9 @@ extension Decision {
     var label: String {
         switch self {
         case .approved:
-            "Одобрить"
+            "Approve"
         case .rejected:
-            "Отклонить"
+            "Reject"
         case .pending:
             ""
         }
