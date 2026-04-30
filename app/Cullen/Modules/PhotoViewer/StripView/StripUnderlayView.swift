@@ -1,12 +1,12 @@
 //
-//  StripV4UnderlayView.swift
+//  StripUnderlayView.swift
 //  Cullen
 //
 
 import SwiftUI
 
 
-struct StripV4UnderlayView: View {
+struct StripUnderlayView: View {
     private enum Layout {
         static let iconSize: CGFloat = 24
         static let labelSize: CGFloat = 12

@@ -1,5 +1,5 @@
 //
-//  StripV4CardView.swift
+//  StripCardView.swift
 //  Cullen
 //
 
@@ -7,7 +7,7 @@ import SwiftUI
 import Kingfisher
 
 
-struct StripV4CardView: View {
+struct StripCardView: View {
     let photo: Photo
     let decision: Decision
 

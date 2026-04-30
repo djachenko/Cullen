@@ -1,11 +1,11 @@
 //
-//  StripV5View.swift
+//  StripView.swift
 //  Cullen
 //
 
 import SwiftUI
 
-struct StripV5View: View {
+struct StripView: View {
 
     @ObservedObject var viewModel: PhotoViewerViewModel
 
@@ -43,13 +43,9 @@ struct StripV5View: View {
 
             viewModel.currentIndex = index
         }
-        .onChange(of: viewModel.currentIndex, initial: true) { old, _ in
-            if old == viewModel.currentIndex {
+        .onChange(of: viewModel.currentIndex, initial: true) { _, _ in
+            withAnimation(.easeInOut(duration: 0.25)) {
                 activeId = viewModel.currentPhoto.id
-            } else {
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    activeId = viewModel.currentPhoto.id
-                }
             }
         }
     }
@@ -57,7 +53,7 @@ struct StripV5View: View {
 
 // MARK: - Strip
 
-private extension StripV5View {
+private extension StripView {
 
     func strip(geometry: GeometryProxy, edgeInset: CGFloat) -> some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -74,7 +70,7 @@ private extension StripV5View {
         .contentMargins(.vertical, edgeInset, for: .scrollContent)
         .background(Color.black)
         .scrollTargetBehavior(.viewAligned)
-        .scrollPosition(id: $activeId, anchor: .center)
+        .scrollPosition(id: $activeId)
         .scrollDisabled(zoomScale > 1)
         .onScrollPhaseChange { _, new in
             isScrolling = new != .idle
@@ -90,14 +86,14 @@ private extension StripV5View {
 
 // MARK: - Cards
 
-private extension StripV5View {
+private extension StripView {
 
     @ViewBuilder
     func card(photo: Photo, geometry: GeometryProxy) -> some View {
         if photo.id == activeId {
             activeCard(photo: photo, geometry: geometry)
         } else {
-            StripV4CardView(
+            StripCardView(
                 photo: photo,
                 decision: viewModel.decisions[photo.id] ?? .pending
             )
@@ -107,28 +103,38 @@ private extension StripV5View {
     func activeCard(photo: Photo, geometry: GeometryProxy) -> some View {
         let threshold = geometry.size.width * Layout.swipeFraction
 
+        let isZoomed = zoomScale > 1
+
+        let opacity = if !isZoomed {
+            1.0
+        } else {
+            0.0
+        }
+
         return ZStack {
             HStack {
-                StripV4UnderlayView(decision: .approved)
+                StripUnderlayView(decision: .approved)
                     .frame(width: threshold)
 
                 Spacer()
 
-                StripV4UnderlayView(decision: .rejected)
+                StripUnderlayView(decision: .rejected)
                     .frame(width: threshold)
             }
             .opacity(min(abs(swipeProgress), 1))
 
-            StripV4CardView(
+            StripCardView(
                 photo: photo,
                 decision: viewModel.decisions[photo.id] ?? .pending
             )
             .offset(x: threshold * swipeProgress)
         }
-        .gestureLayer(captures: { _ in zoomScale == 1 }) {
+        .opacity(opacity)
+        .gestureLayer(captures: { _ in !isZoomed }) {
             GestureTap(count: 2) { location in
                 zoomControl.zoom(to: 3, screenAnchor: location, animated: true)
             }
+
             GesturePan(
                 filter: .horizontal,
                 when: { !isScrolling },
@@ -139,8 +145,10 @@ private extension StripV5View {
                     handleSwipeEnd(translation: translation, velocity: velocity, threshold: threshold)
                 }
             )
+
             GesturePinch(onChanged: { scale, anchor in
                 zoomControl.zoom(to: scale, screenAnchor: anchor)
+
                 if scale > 1 {
                     zoomScale = scale
                 }
@@ -151,29 +159,37 @@ private extension StripV5View {
 
 // MARK: - Zoom overlay
 
-private extension StripV5View {
-
+private extension StripView {
+    @ViewBuilder
     var zoomOverlay: some View {
+        let isZoomed = zoomScale > 1
+
+        let opacity = if isZoomed {
+            1.0
+        } else {
+            0.0
+        }
+
         ZoomableImageView(
             viewModel: ZoomableImageViewModel(
                 url: viewModel.currentPhoto.url,
                 onZoomScaleChange: { scale in
-                    withAnimation(scale == 1 ? .easeInOut(duration: 0.25) : nil) {
+                    withAnimation(.easeInOut(duration: 0.25)) {
                         zoomScale = scale
                     }
                 }
             ),
             externalControl: zoomControl
         )
-        .allowsHitTesting(zoomScale > 1)
-        .opacity(zoomScale > 1 ? 1 : 0)
+        .allowsHitTesting(isZoomed)
+        .opacity(opacity)
         .ignoresSafeArea()
     }
 }
 
 // MARK: - Swipe
 
-private extension StripV5View {
+private extension StripView {
 
     func handleSwipeEnd(translation: CGFloat, velocity: CGFloat, threshold: CGFloat) {
         let projected = translation + velocity * Layout.velocityWeight

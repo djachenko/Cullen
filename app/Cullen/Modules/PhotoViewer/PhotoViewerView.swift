@@ -92,7 +92,7 @@ private extension PhotoViewerView {
     }
 
     var stripView: some View {
-        StripV5View(viewModel: viewModel)
+        StripView(viewModel: viewModel)
     }
 }
 
