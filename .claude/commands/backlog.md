@@ -50,4 +50,8 @@
 6. **SPM пакеты** — CullenUI, SwiftFoundationExtensions, CullenDesignSystem — `/spm`
 7. **Дистрибуция** — AltStore, индикатор подписи — `/distribution`
 
+## CLI
+
+- **Мигрировать build backend на hatchling** — сейчас setuptools, hatchling не требует явного `packages.find` для `src/` layout
+
 Полный бэклог: `backlog.md` в корне проекта.
