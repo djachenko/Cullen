@@ -35,38 +35,36 @@ final class PhotosetCardViewModel: ObservableObject {
     let id: PhotosetId
 
     private let fetchPhotosetUseCase: FetchPhotosetUseCase
-    private let loadDecisionsUseCase: LoadDecisionsUseCase
+    private let decisionsStatsUseCase: DecisionsStatsUseCase
     private let coordinator: Coordinator
 
     init(
         id: PhotosetId,
         fetchPhotosetUseCase: FetchPhotosetUseCase,
-        loadDecisionsUseCase: LoadDecisionsUseCase,
+        decisionsStatsUseCase: DecisionsStatsUseCase,
         coordinator: Coordinator
     ) {
         self.id = id
         self.fetchPhotosetUseCase = fetchPhotosetUseCase
-        self.loadDecisionsUseCase = loadDecisionsUseCase
+        self.decisionsStatsUseCase = decisionsStatsUseCase
         self.coordinator = coordinator
     }
 
     func load() async {
         do {
-            print("PhotosetCardViewModel \(id)")
-
             async let photosetResult = fetchPhotosetUseCase.execute(id: id)
-            async let decisionsResult = loadDecisionsUseCase.execute(for: id)
+            async let decisionsResult = decisionsStatsUseCase.execute(for: id)
 
-            let (photoset, decisions) = try await (photosetResult, decisionsResult)
+            let (photoset, decisionsStats) = try await (photosetResult, decisionsResult)
 
-            print("awaited \(id)")
-
-            let approvedCount = decisions.values.count { $0 == .approved }
-            let rejectedCount = decisions.values.count { $0 == .rejected }
+            let approvedCount = decisionsStats.approved
+            let rejectedCount = decisionsStats.rejected
             let pendingCount = photoset.photosCount - approvedCount - rejectedCount
-            let progress = photoset.photosCount > 0
-                ? Double(approvedCount + rejectedCount) / Double(photoset.photosCount)
-                : 0
+            let progress = if photoset.photosCount > 0 {
+                Double(approvedCount + rejectedCount) / Double(photoset.photosCount)
+            } else {
+                0.0
+            }
 
             state = .content(Content(
                 title: photoset.name,
