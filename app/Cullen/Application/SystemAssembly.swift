@@ -8,6 +8,7 @@
 import Foundation
 import Kingfisher
 import Swinject
+import UserNotifications
 
 
 final class SystemAssembly: Assembly {
@@ -26,5 +27,12 @@ final class SystemAssembly: Assembly {
         container.register(ImageCache.self) { _ in
             .default
         }.inObjectScope(.weak)
+
+        container.register(UNUserNotificationCenter.self) { _ in
+            .current()
+        }.inObjectScope(.weak)
+
+        container.autoregister(SigningExpirationService.init)
+            .inObjectScope(.container)
     }
 }

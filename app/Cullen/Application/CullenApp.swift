@@ -15,6 +15,8 @@ struct Cullen: App {
         KingfisherConfiguration.configure()
 
         Task {
+            await (Cullen.resolver ~> SigningExpirationService.self)
+                .scheduleExpirationNotifications()
             await (Cullen.resolver ~> MigrationService.self).runMigrations()
         }
     }
