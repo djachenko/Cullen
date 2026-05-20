@@ -26,6 +26,8 @@ struct SortOptionDisplayModel: Identifiable {
             self.icon = "chart.bar.fill"
         case .photoCount:
             self.icon = "photo.stack"
+        case .lastOpened:
+            self.icon = "eye"
         }
     }
 }

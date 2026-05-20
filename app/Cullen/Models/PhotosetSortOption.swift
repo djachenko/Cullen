@@ -7,10 +7,22 @@
 
 
 enum PhotosetSortOption: String, CaseIterable, Identifiable {
-    case recent = "Recent"
+    case recent = "Date"
     case name = "Name"
     case progress = "Progress"
     case photoCount = "Photos"
-    
-    var id: String { rawValue }
+    case lastOpened = "Last Opened"
+
+    var id: String {
+        rawValue
+    }
+
+    var defaultDirection: SortDirection {
+        switch self {
+            case .name:
+                .ascending
+            default:
+                .descending
+        }
+    }
 }

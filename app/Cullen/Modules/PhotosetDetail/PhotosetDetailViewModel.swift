@@ -27,6 +27,7 @@ final class PhotosetDetailViewModel: ObservableObject {
     private let loadDecisionsUseCase: LoadDecisionsUseCase
     private let exportDecisionsUseCase: ExportDecisionsUseCase
     private let cacheUseCase: CacheUseCase
+    private let recordLastOpenedUseCase: RecordLastOpenedUseCase
 
     private let photosetTask: Task<Photoset, Error>
     private lazy var photosTask = Task {
@@ -54,7 +55,8 @@ final class PhotosetDetailViewModel: ObservableObject {
         fetchPhotosUseCase: FetchPhotosUseCase,
         loadDecisionsUseCase: LoadDecisionsUseCase,
         exportDecisionsUseCase: ExportDecisionsUseCase,
-        cacheUseCase: CacheUseCase
+        cacheUseCase: CacheUseCase,
+        recordLastOpenedUseCase: RecordLastOpenedUseCase
     ) {
         self.photosetTask = photosetTask
         self.coordinator = coordinator
@@ -62,6 +64,7 @@ final class PhotosetDetailViewModel: ObservableObject {
         self.loadDecisionsUseCase = loadDecisionsUseCase
         self.exportDecisionsUseCase = exportDecisionsUseCase
         self.cacheUseCase = cacheUseCase
+        self.recordLastOpenedUseCase = recordLastOpenedUseCase
     }
 
     nonisolated convenience init(
@@ -71,7 +74,8 @@ final class PhotosetDetailViewModel: ObservableObject {
         fetchPhotosUseCase: FetchPhotosUseCase,
         loadDecisionsUseCase: LoadDecisionsUseCase,
         exportDecisionsUseCase: ExportDecisionsUseCase,
-        cacheUseCase: CacheUseCase
+        cacheUseCase: CacheUseCase,
+        recordLastOpenedUseCase: RecordLastOpenedUseCase
     ) {
         self.init(
             photosetTask: Task {
@@ -81,7 +85,8 @@ final class PhotosetDetailViewModel: ObservableObject {
             fetchPhotosUseCase: fetchPhotosUseCase,
             loadDecisionsUseCase: loadDecisionsUseCase,
             exportDecisionsUseCase: exportDecisionsUseCase,
-            cacheUseCase: cacheUseCase
+            cacheUseCase: cacheUseCase,
+            recordLastOpenedUseCase: recordLastOpenedUseCase
         )
     }
 }
@@ -99,6 +104,10 @@ extension PhotosetDetailViewModel {
             async let decisionsResult = decisionsTask.value
 
             let (photoset, photos, decisions) = try await (photosetResult, photosResult, decisionsResult)
+
+            Task {
+                await recordLastOpenedUseCase.execute(id: photoset.id)
+            }
 
             self.photoset = photoset
             self.photos = photos

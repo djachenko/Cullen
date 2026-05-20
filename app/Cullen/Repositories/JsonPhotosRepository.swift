@@ -93,21 +93,20 @@ private extension Photoset {
             syncStatus: .synced,
             coverImageURL: photos.first?.url,
             photosCount: photos.count,
-            photos: photos
+            photos: photos,
+            date: Self.parseDate(from: filename)
         )
     }
 
-    private static func date(filename: String) -> Date? {
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yy.MM.dd"
+        return f
+    }()
+
+    private static func parseDate(from filename: String) -> Date? {
         let components = filename.split(separator: ".")
-
-        guard components.count >= 3 else {
-            return nil
-        }
-
-        let dateString = "\(components[0]).\(components[1]).\(components[2])"
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yy.MM.dd"
-
-        return formatter.date(from: dateString)
+        guard components.count >= 3 else { return nil }
+        return dateFormatter.date(from: "\(components[0]).\(components[1]).\(components[2])")
     }
 }
