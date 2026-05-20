@@ -15,8 +15,10 @@ final class PhotosetFeedViewModel: ObservableObject {
     @Published var state: PhotosetFeedState = .initial
     @Published var searchText: String = ""
     @Published var selectedSortOption: PhotosetSortOption = .recent
+    @Published var sortDirection: SortDirection = PhotosetSortOption.lastOpened.defaultDirection
 
     private let fetchPhotosetsUseCase: FetchPhotosetsUseCase
+    private let sortPhotosetsUseCase: SortPhotosetsUseCase
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCase
 
     private var cancellables = Set<AnyCancellable>()
@@ -27,9 +29,11 @@ final class PhotosetFeedViewModel: ObservableObject {
 
     init(
         fetchPhotosetsUseCase: FetchPhotosetsUseCase,
+        sortPhotosetsUseCase: SortPhotosetsUseCase,
         getStatisticsUseCase: GetPhotosetStatisticsUseCase,
     ) {
         self.fetchPhotosetsUseCase = fetchPhotosetsUseCase
+        self.sortPhotosetsUseCase = sortPhotosetsUseCase
         self.getStatisticsUseCase = getStatisticsUseCase
 
         setupBindings()
@@ -43,22 +47,42 @@ final class PhotosetFeedViewModel: ObservableObject {
             async let statisticsTask = getStatisticsUseCase.execute()
 
             let (ids, statistics) = try await (idsTask, statisticsTask)
+            let sorted = try await sortPhotosetsUseCase.execute(
+                ids: ids,
+                option: selectedSortOption,
+                direction: sortDirection
+            )
 
             state = .content(content: PhotosetFeedContent(
-                photosetIds: ids,
+                photosetIds: sorted,
                 statistics: StatisticsDisplayModel(from: statistics),
             ))
         } catch {
             state = .error(message: "Failed to load photo sets: \(error.localizedDescription)")
         }
     }
+
+    func didSelectSortOption(_ option: PhotosetSortOption) {
+        if option == selectedSortOption {
+            sortDirection.toggle()
+        } else {
+            selectedSortOption = option
+        }
+    }
 }
 
 private extension PhotosetFeedViewModel {
     func setupBindings() {
-        Publishers.CombineLatest($searchText, $selectedSortOption)
+        $selectedSortOption
+            .dropFirst()
+            .sink { [weak self] option in
+                self?.sortDirection = option.defaultDirection
+            }
+            .store(in: &cancellables)
+
+        Publishers.CombineLatest3($searchText, $selectedSortOption, $sortDirection)
             .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
-            .sink { [weak self] _, _ in
+            .sink { [weak self] _, _, _ in
                 Task { await self?.loadPhotosets() }
             }
             .store(in: &cancellables)

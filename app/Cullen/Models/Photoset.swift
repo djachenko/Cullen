@@ -15,4 +15,5 @@ struct Photoset: Identifiable, Hashable {
     let coverImageURL: URL?
     let photosCount: Int
     let photos: [Photo]
+    let date: Date?
 }

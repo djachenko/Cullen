@@ -97,10 +97,21 @@ struct PhotosetFeedView: View {
 
     private var sortMenu: some View {
         Menu {
-            Picker("Sort by", selection: $viewModel.selectedSortOption) {
-                ForEach(viewModel.sortOptions) { option in
-                    Label(option.title, systemImage: option.icon)
-                        .tag(option.option)
+            ForEach(viewModel.sortOptions) { option in
+                Button {
+                    viewModel.didSelectSortOption(option.option)
+                } label: {
+                    let isSelected = option.option == viewModel.selectedSortOption
+                    if isSelected {
+                        let directionIcon = if viewModel.sortDirection == .ascending {
+                            "chevron.up"
+                        } else {
+                            "chevron.down"
+                        }
+                        Label(option.title, systemImage: directionIcon)
+                    } else {
+                        Label(option.title, systemImage: option.icon)
+                    }
                 }
             }
         } label: {
