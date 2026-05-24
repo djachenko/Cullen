@@ -1,0 +1,20 @@
+---
+description: Apply when working on app distribution, AltStore, code signing, or provisioning profiles
+---
+
+# Дистрибуция & Подпись
+
+## AltStore-совместимость
+
+- Проверить Bundle ID и entitlements на совместимость с free provisioning
+- Подготовить `AltStore.json` source manifest
+- Задокументировать процесс сборки IPA
+
+## Индикатор срока подписи
+
+Парсить `embedded.mobileprovision` из бандла → поле `ExpirationDate`.
+
+### UI
+- В настройках: «Подпись действительна до [дата]»
+- За 3 дня — баннер-предупреждение на главном экране
+- Локальные push-уведомления: за 2 дня и за 1 день
