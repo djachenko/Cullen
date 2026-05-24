@@ -14,38 +14,18 @@ final class JsonDecisionsRepository {
         static let subdirectory  = "decisions"
     }
 
-    enum Error: Swift.Error {
-        case directoryUnavailable
-    }
-
-    private let directory: URL?
+    private let directory: URL
     private let fileManager: FileManager
 
     init(fileManager: FileManager) {
         self.fileManager = fileManager
+        self.directory = fileManager
+                .urls(for: .documentDirectory, in: .userDomainMask)
+                .first!
+                .appending(component: Constants.directoryName)
+                .appending(component: Constants.subdirectory)
 
-        let directory = fileManager
-            .urls(
-                for: .documentDirectory,
-                in: .userDomainMask
-            ).first?
-            .appending(component: Constants.directoryName)
-            .appending(component: Constants.subdirectory)
-
-        if let directory {
-            do {
-                try fileManager.createDirectory(
-                    at: directory,
-                    withIntermediateDirectories: true
-                )
-
-                self.directory = directory
-            } catch {
-                self.directory = nil
-            }
-        } else {
-            self.directory = nil
-        }
+        try? fileManager.createDirectory(at: self.directory, withIntermediateDirectories: true)
     }
 }
 
@@ -68,10 +48,6 @@ extension JsonDecisionsRepository: DecisionsRepository {
 
 private extension JsonDecisionsRepository {
     func fileURL(for photosetId: PhotosetId) throws -> URL {
-        guard let directory else {
-            throw Error.directoryUnavailable
-        }
-
-        return directory.appending(component: "\(photosetId).json")
+        directory.appending(component: "\(photosetId).json")
     }
 }
