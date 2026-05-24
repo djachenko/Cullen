@@ -22,6 +22,6 @@ enum KingfisherConfiguration {
         ]
 
         ImageCache.default.diskStorage.config.expiration = .days(30)
-        ImageCache.default.diskStorage.config.sizeLimit = 16 * 1024 * 1024 * 1024  // 2 GB
+        ImageCache.default.diskStorage.config.sizeLimit = 16 * 1024 * 1024 * 1024
     }
 }
