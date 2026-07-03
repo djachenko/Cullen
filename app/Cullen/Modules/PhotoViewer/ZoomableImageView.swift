@@ -181,12 +181,13 @@ extension ZoomableImageView {
             let scrollSize = scrollView.bounds.size
             let contentSize = scrollView.contentSize
 
+            let insetV = max((scrollSize.height - contentSize.height) / 2, 0)
+            let insetH = max((scrollSize.width  - contentSize.width)  / 2, 0)
+
             scrollView.contentInset = UIEdgeInsets(
-                top: max((scrollSize.height - contentSize.height) / 2, 0),
-                left: max((scrollSize.width - contentSize.width) / 2, 0),
-                bottom: max((scrollSize.height - contentSize.height) / 2, 0),
-                right: max((scrollSize.width - contentSize.width) / 2, 0)
+                top: insetV, left: insetH, bottom: insetV, right: insetH
             )
+
         }
 
         // MARK: - Gesture Handlers

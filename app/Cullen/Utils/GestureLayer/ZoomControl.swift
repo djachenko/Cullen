@@ -37,13 +37,14 @@ final class ZoomControl: ObservableObject {
 
         if let screenAnchor {
             let pointInSV = scrollView.convert(screenAnchor, from: nil)
-            let cx = pointInSV.x - scrollView.contentInset.left + scrollView.contentOffset.x
-            let cy = pointInSV.y - scrollView.contentInset.top + scrollView.contentOffset.y
-            let imagePoint = CGPoint(x: cx / scrollView.zoomScale, y: cy / scrollView.zoomScale)
+            let currentScale = scrollView.zoomScale
 
-            // contentOffset that places imagePoint exactly at pointInSV after zoom.
-            let dx = newInsetX + imagePoint.x * clampedScale - pointInSV.x
-            let dy = newInsetY + imagePoint.y * clampedScale - pointInSV.y
+            // pointInSV is already in content space (bounds.origin == contentOffset).
+            let imagePoint = CGPoint(x: pointInSV.x / currentScale, y: pointInSV.y / currentScale)
+
+            // contentOffset that places imagePoint exactly at screenAnchor after zoom.
+            let dx = newInsetX + imagePoint.x * clampedScale - screenAnchor.x
+            let dy = newInsetY + imagePoint.y * clampedScale - screenAnchor.y
 
             // Clamp to valid scroll range.
             let maxX = max(newContentW - scrollView.bounds.width + newInsetX, -newInsetX)
@@ -57,10 +58,15 @@ final class ZoomControl: ObservableObject {
             targetOffset = CGPoint(x: -newInsetX, y: -newInsetY)
         }
 
-        // setZoomScale fires scrollViewDidZoom → centerImageView sets contentInset = newInset.
-        // setContentOffset is called after, using the now-correct inset.
-        scrollView.setZoomScale(clampedScale, animated: animated)
-        scrollView.setContentOffset(targetOffset, animated: animated)
+        if animated {
+            UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut]) {
+                scrollView.zoomScale = clampedScale
+                scrollView.contentOffset = targetOffset
+            }
+        } else {
+            scrollView.setZoomScale(clampedScale, animated: false)
+            scrollView.setContentOffset(targetOffset, animated: false)
+        }
     }
 
     func reset(animated: Bool = true) {
