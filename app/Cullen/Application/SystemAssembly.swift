@@ -32,15 +32,7 @@ final class SystemAssembly: Assembly {
             .current()
         }.inObjectScope(.weak)
 
-        container.register(SigningExpirationService.self) { resolver in
-            SigningExpirationService(
-                notificationCenter: resolver.resolve(UNUserNotificationCenter.self)!,
-                logger: LoggerImpl(
-                    category: .app,
-                    backend: resolver.resolve(LogBackend.self)!
-                )
-            )
-        }
-        .inObjectScope(.container)
+        container.autoregister(SigningExpirationService.init)
+            .inObjectScope(.container)
     }
 }
