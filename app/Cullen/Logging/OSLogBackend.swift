@@ -39,7 +39,7 @@ final class OSLogBackend: LogBackend {
 
         let data = Data(contents.utf8)
 
-        logger(for: .app).log(level: .info, "export: ready — \(data.count) bytes, \(snapshot().count) lines")
+        logger(for: .app).log(level: .info, "export: ready — \(data.count) bytes, \(self.snapshot().count) lines")
 
         return data
     }
