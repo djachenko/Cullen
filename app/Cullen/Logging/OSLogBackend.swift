@@ -28,15 +28,18 @@ final class OSLogBackend: LogBackend {
     }
 
     func export() async -> Data? {
+        logger(for: .app).log(level: .info, "export: building…")
+
         let contents = snapshot().joined(separator: "\n")
 
         guard !contents.isEmpty else {
+            logger(for: .app).log(level: .info, "export: buffer empty, skipping")
             return nil
         }
 
         let data = Data(contents.utf8)
 
-        logger(for: .app).log(level: .info, "export: \(data.count) bytes, \(snapshot().count) lines")
+        logger(for: .app).log(level: .info, "export: ready — \(data.count) bytes, \(snapshot().count) lines")
 
         return data
     }
