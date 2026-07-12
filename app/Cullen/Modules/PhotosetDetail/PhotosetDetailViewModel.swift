@@ -168,13 +168,12 @@ extension PhotosetDetailViewModel {
         }
 
         nextPendingId = photos
-            .drop { $0.id <= last }
+            .drop { $0.id != last }
+            .dropFirst()
             .drop { decisions[$0.id].isUndecided }
             .drop { !decisions[$0.id].isUndecided }
             .first?
             .id
-
-        logger?.debug("didShow last=\(last) visible=\(photoIds.count) → nextPendingId=\(String(describing: nextPendingId))")
     }
 }
 
