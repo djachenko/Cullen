@@ -11,4 +11,12 @@ CLI/.idea/
 .claude/worktrees/
 .claude/settings.local.json
 
+_claude
+CLAUDE.local.md
+memory/
+
 cli_/.idea/
+
+cli/src/cullen/__pycache__/
+
+*.xcbkptlist
