@@ -7,21 +7,27 @@ import UserNotifications
 
 final class SigningExpirationService {
     private let notificationCenter: UNUserNotificationCenter
+    private let logger: Logger?
 
-    init(notificationCenter: UNUserNotificationCenter) {
+    init(notificationCenter: UNUserNotificationCenter, logger: Logger?) {
         self.notificationCenter = notificationCenter
+        self.logger = logger
     }
 }
 
 extension SigningExpirationService {
     func scheduleExpirationNotifications() async {
         guard let expirationDate = readExpirationDate() else {
+            logger?.notice("no expiration date found in mobileprovision")
             return
         }
+
+        logger?.info("expiration date: \(expirationDate.formatted())")
 
         let granted = await requestPermissionIfNeeded()
 
         guard granted else {
+            logger?.notice("notification permission denied")
             return
         }
 
@@ -80,10 +86,13 @@ private extension SigningExpirationService {
         let now = Date()
         let daysLeft = Calendar.current.dateComponents([.day], from: now, to: expirationDate).day ?? 0
 
+        logger?.info("scheduling notifications for \(daysLeft) days")
+
         for daysBefore in 1...max(1, daysLeft) {
             let fireDate = expirationDate.addingTimeInterval(-TimeInterval(daysBefore * 24 * 60 * 60))
 
             guard fireDate > now else {
+                logger?.debug("skip day \(daysBefore) — fire date in the past")
                 continue
             }
 
@@ -106,6 +115,7 @@ private extension SigningExpirationService {
             )
 
             try? await notificationCenter.add(request)
+            logger?.debug("scheduled notification \(daysBefore) day(s) before at \(fireDate.formatted())")
         }
     }
 }
