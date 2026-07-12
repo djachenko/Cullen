@@ -11,7 +11,7 @@ import Foundation
 final class ConsoleLogBackend: LogBackend {
 
     func log(level: LogLevel, category: LogCategory, message: String) {
-        print("[\(category.rawValue)][\(level.marker)] \(message)")
+        print("\(Date().formatted(.iso8601)) [\(category.rawValue)][\(level.marker)] \(message)")
     }
 
     func export() async -> Data? {

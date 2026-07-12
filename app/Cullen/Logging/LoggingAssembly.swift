@@ -10,13 +10,11 @@ import SwinjectAutoregistration
 final class LoggingAssembly: Assembly {
     func assemble(container: Container) {
         container.register(LogBackend.self) { _ in
-            var backends: [LogBackend] = [OSLogBackend()]
-
             #if DEBUG
-            backends.append(ConsoleLogBackend())
+            return ConsoleLogBackend()
+            #else
+            return OSLogBackend()
             #endif
-
-            return CompositeLogBackend(backends: backends)
         }
         .inObjectScope(.container)
 
