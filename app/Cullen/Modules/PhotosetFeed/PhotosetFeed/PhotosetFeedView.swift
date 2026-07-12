@@ -57,6 +57,14 @@ struct PhotosetFeedView: View {
             VStack(spacing: 20) {
                 statsHeader(content.statistics)
                     .transition(.opacity.combined(with: .move(edge: .top)))
+                    .contextMenu {
+                        ShareLink(
+                            item: viewModel.logExport,
+                            preview: SharePreview("Cullen Logs", image: Image(systemName: "doc.text"))
+                        ) {
+                            Label("Export Logs", systemImage: "square.and.arrow.up")
+                        }
+                    }
 
                 LazyVStack(spacing: 16) {
                     ForEach(content.photosetIds, id: \.self) { id in

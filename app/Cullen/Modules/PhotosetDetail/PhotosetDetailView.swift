@@ -164,6 +164,9 @@ extension PhotosetDetailView {
             .scrollTargetLayout()
         }
         .scrollPosition(id: $scrollTarget, anchor: .center)
+        .onChange(of: scrollTarget) { old, new in
+            viewModel.logger?.debug("scrollTarget \(String(describing: old)) → \(String(describing: new))")
+        }
         .overlay(alignment: .bottomTrailing) {
             viewModel.nextPendingId.map {
                 scrollToNextButton(nextId: $0)
@@ -216,6 +219,8 @@ extension PhotosetDetailView {
 
     private func scrollToNextButton(nextId: PhotoId) -> some View {
         Button {
+            viewModel.logger?.debug("tap next-pending button → scrollTarget=\(nextId)")
+
             withAnimation(.easeInOut(duration: 0.25)) {
                 scrollTarget = nextId
             }

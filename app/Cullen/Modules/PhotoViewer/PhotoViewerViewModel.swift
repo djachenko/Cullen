@@ -21,8 +21,12 @@ final class PhotoViewerViewModel: ObservableObject {
             let clamped = currentIndex.clamped(to: photos.indices)
 
             if clamped != currentIndex {
+                logger?.notice("currentIndex \(oldValue) → \(currentIndex) clamped to \(clamped)")
                 currentIndex = clamped
+                return
             }
+
+            logger?.debug("currentIndex \(oldValue) → \(currentIndex) [\(currentPhoto.id)]")
         }
     }
     @Published var compassViewModel: SwipeCompassViewModel?
@@ -32,6 +36,7 @@ final class PhotoViewerViewModel: ObservableObject {
     // MARK: - Internal Properties
 
     let photos: [Photo]
+    let logger: Logger?
 
     // MARK: - Private Properties
 
@@ -67,10 +72,12 @@ final class PhotoViewerViewModel: ObservableObject {
         saveDecisionUseCase: SaveDecisionUseCase,
         loadDecisionsUseCase: LoadDecisionsUseCase,
         viewerSettingsRepository: ViewerSettingsRepository,
+        logger: Logger?,
     ) {
         self.photosetId = photosetId
         self.photos = photos
         self.currentIndex = startIndex
+        self.logger = logger
         self.swipeHandler = swipeHandler
         self.saveDecisionUseCase = saveDecisionUseCase
         self.loadDecisionsUseCase = loadDecisionsUseCase
@@ -85,15 +92,17 @@ final class PhotoViewerViewModel: ObservableObject {
     }
 
     func commitSwipe(_ direction: SwipeDirection) {
+        logger?.debug("commitSwipe \(String(describing: direction)) at index \(currentIndex)")
+
         switch direction {
-        case .up:
-            goToNext()
-        case .down:
-            goToPrevious()
-        default:
-            if let decision = Decision(direction: direction) {
-                applyDecision(decision)
-            }
+            case .up:
+                goToNext()
+            case .down:
+                goToPrevious()
+            default:
+                if let decision = Decision(direction: direction) {
+                    applyDecision(decision)
+                }
         }
     }
 
@@ -190,8 +199,14 @@ private extension PhotoViewerViewModel {
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+            guard let self else {
+                return
+            }
+
+            logger?.debug("deferred advance from index \(currentIndex)")
+
             withAnimation(.easeInOut(duration: 0.25)) {
-                self?.currentIndex += 1
+                self.currentIndex += 1
             }
         }
     }
