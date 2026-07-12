@@ -20,6 +20,7 @@ final class UseCasesAssembly: Assembly {
         container.autoregister(ExportDecisionsUseCase.self, initializer: ExportDecisionsUseCaseImpl.init)
         container.autoregister(CacheUseCase.self, initializer: CacheUseCaseImpl.init)
         container.autoregister(DecisionsStatsUseCase.self, initializer: DecisionsStatsUseCaseImpl.init)
+        container.autoregister(ExportLogsUseCase.self, initializer: ExportLogsUseCaseImpl.init)
 
         container.autoregister(DecisionsUseCaseImpl.init)
             .inObjectScope(.container) // shared state: decisions cache is shared across screens

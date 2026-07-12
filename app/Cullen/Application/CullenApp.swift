@@ -38,5 +38,6 @@ extension Cullen {
         AppAssembly(),
         SystemAssembly(),
         MigrationsAssembly(),
+        LoggingAssembly(),
     ]).resolver
 }
