@@ -131,7 +131,8 @@ extension PhotoViewerView {
                     )
                 ],
             0,
-            PhotosetId.int(0)
+            PhotosetId.int(0),
+            LogCategory.viewer
         )
     }
 }

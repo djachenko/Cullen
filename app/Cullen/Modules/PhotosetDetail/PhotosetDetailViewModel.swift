@@ -22,6 +22,8 @@ final class PhotosetDetailViewModel: ObservableObject {
         photoset?.name ?? ""
     }
 
+    let logger: Logger?
+
     private let coordinator: Coordinator
     private let fetchPhotosUseCase: FetchPhotosUseCase
     private let loadDecisionsUseCase: LoadDecisionsUseCase
@@ -56,8 +58,10 @@ final class PhotosetDetailViewModel: ObservableObject {
         loadDecisionsUseCase: LoadDecisionsUseCase,
         exportDecisionsUseCase: ExportDecisionsUseCase,
         cacheUseCase: CacheUseCase,
-        recordLastOpenedUseCase: RecordLastOpenedUseCase
+        recordLastOpenedUseCase: RecordLastOpenedUseCase,
+        logger: Logger?
     ) {
+        self.logger = logger
         self.photosetTask = photosetTask
         self.coordinator = coordinator
         self.fetchPhotosUseCase = fetchPhotosUseCase
@@ -75,7 +79,8 @@ final class PhotosetDetailViewModel: ObservableObject {
         loadDecisionsUseCase: LoadDecisionsUseCase,
         exportDecisionsUseCase: ExportDecisionsUseCase,
         cacheUseCase: CacheUseCase,
-        recordLastOpenedUseCase: RecordLastOpenedUseCase
+        recordLastOpenedUseCase: RecordLastOpenedUseCase,
+        logger: Logger?
     ) {
         self.init(
             photosetTask: Task {
@@ -86,7 +91,8 @@ final class PhotosetDetailViewModel: ObservableObject {
             loadDecisionsUseCase: loadDecisionsUseCase,
             exportDecisionsUseCase: exportDecisionsUseCase,
             cacheUseCase: cacheUseCase,
-            recordLastOpenedUseCase: recordLastOpenedUseCase
+            recordLastOpenedUseCase: recordLastOpenedUseCase,
+            logger: logger
         )
     }
 }
@@ -167,6 +173,8 @@ extension PhotosetDetailViewModel {
             .drop { !decisions[$0.id].isUndecided }
             .first?
             .id
+
+        logger?.debug("didShow last=\(last) visible=\(photoIds.count) → nextPendingId=\(String(describing: nextPendingId))")
     }
 }
 
@@ -178,10 +186,14 @@ private extension PhotosetDetailViewModel {
             return
         }
 
+        let startIndex = photos.firstIndex(of: photo) ?? .zero
+
+        logger?.debug("didTap \(photo.id) → startIndex=\(startIndex) of \(photos.count)")
+
         coordinator.show(
             .photoViewer(
                 photos: photos,
-                startIndex: photos.firstIndex(of: photo) ?? .zero,
+                startIndex: startIndex,
                 photosetId: photoset.id
             )
         )

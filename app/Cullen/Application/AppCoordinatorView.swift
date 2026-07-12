@@ -31,13 +31,19 @@ struct AppCoordinatorView: View {
             case .photosetFeed:
                 resolver ~> PhotosetFeedView.self
             case .photosetDetail(let id):
-                resolver ~> (PhotosetDetailView.self, with: id)
+                resolver ~> (PhotosetDetailView.self, with: id, LogCategory.detail)
             case .photoViewer(
                 let photos,
                 let index,
                 let photosetId
             ):
-                resolver ~> (PhotoViewerView.self, with: photos, index, photosetId)
+                resolver ~> (
+                    PhotoViewerView.self,
+                    with: photos,
+                    index,
+                    photosetId,
+                    LogCategory.viewer
+                )
         }
     }
 }

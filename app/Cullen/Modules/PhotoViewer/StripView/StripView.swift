@@ -41,9 +41,12 @@ struct StripView: View {
                 return
             }
 
+            viewModel.logger?.debug("scrollPosition → index \(index) [\(id)], was \(viewModel.currentIndex)")
             viewModel.currentIndex = index
         }
-        .onChange(of: viewModel.currentIndex, initial: true) { _, _ in
+        .onChange(of: viewModel.currentIndex, initial: true) { _, index in
+            viewModel.logger?.debug("index \(index) → scrollPosition [\(viewModel.currentPhoto.id)], activeId was \(String(describing: activeId))")
+
             withAnimation(.easeInOut(duration: 0.25)) {
                 activeId = viewModel.currentPhoto.id
             }
