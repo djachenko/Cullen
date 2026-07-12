@@ -30,7 +30,15 @@ final class OSLogBackend: LogBackend {
     func export() async -> Data? {
         let contents = snapshot().joined(separator: "\n")
 
-        return contents.isEmpty ? nil : Data(contents.utf8)
+        guard !contents.isEmpty else {
+            return nil
+        }
+
+        let data = Data(contents.utf8)
+
+        logger(for: .app).log(level: .info, "export: \(data.count) bytes, \(snapshot().count) lines")
+
+        return data
     }
 
     private func append(_ line: String) {
