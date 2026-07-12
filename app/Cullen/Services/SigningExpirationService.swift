@@ -41,7 +41,7 @@ private extension SigningExpirationService {
         guard
             let url = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"),
             let data = try? Data(contentsOf: url),
-            let raw = String(data: data, encoding: .ascii),
+            let raw = String(data: data, encoding: .isoLatin1),
             let xmlStart = raw.range(of: "<?xml"),
             let xmlEnd = raw.range(of: "</plist>")
         else {
