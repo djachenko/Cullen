@@ -12,6 +12,16 @@ enum LogLevel {
     case error
     case fault
 
+    var marker: String {
+        switch self {
+        case .debug:   "DBG"
+        case .info:    "INF"
+        case .notice:  "NTC"
+        case .error:   "ERR"
+        case .fault:   "FLT"
+        }
+    }
+
     var osLogType: OSLogType {
         switch self {
         case .debug:
