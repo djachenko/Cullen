@@ -20,3 +20,5 @@ cli_/.idea/
 cli/src/cullen/__pycache__/
 
 *.xcbkptlist
+
+.idea/
