@@ -7,7 +7,7 @@ import Foundation
 
 
 protocol ExportLogsUseCase {
-    func execute() async -> URL?
+    func execute() async -> Data?
 }
 
 final class ExportLogsUseCaseImpl: ExportLogsUseCase {
@@ -17,7 +17,7 @@ final class ExportLogsUseCaseImpl: ExportLogsUseCase {
         self.backend = backend
     }
 
-    func execute() async -> URL? {
+    func execute() async -> Data? {
         await backend.export()
     }
 }

@@ -11,6 +11,6 @@ protocol LogBackend {
         category: LogCategory,
         message: String
     )
-    
-    func export() async -> URL?
+
+    func export() async -> Data?
 }

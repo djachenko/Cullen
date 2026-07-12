@@ -22,10 +22,10 @@ final class CompositeLogBackend: LogBackend {
         }
     }
 
-    func export() async -> URL? {
+    func export() async -> Data? {
         for backend in backends {
-            if let url = await backend.export() {
-                return url
+            if let data = await backend.export() {
+                return data
             }
         }
 

@@ -14,7 +14,7 @@ final class ConsoleLogBackend: LogBackend {
         print("[\(category.rawValue)] \(message)")
     }
 
-    func export() async -> URL? {
+    func export() async -> Data? {
         nil
     }
 }

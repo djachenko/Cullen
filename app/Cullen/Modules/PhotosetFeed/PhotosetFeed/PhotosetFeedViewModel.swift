@@ -42,8 +42,16 @@ final class PhotosetFeedViewModel: ObservableObject {
         setupBindings()
     }
 
-    func exportLogs() async -> URL? {
-        await exportLogsUseCase.execute()
+    var logExport: LogExport {
+        let filename = "Cullen-\(Date().formatted(.iso8601.dateSeparator(.dash).timeSeparator(.omitted))).log"
+
+        return LogExport(filename: filename) { [weak self] in
+            guard let data = await self?.exportLogsUseCase.execute() else {
+                throw CancellationError()
+            }
+
+            return data
+        }
     }
 
     func loadPhotosets() async {

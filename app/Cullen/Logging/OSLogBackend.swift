@@ -27,22 +27,10 @@ final class OSLogBackend: LogBackend {
         append("\(Date().formatted(.iso8601)) [\(category.rawValue)] \(message)")
     }
 
-    func export() async -> URL? {
+    func export() async -> Data? {
         let contents = snapshot().joined(separator: "\n")
 
-        guard !contents.isEmpty else {
-            return nil
-        }
-
-        let fileName = "Cullen-\(Date().formatted(.iso8601.dateSeparator(.dash).timeSeparator(.omitted))).log"
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
-
-        do {
-            try contents.write(to: url, atomically: true, encoding: .utf8)
-            return url
-        } catch {
-            return nil
-        }
+        return contents.isEmpty ? nil : Data(contents.utf8)
     }
 
     private func append(_ line: String) {
