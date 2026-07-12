@@ -7,21 +7,27 @@ import UserNotifications
 
 final class SigningExpirationService {
     private let notificationCenter: UNUserNotificationCenter
+    private let logger: Logger?
 
-    init(notificationCenter: UNUserNotificationCenter) {
+    init(notificationCenter: UNUserNotificationCenter, logger: Logger?) {
         self.notificationCenter = notificationCenter
+        self.logger = logger
     }
 }
 
 extension SigningExpirationService {
     func scheduleExpirationNotifications() async {
         guard let expirationDate = readExpirationDate() else {
+            logger?.notice("no expiration date found in mobileprovision")
             return
         }
+
+        logger?.info("expiration date: \(expirationDate.formatted())")
 
         let granted = await requestPermissionIfNeeded()
 
         guard granted else {
+            logger?.notice("notification permission denied")
             return
         }
 
@@ -35,7 +41,7 @@ private extension SigningExpirationService {
         guard
             let url = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"),
             let data = try? Data(contentsOf: url),
-            let raw = String(data: data, encoding: .ascii),
+            let raw = String(data: data, encoding: .isoLatin1),
             let xmlStart = raw.range(of: "<?xml"),
             let xmlEnd = raw.range(of: "</plist>")
         else {
@@ -73,85 +79,51 @@ private extension SigningExpirationService {
     }
 
     func cancelExistingNotifications() async {
-        notificationCenter.removePendingNotificationRequests(
-            withIdentifiers: NotificationId.all
-        )
+        notificationCenter.removeAllPendingNotificationRequests()
     }
 
     func scheduleNotifications(for expirationDate: Date) async {
         let now = Date()
+        let daysLeft = Calendar.current.dateComponents([.day], from: now, to: expirationDate).day ?? 0
 
-        for offset in NotificationOffset.all {
-            let fireDate = expirationDate.addingTimeInterval(-offset.secondsBefore)
+        logger?.info("scheduling notifications for \(daysLeft) days")
+
+        for daysBefore in 1...max(1, daysLeft) {
+            let fireDate = expirationDate.addingTimeInterval(-TimeInterval(daysBefore * 24 * 60 * 60))
 
             guard fireDate > now else {
+                logger?.debug("skip day \(daysBefore) — fire date in the past")
                 continue
             }
 
             let content = UNMutableNotificationContent()
             content.title = "Cullen — истекает подпись"
-            content.body = offset.body
+            content.body = daysBefore == 1
+                ? "Завтра сборка истекает. Последний шанс пересобрать сегодня."
+                : "Через \(daysBefore) дн. сборка перестанет запускаться. Пора пересобрать."
             content.sound = .default
 
             let components = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute],
                 from: fireDate
             )
-            let trigger = UNCalendarNotificationTrigger(
-                dateMatching: components,
-                repeats: false
-            )
-
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
             let request = UNNotificationRequest(
-                identifier: offset.notificationId,
+                identifier: "cullen.signing.expiration.\(daysBefore)days",
                 content: content,
                 trigger: trigger
             )
 
             try? await notificationCenter.add(request)
+            logger?.debug("scheduled notification \(daysBefore) day(s) before at \(fireDate.formatted())")
         }
     }
 }
 
 private extension SigningExpirationService {
-    enum NotificationOffset {
-        case twoDays
-        case oneDay
-
-        static let all: [NotificationOffset] = [.twoDays, .oneDay]
-
-        var secondsBefore: TimeInterval {
-            switch self {
-            case .twoDays:
-                2 * 24 * 60 * 60
-            case .oneDay:
-                1 * 24 * 60 * 60
-            }
-        }
-
-        var body: String {
-            switch self {
-            case .twoDays:
-                "Через 2 дня сборка перестанет запускаться. Пора пересобрать."
-            case .oneDay:
-                "Завтра сборка истекает. Последний шанс пересобрать сегодня."
-            }
-        }
-
-        var notificationId: String {
-            switch self {
-            case .twoDays:
-                NotificationId.twoDaysBefore
-            case .oneDay:
-                NotificationId.oneDayBefore
-            }
-        }
-    }
-
     enum NotificationId {
-        static let twoDaysBefore = "cullen.signing.expiration.2days"
-        static let oneDayBefore = "cullen.signing.expiration.1day"
-
-        static let all: [String] = [twoDaysBefore, oneDayBefore]
+        static func identifier(daysBefore: Int) -> String {
+            "cullen.signing.expiration.\(daysBefore)days"
+        }
     }
 }
