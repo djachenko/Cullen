@@ -12,6 +12,8 @@ struct PhotosetFeedView: View {
     @StateObject private var viewModel: PhotosetFeedViewModel
     let resolver: Resolver
 
+    @State private var exportedLogURL: URL?
+
     init(viewModel: PhotosetFeedViewModel, resolver: Resolver) {
         _viewModel = StateObject(wrappedValue: viewModel)
         self.resolver = resolver
@@ -48,6 +50,15 @@ struct PhotosetFeedView: View {
                 await viewModel.loadPhotosets()
             }
         }
+        .sheet(item: $exportedLogURL) { url in
+            ActivityView(items: [url])
+        }
+    }
+
+    private func exportLogs() {
+        Task {
+            exportedLogURL = await viewModel.exportLogs()
+        }
     }
 
     // MARK: - Content View
@@ -57,6 +68,9 @@ struct PhotosetFeedView: View {
             VStack(spacing: 20) {
                 statsHeader(content.statistics)
                     .transition(.opacity.combined(with: .move(edge: .top)))
+                    .onLongPressGesture {
+                        exportLogs()
+                    }
 
                 LazyVStack(spacing: 16) {
                     ForEach(content.photosetIds, id: \.self) { id in

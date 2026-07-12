@@ -20,6 +20,7 @@ final class PhotosetFeedViewModel: ObservableObject {
     private let fetchPhotosetsUseCase: FetchPhotosetsUseCase
     private let sortPhotosetsUseCase: SortPhotosetsUseCase
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCase
+    private let exportLogsUseCase: ExportLogsUseCase
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -31,12 +32,18 @@ final class PhotosetFeedViewModel: ObservableObject {
         fetchPhotosetsUseCase: FetchPhotosetsUseCase,
         sortPhotosetsUseCase: SortPhotosetsUseCase,
         getStatisticsUseCase: GetPhotosetStatisticsUseCase,
+        exportLogsUseCase: ExportLogsUseCase,
     ) {
         self.fetchPhotosetsUseCase = fetchPhotosetsUseCase
         self.sortPhotosetsUseCase = sortPhotosetsUseCase
         self.getStatisticsUseCase = getStatisticsUseCase
+        self.exportLogsUseCase = exportLogsUseCase
 
         setupBindings()
+    }
+
+    func exportLogs() async -> URL? {
+        await exportLogsUseCase.execute()
     }
 
     func loadPhotosets() async {
