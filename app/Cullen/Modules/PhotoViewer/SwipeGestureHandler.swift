@@ -17,8 +17,7 @@ struct SwipeGestureHandler {
 }
 
 extension SwipeGestureHandler {
-    func track(_ recognizer: UIPanGestureRecognizer) -> (angle: Double, progress: Double)? {
-        let translation = recognizer.translation(in: recognizer.view)
+    func track(translation: CGPoint) -> (angle: Double, progress: Double)? {
         let distance = translation.distance
 
         guard distance >= Constants.deadZoneRadius else {
@@ -31,10 +30,7 @@ extension SwipeGestureHandler {
         return (direction, progress)
     }
 
-    func evaluate(_ recognizer: UIPanGestureRecognizer) -> Double? {
-        let translation = recognizer.translation(in: recognizer.view)
-        let velocity = recognizer.velocity(in: recognizer.view)
-
+    func evaluate(translation: CGPoint, velocity: CGPoint) -> Double? {
         // Мёртвая зона — игнорируем случайные микро-свайпы
         let distance = translation.distance
 

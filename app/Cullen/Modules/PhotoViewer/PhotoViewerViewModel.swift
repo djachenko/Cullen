@@ -157,9 +157,12 @@ final class PhotoViewerViewModel: ObservableObject {
 
 extension PhotoViewerViewModel {
     func handle(recognizer: UIPanGestureRecognizer) {
+        let translation = recognizer.translation(in: recognizer.view)
+        let velocity = recognizer.velocity(in: recognizer.view)
+
         switch recognizer.state {
         case .changed:
-            if let (angle, progress) = swipeHandler.track(recognizer),
+            if let (angle, progress) = swipeHandler.track(translation: translation),
                let direction = SwipeDirection(angle: angle) {
                 compassViewModel = SwipeCompassViewModel(activeDirection: direction, progress: progress)
             } else {
@@ -167,7 +170,7 @@ extension PhotoViewerViewModel {
             }
 
         case .ended, .cancelled:
-            if let angle = swipeHandler.evaluate(recognizer),
+            if let angle = swipeHandler.evaluate(translation: translation, velocity: velocity),
                let direction = SwipeDirection(angle: angle) {
                 commitSwipe(direction)
             } else {
