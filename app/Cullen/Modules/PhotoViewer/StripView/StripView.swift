@@ -142,10 +142,10 @@ private extension StripView {
                 filter: .horizontal,
                 when: { !isScrolling },
                 onChanged: { translation in
-                    swipeProgress = translation / threshold
+                    swipeProgress = translation.x / threshold
                 },
                 onEnded: { translation, velocity in
-                    handleSwipeEnd(translation: translation, velocity: velocity, threshold: threshold)
+                    handleSwipeEnd(translation: translation.x, velocity: velocity.x, threshold: threshold)
                 }
             )
 
