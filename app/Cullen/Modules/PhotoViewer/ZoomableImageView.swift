@@ -16,6 +16,7 @@ struct ZoomableImageViewModel {
     var maxZoomScale: CGFloat = 5
     var doubleTapZoomScale: CGFloat = 3
 
+    @available(*, deprecated, message: "Pan handled via gestureLayer since compass unification; internal pan recognizer is unused")
     var onPan: (_ recognizer: UIPanGestureRecognizer) -> Void = { _ in }
     var onZoomScaleChange: (CGFloat) -> Void = { _ in }
 }
@@ -87,7 +88,6 @@ extension ZoomableImageView {
             scrollView.contentInsetAdjustmentBehavior = .never
 
             scrollView.addGestureRecognizer(doubleTap)
-            scrollView.addGestureRecognizer(pan)
 
             scrollView.onLayout = { [weak self] in
                 self?.layoutImageView()
@@ -115,6 +115,7 @@ extension ZoomableImageView {
             return recognizer
         }()
 
+        @available(*, deprecated, message: "Pan handled via gestureLayer since compass unification; no longer wired to scrollView")
         private lazy var pan: UIPanGestureRecognizer = {
             let recognizer = UIPanGestureRecognizer(
                 target: self,
@@ -214,6 +215,7 @@ extension ZoomableImageView {
             }
         }
 
+        @available(*, deprecated, message: "Pan handled via gestureLayer since compass unification")
         @objc func handlePan(_ recognizer: UIPanGestureRecognizer) {
             viewModel.onPan(recognizer)
         }
