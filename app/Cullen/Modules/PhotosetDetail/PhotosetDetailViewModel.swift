@@ -58,6 +58,7 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published private var nextPendingId: PhotoId? = nil
     @Published private var decisionFrontId: PhotoId? = nil
 
+    private var windowBoostTask: Task<Void, Never>?
 
     nonisolated private init(
         photosetTask: Task<Photoset, Error>,
@@ -204,7 +205,16 @@ extension PhotosetDetailViewModel {
         let visible = Set(photoIds)
         let urls = photos.filter { visible.contains($0.id) }.map(\.url)
 
-        Task { await syncUseCase?.window(urls) }
+        windowBoostTask?.cancel()
+        windowBoostTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(250))
+
+            guard !Task.isCancelled else {
+                return
+            }
+
+            await self?.syncUseCase?.window(urls)
+        }
     }
 }
 
