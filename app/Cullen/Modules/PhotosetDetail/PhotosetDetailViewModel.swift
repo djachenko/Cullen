@@ -132,6 +132,7 @@ extension PhotosetDetailViewModel {
 
             let sync = syncRegistry.useCase(for: photoset.id)
             syncUseCase = sync
+            await sync.prepare()
             await sync.setForeground(true)
 
             state = .content(photos.map { photo in
@@ -171,11 +172,11 @@ extension PhotosetDetailViewModel {
 
         Task {
             switch syncUseCase.state {
-                case .notCached:
+                case .none, .notCached?:
                     await syncUseCase.start()
-                case .syncing:
+                case .syncing?:
                     await syncUseCase.cancel()
-                case .synced:
+                case .synced?:
                     await syncUseCase.clear()
             }
         }

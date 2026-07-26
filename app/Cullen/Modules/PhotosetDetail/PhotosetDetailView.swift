@@ -64,14 +64,14 @@ private extension PhotosetDetailView {
         Button {
             viewModel.didTapPrefetchButton()
         } label: {
-            switch viewModel.syncUseCase?.state ?? .notCached {
-                case .notCached:
+            switch viewModel.syncUseCase?.state {
+                case .none, .notCached?:
                     Image(systemName: "arrow.down.circle")
                         .font(.system(size: 20))
-                case .syncing(let progress):
+                case .syncing(let progress)?:
                     CircularProgress(value: progress, color: .accentColor)
                         .frame(width: 20, height: 20)
-                case .synced:
+                case .synced?:
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 20))
                         .foregroundStyle(.green)

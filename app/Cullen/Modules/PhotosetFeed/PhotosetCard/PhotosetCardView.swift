@@ -30,6 +30,9 @@ struct PhotosetCardView: View {
         .task {
             await viewModel.load()
         }
+        .task {
+            await viewModel.prepareSync()
+        }
         .onTapGesture {
             viewModel.didTap()
         }
@@ -119,17 +122,30 @@ extension PhotosetCardView {
             .overlay(alignment: .bottom) {
                 cacheSyncIndicator
             }
+            .overlay(alignment: .topTrailing) {
+                cacheSyncedBadge
+            }
     }
 
     @ViewBuilder
     private var cacheSyncIndicator: some View {
-        if case .syncing(let progress) = viewModel.syncUseCase.state {
+        if case .syncing(let progress)? = viewModel.syncUseCase.state {
             GeometryReader { geometry in
                 Rectangle()
                     .fill(Color.accentColor)
                     .frame(width: geometry.size.width * progress)
             }
             .frame(height: 3)
+        }
+    }
+
+    @ViewBuilder
+    private var cacheSyncedBadge: some View {
+        if case .synced? = viewModel.syncUseCase.state {
+            Image(systemName: "arrow.down.circle.fill")
+                .font(.system(size: 18))
+                .foregroundStyle(.white, .green)
+                .padding(8)
         }
     }
 }

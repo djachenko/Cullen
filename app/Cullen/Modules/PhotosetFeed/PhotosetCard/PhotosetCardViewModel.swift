@@ -91,4 +91,8 @@ final class PhotosetCardViewModel: ObservableObject {
     func didLongPress() {
         Task { await syncUseCase.start() }
     }
+
+    func prepareSync() async {
+        await syncUseCase.prepare()
+    }
 }
