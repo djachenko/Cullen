@@ -113,5 +113,20 @@ extension PhotosetCardView {
             .aspectRatio(contentMode: .fill)
             .frame(height: 200)
             .clipped()
+            .overlay(alignment: .bottom) {
+                cacheSyncIndicator
+            }
+    }
+
+    @ViewBuilder
+    private var cacheSyncIndicator: some View {
+        if case .syncing(let progress) = viewModel.syncUseCase.state {
+            GeometryReader { geometry in
+                Rectangle()
+                    .fill(Color.accentColor)
+                    .frame(width: geometry.size.width * progress)
+            }
+            .frame(height: 3)
+        }
     }
 }
