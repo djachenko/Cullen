@@ -16,7 +16,7 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published var aspectRatio: Double = 3.0 / 2.0
     @Published var export: DecisionsExport?
     @Published var scrollTarget: PhotoId? = nil
-    @Published var prefetchState: PhotosetDetailPrefetchState = .notCached
+    @Published private(set) var syncUseCase: PhotosetSyncUseCase?
 
     var showNextButton: Bool {
         nextPendingId != nil || decisionFrontId != nil
@@ -32,7 +32,7 @@ final class PhotosetDetailViewModel: ObservableObject {
     private let fetchPhotosUseCase: FetchPhotosUseCase
     private let loadDecisionsUseCase: LoadDecisionsUseCase
     private let exportDecisionsUseCase: ExportDecisionsUseCase
-    private let cacheUseCase: CacheUseCase
+    private let syncRegistry: PhotosetSyncRegistry
     private let recordLastOpenedUseCase: RecordLastOpenedUseCase
 
     private let photosetTask: Task<Photoset, Error>
@@ -58,7 +58,6 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published private var nextPendingId: PhotoId? = nil
     @Published private var decisionFrontId: PhotoId? = nil
 
-    private var prefetchTask: Task<Void, Never>?
 
     nonisolated private init(
         photosetTask: Task<Photoset, Error>,
@@ -66,7 +65,7 @@ final class PhotosetDetailViewModel: ObservableObject {
         fetchPhotosUseCase: FetchPhotosUseCase,
         loadDecisionsUseCase: LoadDecisionsUseCase,
         exportDecisionsUseCase: ExportDecisionsUseCase,
-        cacheUseCase: CacheUseCase,
+        syncRegistry: PhotosetSyncRegistry,
         recordLastOpenedUseCase: RecordLastOpenedUseCase,
         logger: Logger?
     ) {
@@ -76,7 +75,7 @@ final class PhotosetDetailViewModel: ObservableObject {
         self.fetchPhotosUseCase = fetchPhotosUseCase
         self.loadDecisionsUseCase = loadDecisionsUseCase
         self.exportDecisionsUseCase = exportDecisionsUseCase
-        self.cacheUseCase = cacheUseCase
+        self.syncRegistry = syncRegistry
         self.recordLastOpenedUseCase = recordLastOpenedUseCase
     }
 
@@ -87,7 +86,7 @@ final class PhotosetDetailViewModel: ObservableObject {
         fetchPhotosUseCase: FetchPhotosUseCase,
         loadDecisionsUseCase: LoadDecisionsUseCase,
         exportDecisionsUseCase: ExportDecisionsUseCase,
-        cacheUseCase: CacheUseCase,
+        syncRegistry: PhotosetSyncRegistry,
         recordLastOpenedUseCase: RecordLastOpenedUseCase,
         logger: Logger?
     ) {
@@ -99,7 +98,7 @@ final class PhotosetDetailViewModel: ObservableObject {
             fetchPhotosUseCase: fetchPhotosUseCase,
             loadDecisionsUseCase: loadDecisionsUseCase,
             exportDecisionsUseCase: exportDecisionsUseCase,
-            cacheUseCase: cacheUseCase,
+            syncRegistry: syncRegistry,
             recordLastOpenedUseCase: recordLastOpenedUseCase,
             logger: logger
         )
@@ -130,7 +129,9 @@ extension PhotosetDetailViewModel {
 
             recountPendingIds()
 
-            prefetchState = await countPrefetchState()
+            let sync = syncRegistry.useCase(for: photoset.id)
+            syncUseCase = sync
+            await sync.setForeground(true)
 
             state = .content(photos.map { photo in
                 PhotoGridCellViewModel(
@@ -159,17 +160,23 @@ extension PhotosetDetailViewModel {
 
 extension PhotosetDetailViewModel {
     func onDisappear() {
-        cancelPrefetch()
+        Task { await syncUseCase?.setForeground(false) }
     }
 
     func didTapPrefetchButton() {
-        switch prefetchState {
-            case .notCached, .partial:
-                startPrefetch()
-            case .full:
-                clearCache()
-            case .prefetching:
-                cancelPrefetch()
+        guard let syncUseCase else {
+            return
+        }
+
+        Task {
+            switch syncUseCase.state {
+                case .notCached:
+                    await syncUseCase.start()
+                case .syncing:
+                    await syncUseCase.cancel()
+                case .synced:
+                    await syncUseCase.clear()
+            }
         }
     }
 
@@ -218,73 +225,6 @@ private extension PhotosetDetailViewModel {
     }
 }
 
-// MARK: Handle cache workflow
-
-private extension PhotosetDetailViewModel {
-    func startPrefetch() {
-        guard let photosetId = photoset?.id else {
-            return
-        }
-
-        prefetchTask = Task { [weak self] in
-            guard let self,
-                  let stream = try? await cacheUseCase.prefetch(photoset: photosetId) else {
-                return
-            }
-
-            for await event in stream {
-                switch event {
-                    case .progress(let done, let total):
-                        let progress = Double(done) / Double(total)
-                        prefetchState = .prefetching(progress: progress)
-                    case .finished:
-                        prefetchState = await countPrefetchState()
-                }
-            }
-        }
-    }
-
-    func cancelPrefetch() {
-        prefetchTask?.cancel()
-        prefetchTask = nil
-
-        Task { [weak self] in
-            guard let self else {
-                return
-            }
-
-            prefetchState = await countPrefetchState()
-        }
-    }
-
-    func clearCache() {
-        guard let photosetId = photoset?.id else {
-            return
-        }
-
-        Task { [weak self] in
-            guard let self else {
-                return
-            }
-
-            try? await cacheUseCase.removeFromCache(photoset: photosetId)
-            prefetchState = await countPrefetchState()
-        }
-    }
-}
-
-
-private extension PhotosetDetailViewModel {
-    func countPrefetchState() async -> PhotosetDetailPrefetchState {
-        if let photosetId = photoset?.id,
-           let ratio = try? await cacheUseCase.cacheRatio(photoset: photosetId) {
-            PhotosetDetailPrefetchState(ratio: ratio)
-        } else {
-            .notCached
-        }
-    }
-}
-
 
 private extension PhotosetDetailViewModel {
     func recountPendingIds() {
@@ -326,20 +266,6 @@ private extension Decision? {
                 false
             case .pending, nil:
                 true
-        }
-    }
-}
-
-
-private extension PhotosetDetailPrefetchState {
-    init(ratio: Double) {
-        self = switch ratio {
-            case 0:
-                .notCached
-            case 1:
-                .full
-            default:
-                .partial(ratio: ratio)
         }
     }
 }

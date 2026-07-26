@@ -5,6 +5,7 @@
 //  Created by justin on 18/2/26.
 //
 
+import Kingfisher
 import Swinject
 import SwinjectAutoregistration
 
@@ -20,8 +21,14 @@ final class RepositoriesAssembly: Assembly {
         container.autoregister(LastOpenedRepository.self, initializer: UserDefaultsLastOpenedRepository.init)
             .inObjectScope(.container)
 
-        container.autoregister(ImageCacheService.self, initializer: KingfisherImageCacheService.init)
-            .inObjectScope(.container)
+        container.register(ImageSyncService.self) { resolver in
+            KingfisherImageSyncService(
+                downloader: KingfisherManager.shared.downloader,
+                cache: resolver ~> ImageCache.self,
+                maxInFlight: 4 // matches KingfisherConfiguration.httpMaximumConnectionsPerHost
+            )
+        }
+        .inObjectScope(.container)
 
         container.autoregister(AppPreferences.init)
             .inObjectScope(.container)
