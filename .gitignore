@@ -25,3 +25,5 @@ cli/src/cullen/__pycache__/
 *.xcbkptlist
 
 .idea/
+
+*.xcconfig
