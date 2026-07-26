@@ -62,6 +62,20 @@ extension PhotosetSyncUseCase {
         recompute()
     }
 
+    func window(_ urls: [URL]) async {
+        guard isDownloading else {
+            return
+        }
+
+        let boosted = urls.filter { keySet.contains($0) && !done.contains($0) }
+
+        guard !boosted.isEmpty else {
+            return
+        }
+
+        await syncService.download(urls: boosted, with: .high)
+    }
+
     func cancel() async {
         isDownloading = false
 
