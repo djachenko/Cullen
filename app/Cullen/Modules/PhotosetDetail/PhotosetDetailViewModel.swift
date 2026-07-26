@@ -15,8 +15,12 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published var state: PhotosetDetailState = .initial
     @Published var aspectRatio: Double = 3.0 / 2.0
     @Published var export: DecisionsExport?
-    @Published var nextPendingId: PhotoId? = nil
+    @Published var scrollTarget: PhotoId? = nil
     @Published var prefetchState: PhotosetDetailPrefetchState = .notCached
+
+    var showNextButton: Bool {
+        nextPendingId != nil || decisionFrontId != nil
+    }
 
     var title: String {
         photoset?.name ?? ""
@@ -48,6 +52,11 @@ final class PhotosetDetailViewModel: ObservableObject {
     private var photoset: Photoset?
     private var photos: [Photo] = []
     private var decisions: [PhotoId: Decision] = [:]
+
+    private var lastVisibleId: PhotoId? = nil
+
+    @Published private var nextPendingId: PhotoId? = nil
+    @Published private var decisionFrontId: PhotoId? = nil
 
     private var prefetchTask: Task<Void, Never>?
 
@@ -119,6 +128,11 @@ extension PhotosetDetailViewModel {
             self.photos = photos
             self.decisions = decisions
 
+            if let id = lastVisibleId {
+                nextPendingId = nextPendingIslandStart(after: id)
+                decisionFrontId = computeDecisionFront(after: id)
+            }
+
             prefetchState = await countPrefetchState()
 
             state = .content(photos.map { photo in
@@ -162,18 +176,31 @@ extension PhotosetDetailViewModel {
         }
     }
 
+    func didTapNextButton() {
+        logger?.debug("tap next-pending → \(String(describing: nextPendingId))")
+
+        withAnimation(.easeInOut(duration: 0.25)) {
+            scrollTarget = nextPendingId
+        }
+    }
+
+    func didLongPressNextButton() {
+        logger?.debug("long-press next-pending → \(String(describing: decisionFrontId))")
+
+        withAnimation(.easeInOut(duration: 0.25)) {
+            scrollTarget = decisionFrontId
+        }
+    }
+
     func didShow(photoIds: [PhotoId]) {
         guard let last = photoIds.last else {
             return
         }
 
-        nextPendingId = photos
-            .drop { $0.id != last }
-            .dropFirst()
-            .drop { decisions[$0.id].isUndecided }
-            .drop { !decisions[$0.id].isUndecided }
-            .first?
-            .id
+        lastVisibleId = last
+
+        nextPendingId = nextPendingIslandStart(after: last)
+        decisionFrontId = computeDecisionFront(after: last)
     }
 }
 
@@ -263,6 +290,30 @@ private extension PhotosetDetailViewModel {
         } else {
             .notCached
         }
+    }
+}
+
+
+private extension PhotosetDetailViewModel {
+    func nextPendingIslandStart(after photoId: PhotoId) -> PhotoId? {
+        photos
+            .drop { $0.id != photoId }
+            .dropFirst()
+            .drop { decisions[$0.id].isUndecided }
+            .drop { !decisions[$0.id].isUndecided }
+            .first?
+            .id
+    }
+
+    func computeDecisionFront(after photoId: PhotoId) -> PhotoId? {
+        var current = nextPendingIslandStart(after: photoId)
+
+        while let id = current,
+              let next = nextPendingIslandStart(after: id) {
+            current = next
+        }
+
+        return current
     }
 }
 

@@ -13,8 +13,6 @@ struct PhotosetDetailView: View {
     @State private var gridWidth: CGFloat = 0
     @StateObject private var viewModel: PhotosetDetailViewModel
 
-    @State private var scrollTarget: PhotoId? = nil
-
     init(viewModel: PhotosetDetailViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
@@ -163,13 +161,10 @@ extension PhotosetDetailView {
             }
             .scrollTargetLayout()
         }
-        .scrollPosition(id: $scrollTarget, anchor: .center)
-        .onChange(of: scrollTarget) { old, new in
-            viewModel.logger?.debug("scrollTarget \(String(describing: old)) → \(String(describing: new))")
-        }
+        .scrollPosition(id: $viewModel.scrollTarget, anchor: .center)
         .overlay(alignment: .bottomTrailing) {
-            viewModel.nextPendingId.map {
-                scrollToNextButton(nextId: $0)
+            if viewModel.showNextButton {
+                scrollToNextButton
             }
         }
         .onScrollTargetVisibilityChange(idType: PhotoId.self) { visibleIds in
@@ -217,21 +212,26 @@ extension PhotosetDetailView {
         .padding(.top, 80)
     }
 
-    private func scrollToNextButton(nextId: PhotoId) -> some View {
-        Button {
-            viewModel.logger?.debug("tap next-pending button → scrollTarget=\(nextId)")
-
-            withAnimation(.easeInOut(duration: 0.25)) {
-                scrollTarget = nextId
-            }
-        } label: {
-            Image(systemName: "arrow.down.circle.fill")
-                .font(.system(size: 44))
-                .foregroundStyle(.white, .blue)
-                .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
-        }
-        .padding(.bottom, 24)
-        .padding(.trailing, 20)
+    private var scrollToNextButton: some View {
+        Image(systemName: "arrow.down.circle.fill")
+            .font(.system(size: 44))
+            .foregroundStyle(.white, .blue)
+            .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
+            .gesture(
+                LongPressGesture(minimumDuration: 0.5)
+                    .exclusively(before: TapGesture())
+                    .onEnded { value in
+                        switch value {
+                            case .first:
+                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                viewModel.didLongPressNextButton()
+                            case .second:
+                                viewModel.didTapNextButton()
+                        }
+                    }
+            )
+            .padding(.bottom, 24)
+            .padding(.trailing, 20)
     }
 }
 
