@@ -33,6 +33,9 @@ struct PhotosetCardView: View {
         .onTapGesture {
             viewModel.didTap()
         }
+        .onLongPressGesture(minimumDuration: 0.4) {
+            viewModel.didLongPress()
+        }
     }
 }
 

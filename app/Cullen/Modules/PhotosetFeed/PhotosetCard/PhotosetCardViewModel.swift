@@ -87,4 +87,8 @@ final class PhotosetCardViewModel: ObservableObject {
     func didTap() {
         coordinator.show(.photosetDetail(id))
     }
+
+    func didLongPress() {
+        Task { await syncUseCase.start() }
+    }
 }
