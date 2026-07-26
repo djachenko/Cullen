@@ -19,6 +19,7 @@ struct Cullen: App {
                 .scheduleExpirationNotifications()
 
             await (Cullen.resolver ~> MigrationService.self).runMigrations()
+            await (Cullen.resolver ~> PhotosetSyncRegistry.self).resumeDesired()
         }
     }
 

@@ -29,7 +29,8 @@ final class UseCasesAssembly: Assembly {
         container.register(PhotosetSyncRegistry.self) { resolver in
             PhotosetSyncRegistry(
                 syncService: resolver ~> ImageSyncService.self,
-                photosetsRepository: resolver ~> PhotosetsRepository.self
+                photosetsRepository: resolver ~> PhotosetsRepository.self,
+                desiredStore: resolver ~> DesiredSyncStore.self
             )
         }
         .inObjectScope(.container) // one shared sync use case per photoset, kept alive here

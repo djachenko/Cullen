@@ -20,6 +20,7 @@ final class PhotosetSyncUseCase {
     private let photosetId: PhotosetId
     private let syncService: ImageSyncService
     private let photosetsRepository: PhotosetsRepository
+    private let desiredStore: DesiredSyncStore
 
     private var keys: [URL] = []
     private var keySet: Set<URL> = []
@@ -31,11 +32,13 @@ final class PhotosetSyncUseCase {
     init(
         photosetId: PhotosetId,
         syncService: ImageSyncService,
-        photosetsRepository: PhotosetsRepository
+        photosetsRepository: PhotosetsRepository,
+        desiredStore: DesiredSyncStore
     ) {
         self.photosetId = photosetId
         self.syncService = syncService
         self.photosetsRepository = photosetsRepository
+        self.desiredStore = desiredStore
     }
 }
 
@@ -49,6 +52,8 @@ extension PhotosetSyncUseCase {
         guard !keySet.isEmpty else {
             return
         }
+
+        await desiredStore.add(photosetId)
 
         isDownloading = true
         observe()
@@ -67,6 +72,7 @@ extension PhotosetSyncUseCase {
     func clear() async {
         isDownloading = false
 
+        await desiredStore.remove(photosetId)
         await syncService.stop(urls: keys)
         await syncService.removeFromCache(urls: keys)
 

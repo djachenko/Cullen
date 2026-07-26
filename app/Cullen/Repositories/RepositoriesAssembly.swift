@@ -21,6 +21,9 @@ final class RepositoriesAssembly: Assembly {
         container.autoregister(LastOpenedRepository.self, initializer: UserDefaultsLastOpenedRepository.init)
             .inObjectScope(.container)
 
+        container.autoregister(DesiredSyncStore.self, initializer: UserDefaultsDesiredSyncStore.init)
+            .inObjectScope(.container)
+
         container.register(ImageSyncService.self) { resolver in
             KingfisherImageSyncService(
                 downloader: KingfisherManager.shared.downloader,
