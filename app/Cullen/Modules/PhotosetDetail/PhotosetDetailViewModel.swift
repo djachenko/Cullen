@@ -200,6 +200,11 @@ extension PhotosetDetailViewModel {
         lastVisibleId = last
 
         recountPendingIds()
+
+        let visible = Set(photoIds)
+        let urls = photos.filter { visible.contains($0.id) }.map(\.url)
+
+        Task { await syncUseCase?.window(urls) }
     }
 }
 
