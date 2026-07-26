@@ -15,7 +15,7 @@ import Observation
 @MainActor
 @Observable
 final class PhotosetSyncUseCase {
-    private(set) var state: PhotosetCacheState = .notCached
+    private(set) var state: PhotosetCacheState?
 
     private let photosetId: PhotosetId
     private let syncService: ImageSyncService
@@ -27,6 +27,7 @@ final class PhotosetSyncUseCase {
     private var done: Set<URL> = []
     private var isDownloading = false
     private var isForeground = false
+    private var loaded = false
     private var observeTask: Task<Void, Never>?
 
     init(
@@ -46,6 +47,12 @@ final class PhotosetSyncUseCase {
 // MARK: Commands
 
 extension PhotosetSyncUseCase {
+    // Resolve the baseline (which keys are already cached) without downloading.
+    // Cheap to call repeatedly; state stays nil until it lands.
+    func prepare() async {
+        await loadKeysIfNeeded()
+    }
+
     func start() async {
         await loadKeysIfNeeded()
 
@@ -118,7 +125,7 @@ private extension PhotosetSyncUseCase {
     }
 
     func loadKeysIfNeeded() async {
-        guard keySet.isEmpty else {
+        guard !loaded else {
             return
         }
 
@@ -129,6 +136,7 @@ private extension PhotosetSyncUseCase {
         keys = photoset.photos.map(\.url)
         keySet = Set(keys)
         done = keySet.filter { syncService.isCached(url: $0) }
+        loaded = true
 
         recompute()
     }
@@ -159,12 +167,15 @@ private extension PhotosetSyncUseCase {
     }
 
     func recompute() {
-        state = if keySet.isEmpty {
-            .notCached
-        } else if done.count == keySet.count {
+        guard loaded else {
+            state = nil
+            return
+        }
+
+        state = if !keySet.isEmpty && done.count == keySet.count {
             .synced
         } else if isDownloading {
-            .syncing(progress: Double(done.count) / Double(keySet.count))
+            .syncing(progress: keySet.isEmpty ? 0 : Double(done.count) / Double(keySet.count))
         } else {
             .notCached
         }
