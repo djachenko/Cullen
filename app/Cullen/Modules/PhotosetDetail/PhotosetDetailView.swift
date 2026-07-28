@@ -21,12 +21,12 @@ struct PhotosetDetailView: View {
         GeometryReader { geometry in
             ZStack {
                 switch viewModel.state {
-                case .initial, .loading:
-                    loadingView
-                case .content(let content):
-                    contentView(content: content)
-                case .error(let message):
-                    errorView(message: message)
+                    case .initial, .loading:
+                        loadingView
+                    case .content(let content):
+                        contentView(content: content)
+                    case .error(let message):
+                        errorView(message: message)
                 }
             }
             .onAppear {
@@ -213,23 +213,24 @@ extension PhotosetDetailView {
     }
 
     private var scrollToNextButton: some View {
-        Image(systemName: "arrow.down.circle.fill")
+        var longPressActive = false
+
+        return Image(systemName: "arrow.down.circle.fill")
             .font(.system(size: 44))
             .foregroundStyle(.white, .blue)
             .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
-            .gesture(
-                LongPressGesture(minimumDuration: 0.5)
-                    .exclusively(before: TapGesture())
-                    .onEnded { value in
-                        switch value {
-                            case .first:
-                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                viewModel.didLongPressNextButton()
-                            case .second:
-                                viewModel.didTapNextButton()
-                        }
-                    }
-            )
+            .onLongPressGesture(minimumDuration: 0.5) {
+                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+                longPressActive = true
+            } onPressingChanged: { pressing in
+                if !pressing, longPressActive {
+                    longPressActive = false
+                    viewModel.didLongPressNextButton()
+                }
+            }
+            .onTapGesture {
+                viewModel.didTapNextButton()
+            }
             .padding(.bottom, 24)
             .padding(.trailing, 20)
     }
