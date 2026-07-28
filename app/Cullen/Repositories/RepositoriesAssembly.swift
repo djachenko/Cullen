@@ -22,5 +22,8 @@ final class RepositoriesAssembly: Assembly {
 
         container.autoregister(ImageCacheService.self, initializer: KingfisherImageCacheService.init)
             .inObjectScope(.container)
+
+        container.autoregister(SortPreferenceRepository.self, initializer: UserDefaultsSortPreferenceRepository.init)
+            .inObjectScope(.container)
     }
 }
