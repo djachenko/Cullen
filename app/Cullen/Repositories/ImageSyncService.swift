@@ -23,6 +23,12 @@ enum SyncPriority: Int, Comparable, CaseIterable {
 }
 
 
+enum CacheEvent {
+    case cached(URL)
+    case failed(URL) // exhausted retries — this URL won't be cached without a fresh request
+}
+
+
 protocol ImageDownloadService {
     func download(urls: [URL], with priority: SyncPriority) async
     func stop(urls: [URL]) async
@@ -36,7 +42,7 @@ protocol ImageCacheService {
     // Producers (the downloader on store, CullenImage on display) report here;
     // consumers observe via events(). One broadcast, many taps.
     func report(cached url: URL) async
-    func events() async -> AsyncStream<URL>
+    func events() async -> AsyncStream<CacheEvent>
 }
 
 
@@ -44,16 +50,24 @@ actor KingfisherImageSyncService {
     private let downloader: ImageDownloader
     private let cache: ImageCache
     private let maxInFlight: Int
+    private let maxAttempts: Int
 
     private var buckets: [SyncPriority: [URL]] = [:]
     private var priorityOf: [URL: SyncPriority] = [:]
+    private var attempts: [URL: Int] = [:]
     private var inFlight: [URL: Task<Void, Never>] = [:]
-    private var subscribers: [UUID: AsyncStream<URL>.Continuation] = [:]
+    private var subscribers: [UUID: AsyncStream<CacheEvent>.Continuation] = [:]
 
-    init(downloader: ImageDownloader = .default, cache: ImageCache = .default, maxInFlight: Int = 6) {
+    init(
+        downloader: ImageDownloader = .default,
+        cache: ImageCache = .default,
+        maxInFlight: Int = 6,
+        maxAttempts: Int = 3
+    ) {
         self.downloader = downloader
         self.cache = cache
         self.maxInFlight = maxInFlight
+        self.maxAttempts = maxAttempts
     }
 }
 
@@ -91,11 +105,11 @@ extension KingfisherImageSyncService: ImageCacheService {
     }
 
     func report(cached url: URL) {
-        subscribers.values.forEach { $0.yield(url) }
+        broadcast(.cached(url))
     }
 
-    func events() -> AsyncStream<URL> {
-        let (stream, continuation) = AsyncStream<URL>.makeStream()
+    func events() -> AsyncStream<CacheEvent> {
+        let (stream, continuation) = AsyncStream<CacheEvent>.makeStream()
         let id = UUID()
 
         subscribers[id] = continuation
@@ -141,6 +155,7 @@ private extension KingfisherImageSyncService {
         }
 
         priorityOf[url] = nil
+        attempts[url] = nil
         inFlight[url]?.cancel()
         inFlight[url] = nil
     }
@@ -172,8 +187,8 @@ private extension KingfisherImageSyncService {
 
     func start(_ url: URL) {
         inFlight[url] = Task {
-            let cached = await perform(url)
-            finished(url, cached: cached)
+            let success = await perform(url)
+            finished(url, success: success)
         }
     }
 
@@ -187,15 +202,31 @@ private extension KingfisherImageSyncService {
         }
     }
 
-    func finished(_ url: URL, cached: Bool) {
+    func finished(_ url: URL, success: Bool) {
         inFlight[url] = nil
-        priorityOf[url] = nil
 
-        if cached {
+        if success {
+            attempts[url] = nil
+            priorityOf[url] = nil
             report(cached: url)
+        } else {
+            let used = (attempts[url] ?? 0) + 1
+            attempts[url] = used
+
+            if used < maxAttempts, let priority = priorityOf[url] {
+                buckets[priority, default: []].append(url) // retry — back of its bucket
+            } else {
+                attempts[url] = nil
+                priorityOf[url] = nil
+                broadcast(.failed(url))
+            }
         }
 
         pump()
+    }
+
+    func broadcast(_ event: CacheEvent) {
+        subscribers.values.forEach { $0.yield(event) }
     }
 
     func removeSubscriber(_ id: UUID) {
