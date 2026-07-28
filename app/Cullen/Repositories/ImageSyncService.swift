@@ -2,8 +2,10 @@
 //  ImageSyncService.swift
 //  Cullen
 //
-//  Data - image sync engine: keys + priorities, own admission scheduler
-//  over a single shared Kingfisher ImageDownloader.
+//  Data - image sync engine split across two protocols:
+//  ImageDownloadService (fetch + schedule) and ImageCacheService (cache truth
+//  + a broadcast hub of "this URL is now cached" events). One concrete actor
+//  implements both for now; physical extraction can come later.
 //
 
 import Foundation
@@ -21,18 +23,24 @@ enum SyncPriority: Int, Comparable, CaseIterable {
 }
 
 
-protocol ImageSyncService {
+protocol ImageDownloadService {
     func download(urls: [URL], with priority: SyncPriority) async
     func stop(urls: [URL]) async
-    func removeFromCache(urls: [URL]) async
-
-    func isCached(url: URL) -> Bool
-
-    func completions() async -> AsyncStream<URL>
 }
 
 
-actor KingfisherImageSyncService: ImageSyncService {
+protocol ImageCacheService {
+    func isCached(url: URL) -> Bool
+    func removeFromCache(urls: [URL]) async
+
+    // Producers (the downloader on store, CullenImage on display) report here;
+    // consumers observe via events(). One broadcast, many taps.
+    func report(cached url: URL) async
+    func events() async -> AsyncStream<URL>
+}
+
+
+actor KingfisherImageSyncService {
     private let downloader: ImageDownloader
     private let cache: ImageCache
     private let maxInFlight: Int
@@ -47,23 +55,29 @@ actor KingfisherImageSyncService: ImageSyncService {
         self.cache = cache
         self.maxInFlight = maxInFlight
     }
+}
 
-    nonisolated func isCached(url: URL) -> Bool {
-        cache.isCached(forKey: url.cacheKey)
-    }
 
+// MARK: ImageDownloadService
+
+extension KingfisherImageSyncService: ImageDownloadService {
     func download(urls: [URL], with priority: SyncPriority) {
-        for url in urls {
-            enqueue(url, priority)
-        }
+        urls.forEach { enqueue($0, priority) }
 
         pump()
     }
 
     func stop(urls: [URL]) {
-        for url in urls {
-            remove(url)
-        }
+        urls.forEach { remove($0) }
+    }
+}
+
+
+// MARK: ImageCacheService
+
+extension KingfisherImageSyncService: ImageCacheService {
+    nonisolated func isCached(url: URL) -> Bool {
+        cache.isCached(forKey: url.cacheKey)
     }
 
     func removeFromCache(urls: [URL]) async {
@@ -76,7 +90,11 @@ actor KingfisherImageSyncService: ImageSyncService {
         }
     }
 
-    func completions() -> AsyncStream<URL> {
+    func report(cached url: URL) {
+        subscribers.values.forEach { $0.yield(url) }
+    }
+
+    func events() -> AsyncStream<URL> {
         let (stream, continuation) = AsyncStream<URL>.makeStream()
         let id = UUID()
 
@@ -154,34 +172,30 @@ private extension KingfisherImageSyncService {
 
     func start(_ url: URL) {
         inFlight[url] = Task {
-            try? await perform(url)
-            await finished(url)
+            let cached = await perform(url)
+            finished(url, cached: cached)
         }
     }
 
-    func perform(_ url: URL) async throws {
-        let result = try await downloader.downloadImage(with: url)
-
-        try await cache.storeToDisk(result.originalData, forKey: url.cacheKey)
+    func perform(_ url: URL) async -> Bool {
+        do {
+            let result = try await downloader.downloadImage(with: url)
+            try await cache.storeToDisk(result.originalData, forKey: url.cacheKey)
+            return true
+        } catch {
+            return false
+        }
     }
 
-    func finished(_ url: URL) {
+    func finished(_ url: URL, cached: Bool) {
         inFlight[url] = nil
         priorityOf[url] = nil
 
-        broadcast(url)
-        pump()
-    }
-}
-
-
-// MARK: Subscribers
-
-private extension KingfisherImageSyncService {
-    func broadcast(_ url: URL) {
-        for continuation in subscribers.values {
-            continuation.yield(url)
+        if cached {
+            report(cached: url)
         }
+
+        pump()
     }
 
     func removeSubscriber(_ id: UUID) {

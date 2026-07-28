@@ -18,7 +18,8 @@ final class PhotosetSyncUseCase {
     private(set) var state: PhotosetCacheState?
 
     private let photosetId: PhotosetId
-    private let syncService: ImageSyncService
+    private let downloadService: ImageDownloadService
+    private let cacheService: ImageCacheService
     private let photosetsRepository: PhotosetsRepository
     private let desiredStore: DesiredSyncStore
 
@@ -32,12 +33,14 @@ final class PhotosetSyncUseCase {
 
     init(
         photosetId: PhotosetId,
-        syncService: ImageSyncService,
+        downloadService: ImageDownloadService,
+        cacheService: ImageCacheService,
         photosetsRepository: PhotosetsRepository,
         desiredStore: DesiredSyncStore
     ) {
         self.photosetId = photosetId
-        self.syncService = syncService
+        self.downloadService = downloadService
+        self.cacheService = cacheService
         self.photosetsRepository = photosetsRepository
         self.desiredStore = desiredStore
     }
@@ -65,7 +68,7 @@ extension PhotosetSyncUseCase {
         isDownloading = true
         observe()
 
-        await syncService.download(urls: pending, with: priority)
+        await downloadService.download(urls: pending, with: priority)
         recompute()
     }
 
@@ -80,13 +83,13 @@ extension PhotosetSyncUseCase {
             return
         }
 
-        await syncService.download(urls: boosted, with: .high)
+        await downloadService.download(urls: boosted, with: .high)
     }
 
     func cancel() async {
         isDownloading = false
 
-        await syncService.stop(urls: keys)
+        await downloadService.stop(urls: keys)
         recompute()
     }
 
@@ -94,8 +97,8 @@ extension PhotosetSyncUseCase {
         isDownloading = false
 
         await desiredStore.remove(photosetId)
-        await syncService.stop(urls: keys)
-        await syncService.removeFromCache(urls: keys)
+        await downloadService.stop(urls: keys)
+        await cacheService.removeFromCache(urls: keys)
 
         done.removeAll()
         recompute()
@@ -108,7 +111,7 @@ extension PhotosetSyncUseCase {
             return
         }
 
-        await syncService.download(urls: pending, with: priority)
+        await downloadService.download(urls: pending, with: priority)
     }
 }
 
@@ -135,7 +138,7 @@ private extension PhotosetSyncUseCase {
 
         keys = photoset.photos.map(\.url)
         keySet = Set(keys)
-        done = keySet.filter { syncService.isCached(url: $0) }
+        done = keySet.filter { cacheService.isCached(url: $0) }
         loaded = true
 
         recompute()
@@ -147,7 +150,7 @@ private extension PhotosetSyncUseCase {
         }
 
         observeTask = Task { [weak self] in
-            guard let stream = await self?.syncService.completions() else {
+            guard let stream = await self?.cacheService.events() else {
                 return
             }
 
@@ -156,7 +159,7 @@ private extension PhotosetSyncUseCase {
                     break
                 }
 
-                guard keySet.contains(url), syncService.isCached(url: url) else {
+                guard keySet.contains(url), cacheService.isCached(url: url) else {
                     continue
                 }
 

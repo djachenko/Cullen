@@ -24,7 +24,7 @@ final class RepositoriesAssembly: Assembly {
         container.autoregister(DesiredSyncStore.self, initializer: UserDefaultsDesiredSyncStore.init)
             .inObjectScope(.container)
 
-        container.register(ImageSyncService.self) { resolver in
+        container.register(KingfisherImageSyncService.self) { resolver in
             KingfisherImageSyncService(
                 downloader: KingfisherManager.shared.downloader,
                 cache: resolver ~> ImageCache.self,
@@ -32,6 +32,9 @@ final class RepositoriesAssembly: Assembly {
             )
         }
         .inObjectScope(.container)
+
+        container.register(ImageDownloadService.self) { $0 ~> KingfisherImageSyncService.self }
+        container.register(ImageCacheService.self) { $0 ~> KingfisherImageSyncService.self }
 
         container.autoregister(AppPreferences.init)
             .inObjectScope(.container)
