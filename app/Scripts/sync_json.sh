@@ -11,7 +11,9 @@ if [ ! -d "$SOURCE" ]; then
   exit 0
 fi
 
-# Copy all photoset JSON files (skip index — it's regenerated below)
+# Wipe stale JSON files before copying so removed photosets don't persist
+find "$DEST" -maxdepth 1 -name '*.json' -delete
+
 find "$SOURCE" -maxdepth 1 -name '*.json' ! -name 'index.json' -exec cp -f {} "$DEST/" \;
 
 # Regenerate index.json as a sorted JSON array of filenames
