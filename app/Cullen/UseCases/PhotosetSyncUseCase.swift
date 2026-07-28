@@ -32,6 +32,7 @@ final class PhotosetSyncUseCase {
     private var keys: [URL] = []
     private var keySet: Set<URL> = []
     private var done: Set<URL> = []
+    private var failed: Set<URL> = []
     private var isForeground = false
     private var loaded = false
     private var observeTask: Task<Void, Never>?
@@ -68,6 +69,7 @@ extension PhotosetSyncUseCase {
             return
         }
 
+        failed.removeAll() // manual (re)start re-attempts anything that gave up
         isSyncing = true
         await desiredStore.add(photosetId)
 
@@ -89,6 +91,7 @@ extension PhotosetSyncUseCase {
         await cacheService.removeFromCache(urls: keys)
 
         done.removeAll()
+        failed.removeAll()
         recompute()
     }
 
@@ -126,7 +129,7 @@ private extension PhotosetSyncUseCase {
     }
 
     var pending: [URL] {
-        keys.filter { !done.contains($0) }
+        keys.filter { !done.contains($0) && !failed.contains($0) }
     }
 
     func loadKeysIfNeeded() async {
@@ -158,19 +161,41 @@ private extension PhotosetSyncUseCase {
                 return
             }
 
-            for await url in stream {
+            for await event in stream {
                 guard let self else {
                     break
                 }
 
-                guard keySet.contains(url), cacheService.isCached(url: url) else {
-                    continue
+                switch event {
+                    case .cached(let url):
+                        guard keySet.contains(url), cacheService.isCached(url: url) else {
+                            continue
+                        }
+
+                        done.insert(url)
+
+                    case .failed(let url):
+                        guard keySet.contains(url) else {
+                            continue
+                        }
+
+                        failed.insert(url)
                 }
 
-                done.insert(url)
                 recompute()
+                await drainIfSettled()
             }
         }
+    }
+
+    // Left the offline queue once every key is resolved — cached or given up.
+    func drainIfSettled() async {
+        guard isSyncing, done.count + failed.count == keySet.count else {
+            return
+        }
+
+        isSyncing = false
+        await desiredStore.remove(photosetId)
     }
 
     func recompute() {
