@@ -129,10 +129,10 @@ extension PhotosetCardView {
 
     @ViewBuilder
     private var cacheSyncIndicator: some View {
-        if case .syncing(let progress)? = viewModel.syncUseCase.state {
+        if let progress = viewModel.syncUseCase.progress, progress > 0, progress < 1 {
             GeometryReader { geometry in
                 Rectangle()
-                    .fill(Color.accentColor)
+                    .fill(viewModel.syncUseCase.isSyncing ? Color.accentColor : Color.secondary)
                     .frame(width: geometry.size.width * progress)
             }
             .frame(height: 3)
@@ -141,7 +141,7 @@ extension PhotosetCardView {
 
     @ViewBuilder
     private var cacheSyncedBadge: some View {
-        if case .synced? = viewModel.syncUseCase.state {
+        if viewModel.syncUseCase.progress == 1 {
             Image(systemName: "arrow.down.circle.fill")
                 .font(.system(size: 18))
                 .foregroundStyle(.white, .green)

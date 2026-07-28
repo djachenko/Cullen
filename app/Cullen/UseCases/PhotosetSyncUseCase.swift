@@ -4,8 +4,9 @@
 //
 //  Domain - sync state of a single photoset. One long-lived instance per
 //  PhotosetId (vended by PhotosetSyncRegistry), shared across screens.
-//  Owns nothing downloadable itself — drives the keys-only ImageSyncService
-//  and derives its state from broadcast completions.
+//  Owns nothing downloadable itself — drives ImageDownloadService and derives
+//  its progress from ImageCacheService's broadcast (both explicit sync and
+//  casual scrolling report there).
 //
 
 import Foundation
@@ -15,7 +16,12 @@ import Observation
 @MainActor
 @Observable
 final class PhotosetSyncUseCase {
-    private(set) var state: PhotosetCacheState?
+    // Доля закэшированного (nil пока baseline не посчитан). Растёт и от синка,
+    // и от листания — источник правды кэш, не наши загрузки.
+    private(set) var progress: Double?
+
+    // Стоит ли сет в очереди на оффлайн (committed). Независим от progress.
+    private(set) var isSyncing = false
 
     private let photosetId: PhotosetId
     private let downloadService: ImageDownloadService
@@ -26,7 +32,6 @@ final class PhotosetSyncUseCase {
     private var keys: [URL] = []
     private var keySet: Set<URL> = []
     private var done: Set<URL> = []
-    private var isDownloading = false
     private var isForeground = false
     private var loaded = false
     private var observeTask: Task<Void, Never>?
@@ -50,8 +55,8 @@ final class PhotosetSyncUseCase {
 // MARK: Commands
 
 extension PhotosetSyncUseCase {
-    // Resolve the baseline (which keys are already cached) without downloading.
-    // Cheap to call repeatedly; state stays nil until it lands.
+    // Resolve the baseline and start observing without downloading. Cheap to
+    // call repeatedly; progress stays nil until it lands.
     func prepare() async {
         await loadKeysIfNeeded()
     }
@@ -63,17 +68,32 @@ extension PhotosetSyncUseCase {
             return
         }
 
+        isSyncing = true
         await desiredStore.add(photosetId)
 
-        isDownloading = true
-        observe()
-
         await downloadService.download(urls: pending, with: priority)
+    }
+
+    func cancel() async {
+        isSyncing = false
+
+        await desiredStore.remove(photosetId)
+        await downloadService.stop(urls: keys)
+    }
+
+    func clear() async {
+        isSyncing = false
+
+        await desiredStore.remove(photosetId)
+        await downloadService.stop(urls: keys)
+        await cacheService.removeFromCache(urls: keys)
+
+        done.removeAll()
         recompute()
     }
 
     func window(_ urls: [URL]) async {
-        guard isDownloading else {
+        guard isSyncing else {
             return
         }
 
@@ -86,28 +106,10 @@ extension PhotosetSyncUseCase {
         await downloadService.download(urls: boosted, with: .high)
     }
 
-    func cancel() async {
-        isDownloading = false
-
-        await downloadService.stop(urls: keys)
-        recompute()
-    }
-
-    func clear() async {
-        isDownloading = false
-
-        await desiredStore.remove(photosetId)
-        await downloadService.stop(urls: keys)
-        await cacheService.removeFromCache(urls: keys)
-
-        done.removeAll()
-        recompute()
-    }
-
     func setForeground(_ on: Bool) async {
         isForeground = on
 
-        guard isDownloading else {
+        guard isSyncing else {
             return
         }
 
@@ -139,8 +141,10 @@ private extension PhotosetSyncUseCase {
         keys = photoset.photos.map(\.url)
         keySet = Set(keys)
         done = keySet.filter { cacheService.isCached(url: $0) }
+        isSyncing = await desiredStore.all().contains(photosetId)
         loaded = true
 
+        observe()
         recompute()
     }
 
@@ -171,16 +175,10 @@ private extension PhotosetSyncUseCase {
 
     func recompute() {
         guard loaded else {
-            state = nil
+            progress = nil
             return
         }
 
-        state = if !keySet.isEmpty && done.count == keySet.count {
-            .synced
-        } else if isDownloading {
-            .syncing(progress: keySet.isEmpty ? 0 : Double(done.count) / Double(keySet.count))
-        } else {
-            .notCached
-        }
+        progress = keySet.isEmpty ? 1 : Double(done.count) / Double(keySet.count)
     }
 }

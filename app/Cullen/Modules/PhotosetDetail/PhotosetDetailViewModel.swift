@@ -171,13 +171,12 @@ extension PhotosetDetailViewModel {
         }
 
         Task {
-            switch syncUseCase.state {
-                case .none, .notCached?:
-                    await syncUseCase.start()
-                case .syncing?:
-                    await syncUseCase.cancel()
-                case .synced?:
-                    await syncUseCase.clear()
+            if syncUseCase.progress == 1 {
+                await syncUseCase.clear()
+            } else if syncUseCase.isSyncing {
+                await syncUseCase.cancel()
+            } else {
+                await syncUseCase.start()
             }
         }
     }
