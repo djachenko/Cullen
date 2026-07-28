@@ -11,18 +11,21 @@
 
 @MainActor
 final class PhotosetSyncRegistry {
-    private let syncService: ImageSyncService
+    private let downloadService: ImageDownloadService
+    private let cacheService: ImageCacheService
     private let photosetsRepository: PhotosetsRepository
     private let desiredStore: DesiredSyncStore
 
     private var useCases: [PhotosetId: PhotosetSyncUseCase] = [:]
 
     nonisolated init(
-        syncService: ImageSyncService,
+        downloadService: ImageDownloadService,
+        cacheService: ImageCacheService,
         photosetsRepository: PhotosetsRepository,
         desiredStore: DesiredSyncStore
     ) {
-        self.syncService = syncService
+        self.downloadService = downloadService
+        self.cacheService = cacheService
         self.photosetsRepository = photosetsRepository
         self.desiredStore = desiredStore
     }
@@ -34,7 +37,8 @@ final class PhotosetSyncRegistry {
 
         let useCase = PhotosetSyncUseCase(
             photosetId: id,
-            syncService: syncService,
+            downloadService: downloadService,
+            cacheService: cacheService,
             photosetsRepository: photosetsRepository,
             desiredStore: desiredStore
         )

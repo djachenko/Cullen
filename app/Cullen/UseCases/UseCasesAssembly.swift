@@ -28,7 +28,8 @@ final class UseCasesAssembly: Assembly {
 
         container.register(PhotosetSyncRegistry.self) { resolver in
             PhotosetSyncRegistry(
-                syncService: resolver ~> ImageSyncService.self,
+                downloadService: resolver ~> ImageDownloadService.self,
+                cacheService: resolver ~> ImageCacheService.self,
                 photosetsRepository: resolver ~> PhotosetsRepository.self,
                 desiredStore: resolver ~> DesiredSyncStore.self
             )
