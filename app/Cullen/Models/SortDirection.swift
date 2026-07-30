@@ -3,7 +3,7 @@
 //  Cullen
 //
 
-enum SortDirection {
+enum SortDirection: String {
     case ascending
     case descending
 

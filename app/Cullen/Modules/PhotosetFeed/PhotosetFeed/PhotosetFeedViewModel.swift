@@ -21,6 +21,7 @@ final class PhotosetFeedViewModel: ObservableObject {
     private let sortPhotosetsUseCase: SortPhotosetsUseCase
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCase
     private let exportLogsUseCase: ExportLogsUseCase
+    private let preferences: AppPreferences
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -33,11 +34,16 @@ final class PhotosetFeedViewModel: ObservableObject {
         sortPhotosetsUseCase: SortPhotosetsUseCase,
         getStatisticsUseCase: GetPhotosetStatisticsUseCase,
         exportLogsUseCase: ExportLogsUseCase,
+        preferences: AppPreferences,
     ) {
         self.fetchPhotosetsUseCase = fetchPhotosetsUseCase
         self.sortPhotosetsUseCase = sortPhotosetsUseCase
         self.getStatisticsUseCase = getStatisticsUseCase
         self.exportLogsUseCase = exportLogsUseCase
+        self.preferences = preferences
+
+        selectedSortOption = preferences.sortOption
+        sortDirection = preferences.sortDirection
 
         setupBindings()
     }
@@ -92,6 +98,14 @@ private extension PhotosetFeedViewModel {
             .dropFirst()
             .sink { [weak self] option in
                 self?.sortDirection = option.defaultDirection
+            }
+            .store(in: &cancellables)
+
+        Publishers.CombineLatest($selectedSortOption, $sortDirection)
+            .dropFirst()
+            .sink { [weak self] option, direction in
+                self?.preferences.sortOption = option
+                self?.preferences.sortDirection = direction
             }
             .store(in: &cancellables)
 

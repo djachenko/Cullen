@@ -24,11 +24,7 @@ import Foundation
 
     init(key: String, initialValue: Value, userDefaults: UserDefaults = .standard) {
         getBlock = {
-            if let stored = userDefaults.object(forKey: key) as? Value {
-                return stored
-            }
-            userDefaults.set(initialValue, forKey: key)
-            return initialValue
+            userDefaults.object(forKey: key) as? Value ?? initialValue
         }
         setBlock = { newValue in
             userDefaults.set(newValue, forKey: key)
@@ -42,7 +38,6 @@ extension Preference where Value: RawRepresentable, Value.RawValue == String {
     init(key: String, initialValue: Value, userDefaults: UserDefaults = .standard) {
         getBlock = {
             guard let raw = userDefaults.string(forKey: key) else {
-                userDefaults.set(initialValue.rawValue, forKey: key)
                 return initialValue
             }
             return Value(rawValue: raw) ?? initialValue
@@ -57,7 +52,6 @@ extension Preference where Value: RawRepresentable, Value.RawValue == Int {
     init(key: String, initialValue: Value, userDefaults: UserDefaults = .standard) {
         getBlock = {
             guard userDefaults.object(forKey: key) != nil else {
-                userDefaults.set(initialValue.rawValue, forKey: key)
                 return initialValue
             }
             return Value(rawValue: userDefaults.integer(forKey: key)) ?? initialValue
