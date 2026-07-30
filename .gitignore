@@ -1,4 +1,7 @@
 
+app/build/
+app/Cullen.xcconfig
+
 Cullen.xcodeproj/xcuserdata/
 
 Cullen.xcodeproj/project.xcworkspace/xcuserdata/
