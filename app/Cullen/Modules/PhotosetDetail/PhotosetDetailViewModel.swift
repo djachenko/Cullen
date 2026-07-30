@@ -128,10 +128,7 @@ extension PhotosetDetailViewModel {
             self.photos = photos
             self.decisions = decisions
 
-            if let id = lastVisibleId {
-                nextPendingId = nextPendingIslandStart(after: id)
-                decisionFrontId = computeDecisionFront(after: id)
-            }
+            recountPendingIds()
 
             prefetchState = await countPrefetchState()
 
@@ -177,16 +174,12 @@ extension PhotosetDetailViewModel {
     }
 
     func didTapNextButton() {
-        logger?.debug("tap next-pending → \(String(describing: nextPendingId))")
-
         withAnimation(.easeInOut(duration: 0.25)) {
             scrollTarget = nextPendingId
         }
     }
 
     func didLongPressNextButton() {
-        logger?.debug("long-press next-pending → \(String(describing: decisionFrontId))")
-
         withAnimation(.easeInOut(duration: 0.25)) {
             scrollTarget = decisionFrontId
         }
@@ -199,8 +192,7 @@ extension PhotosetDetailViewModel {
 
         lastVisibleId = last
 
-        nextPendingId = nextPendingIslandStart(after: last)
-        decisionFrontId = computeDecisionFront(after: last)
+        recountPendingIds()
     }
 }
 
@@ -295,6 +287,15 @@ private extension PhotosetDetailViewModel {
 
 
 private extension PhotosetDetailViewModel {
+    func recountPendingIds() {
+        guard let lastVisibleId else {
+            return
+        }
+
+        nextPendingId = nextPendingIslandStart(after: lastVisibleId)
+        decisionFrontId = computeDecisionFront(after: lastVisibleId)
+    }
+
     func nextPendingIslandStart(after photoId: PhotoId) -> PhotoId? {
         photos
             .drop { $0.id != photoId }
