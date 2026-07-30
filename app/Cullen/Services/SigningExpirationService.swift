@@ -67,14 +67,13 @@ private extension SigningExpirationService {
     func requestPermissionIfNeeded() async -> Bool {
         let settings = await notificationCenter.notificationSettings()
 
-        switch settings.authorizationStatus {
-        case .authorized, .provisional:
-            return true
-        case .notDetermined:
-            let granted = (try? await notificationCenter.requestAuthorization(options: [.alert, .sound])) ?? false
-            return granted
-        default:
-            return false
+        return switch settings.authorizationStatus {
+            case .authorized, .provisional:
+                true
+            case .notDetermined:
+                (try? await notificationCenter.requestAuthorization(options: [.alert, .sound])) ?? false
+            default:
+                false
         }
     }
 
@@ -98,9 +97,11 @@ private extension SigningExpirationService {
 
             let content = UNMutableNotificationContent()
             content.title = "Cullen — истекает подпись"
-            content.body = daysBefore == 1
-                ? "Завтра сборка истекает. Последний шанс пересобрать сегодня."
-                : "Через \(daysBefore) дн. сборка перестанет запускаться. Пора пересобрать."
+            content.body = if daysBefore == 1 {
+                "Завтра сборка истекает. Последний шанс пересобрать сегодня."
+            } else {
+                "Через \(daysBefore) дн. сборка перестанет запускаться. Пора пересобрать."
+            }
             content.sound = .default
 
             let components = Calendar.current.dateComponents(
