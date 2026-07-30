@@ -76,7 +76,9 @@ else
 fi
 echo
 
-git checkout -B test origin/master
+# --no-track: test is local-only, an upstream would just produce noise about being
+# ahead of origin/master and tempt git into pushing it
+git checkout -B test --no-track origin/master
 
 for branch in $branches; do
     echo "==> merging $branch"
