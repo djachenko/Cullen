@@ -143,7 +143,7 @@ private extension PhotosetSyncUseCase {
 
         keys = photoset.photos.map(\.url)
         keySet = Set(keys)
-        done = keySet.filter { cacheService.isCached(url: $0) }
+        done = await cacheService.cached(among: keys)
         isSyncing = await desiredStore.all().contains(photosetId)
         loaded = true
 

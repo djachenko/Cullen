@@ -37,6 +37,11 @@ protocol ImageDownloadService {
 
 protocol ImageCacheService {
     func isCached(url: URL) -> Bool
+
+    // Scanning a whole photoset means thousands of disk hits — always off the
+    // caller's thread, never one isCached at a time from a @MainActor type.
+    func cached(among urls: [URL]) async -> Set<URL>
+
     func removeFromCache(urls: [URL]) async
 
     // Everything that lands in the cache is reported here by CullenImageCache,
@@ -109,6 +114,19 @@ extension KingfisherImageSyncService: ImageDownloadService {
 extension KingfisherImageSyncService: ImageCacheService {
     nonisolated func isCached(url: URL) -> Bool {
         cache.isCached(forKey: url.cacheKey)
+    }
+
+    // Detached on purpose: the scan is long and synchronous, so it must not run
+    // on the main actor (it would freeze the feed) nor on this actor (it would
+    // stall the download pump for its whole duration).
+    nonisolated func cached(among urls: [URL]) async -> Set<URL> {
+        await Task.detached(priority: .utility) { [self] in
+            urls.reduce(into: Set<URL>()) { cached, url in
+                if isCached(url: url) {
+                    cached.insert(url)
+                }
+            }
+        }.value
     }
 
     func removeFromCache(urls: [URL]) async {

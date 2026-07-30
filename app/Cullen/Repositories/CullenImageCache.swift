@@ -18,7 +18,7 @@ protocol ImageCacheDelegate: AnyObject, Sendable {
 }
 
 
-final class CullenImageCache: ImageCache {
+final class CullenImageCache: ImageCache, @unchecked Sendable {
     // Same name as ImageCache.default — keeps pointing at the existing cache directory.
     static let shared = CullenImageCache(name: "default")
 
