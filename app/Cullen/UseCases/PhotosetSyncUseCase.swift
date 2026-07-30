@@ -152,11 +152,7 @@ private extension PhotosetSyncUseCase {
     }
 
     func observe() {
-        guard observeTask == nil else {
-            return
-        }
-
-        observeTask = Task { [weak self] in
+        observeTask = observeTask ?? Task { [weak self] in
             guard let stream = await self?.cacheService.events() else {
                 return
             }

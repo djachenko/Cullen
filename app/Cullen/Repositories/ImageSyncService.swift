@@ -59,8 +59,8 @@ actor KingfisherImageSyncService {
     private var subscribers: [UUID: AsyncStream<CacheEvent>.Continuation] = [:]
 
     init(
-        downloader: ImageDownloader = .default,
-        cache: CullenImageCache = .shared,
+        downloader: ImageDownloader,
+        cache: CullenImageCache,
         maxInFlight: Int = 6,
         maxAttempts: Int = 3
     ) {
@@ -78,7 +78,9 @@ actor KingfisherImageSyncService {
 
 extension KingfisherImageSyncService: ImageCacheDelegate {
     nonisolated func imageCache(didStore url: URL) {
-        Task { await report(cached: url) }
+        Task {
+            await report(cached: url)
+        }
     }
 }
 
@@ -87,13 +89,17 @@ extension KingfisherImageSyncService: ImageCacheDelegate {
 
 extension KingfisherImageSyncService: ImageDownloadService {
     func download(urls: [URL], with priority: SyncPriority) {
-        urls.forEach { enqueue($0, priority) }
+        urls.forEach {
+            enqueue($0, priority)
+        }
 
         pump()
     }
 
     func stop(urls: [URL]) {
-        urls.forEach { remove($0) }
+        urls.forEach {
+            remove($0)
+        }
     }
 }
 
@@ -145,6 +151,7 @@ private extension KingfisherImageSyncService {
         // Уже качается — приоритет запоминаем, но очередь не трогаем.
         guard inFlight[url] == nil else {
             priorityOf[url] = priority
+
             return
         }
 
@@ -177,11 +184,16 @@ private extension KingfisherImageSyncService {
 
 private extension KingfisherImageSyncService {
     func pump() {
-        while inFlight.count < maxInFlight, let url = nextPending() {
+        while inFlight.count < maxInFlight,
+              let url = nextPending() {
             start(url)
         }
     }
 
+    // Priorities come from CaseIterable, not from buckets.keys — dictionary key
+    // order is undefined, so it can't tell us which bucket is the highest.
+    // The inner loop drains entries that are already in flight so a stale one
+    // doesn't send us down to a lower priority with work still waiting here.
     func nextPending() -> URL? {
         for priority in SyncPriority.allCases.reversed() {
             while let url = buckets[priority]?.first {
@@ -199,6 +211,7 @@ private extension KingfisherImageSyncService {
     func start(_ url: URL) {
         inFlight[url] = Task {
             let success = await perform(url)
+
             finished(url, success: success)
         }
     }
@@ -207,6 +220,7 @@ private extension KingfisherImageSyncService {
         do {
             let result = try await downloader.downloadImage(with: url)
             try await cache.storeToDisk(result.originalData, forKey: url.cacheKey)
+
             return true
         } catch {
             return false

@@ -64,7 +64,9 @@ final class PhotosetSyncRegistry {
     // be released — the download lives on without it.
     func resumeDesired() async {
         await desiredStore.all().forEach { id in
-            Task { await useCase(for: id).start() }
+            Task {
+                await useCase(for: id).start()
+            }
         }
     }
 }

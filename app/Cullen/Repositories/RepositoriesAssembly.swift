@@ -32,7 +32,8 @@ final class RepositoriesAssembly: Assembly {
             )
         }
         .inObjectScope(.container)
-        .implements(ImageDownloadService.self, ImageCacheService.self)
+        .implements(ImageDownloadService.self)
+        .implements(ImageCacheService.self)
 
         container.autoregister(AppPreferences.init)
             .inObjectScope(.container)

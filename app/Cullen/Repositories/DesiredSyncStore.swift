@@ -17,9 +17,19 @@ protocol DesiredSyncStore {
 
 
 actor UserDefaultsDesiredSyncStore: DesiredSyncStore {
-    private static let defaultsKey = "cullen.desiredSync"
+    private enum Constants {
+        static let defaultsKey = "cullen.desiredSync"
+    }
 
-    private var cache: Set<String>?
+    private lazy var cache = {
+        let photosetIds: [PhotosetId] = if let persistedIds = defaults.stringArray(forKey: Constants.defaultsKey) {
+            persistedIds.map { .string($0) }
+        } else {
+            []
+        }
+
+        return Set(photosetIds)
+    }()
 
     private let defaults: UserDefaults
 
@@ -28,34 +38,22 @@ actor UserDefaultsDesiredSyncStore: DesiredSyncStore {
     }
 
     func add(_ id: PhotosetId) {
-        var data = loaded()
-        data.insert(id.description)
-        persist(data)
+        cache.insert(id)
+
+        persist()
     }
 
     func remove(_ id: PhotosetId) {
-        var data = loaded()
-        data.remove(id.description)
-        persist(data)
+        cache.remove(id)
+
+        persist()
     }
 
     func all() -> [PhotosetId] {
-        loaded().map { .string($0) }
+        Array(cache)
     }
 
-    private func persist(_ data: Set<String>) {
-        cache = data
-        defaults.set(Array(data), forKey: Self.defaultsKey)
-    }
-
-    private func loaded() -> Set<String> {
-        if let cache {
-            return cache
-        }
-
-        let raw = Set(defaults.stringArray(forKey: Self.defaultsKey) ?? [])
-        cache = raw
-
-        return raw
+    private func persist() {
+        defaults.set(cache.map { $0.description }, forKey: Constants.defaultsKey)
     }
 }
