@@ -220,11 +220,15 @@ extension PhotosetDetailView {
             .foregroundStyle(.white, .blue)
             .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
             .onLongPressGesture(minimumDuration: 0.5) {
-                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+                UIImpactFeedbackGenerator(style: .rigid)
+                    .impactOccurred()
+
                 longPressActive = true
             } onPressingChanged: { pressing in
-                if !pressing, longPressActive {
+                if !pressing,
+                   longPressActive {
                     longPressActive = false
+
                     viewModel.didLongPressNextButton()
                 }
             }
