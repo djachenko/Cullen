@@ -1,6 +1,5 @@
 
 app/build/
-app/Cullen.xcconfig
 
 Cullen.xcodeproj/xcuserdata/
 
@@ -26,4 +25,3 @@ cli/src/cullen/__pycache__/
 
 .idea/
 
-*.xcconfig
