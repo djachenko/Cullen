@@ -82,6 +82,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D0C3DE9C2EDD91AE0068307C /* Build configuration list for PBXNativeTarget "Cullen" */;
 			buildPhases = (
+				D0091126301B45DA00A95907 /* Drop old provisions, reset build lifetime */,
+				47318FD150434678A41C5539 /* Sync JSON from local source */,
 				D0C3DE772EDD91AD0068307C /* Sources */,
 				D0C3DE782EDD91AD0068307C /* Frameworks */,
 				D0C3DE792EDD91AD0068307C /* Resources */,
@@ -152,6 +154,41 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		D0091126301B45DA00A95907 /* Drop old provisions, reset build lifetime */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Drop old provisions, reset build lifetime";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "find \"${HOME}/Library/MobileDevice/Provisioning Profiles\" -name \"*.mobileprovision\" -delete\n";
+		};
+		47318FD150434678A41C5539 /* Sync JSON from local source */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Sync JSON from local source";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "\"$SRCROOT/Scripts/sync_json.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D0C3DE772EDD91AD0068307C /* Sources */ = {
