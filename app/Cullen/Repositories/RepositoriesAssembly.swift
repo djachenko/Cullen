@@ -26,5 +26,6 @@ final class RepositoriesAssembly: Assembly {
         container.autoregister(AppPreferences.init)
             .inObjectScope(.container)
             .implements(PhotosetFeedPreferences.self)
+            .implements(SigningExpirationServicePreferences.self)
     }
 }

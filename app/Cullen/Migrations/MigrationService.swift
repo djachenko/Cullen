@@ -25,14 +25,13 @@ final class MigrationService {
     }
 
     func runMigrations() async {
-//        TODO: make asyncForEach
-        for migration in migrations {
+        await migrations.forEach { migration in
             let shouldRun = migration.key.map {
                 !userDefaults.bool(forKey: $0)
             } ?? true
 
             guard shouldRun else {
-                continue
+                return
             }
 
             do {
@@ -47,4 +46,3 @@ final class MigrationService {
         }
     }
 }
-
