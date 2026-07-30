@@ -10,3 +10,5 @@ final class AppPreferences {
     @Preference(key: "cullen.feedSort.direction", initialValue: SortDirection.descending)
     var sortDirection: SortDirection
 }
+
+extension AppPreferences: PhotosetFeedPreferences {}

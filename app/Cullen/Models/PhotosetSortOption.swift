@@ -13,6 +13,8 @@ enum PhotosetSortOption: String, CaseIterable, Identifiable {
     case photoCount = "Photos"
     case lastOpened = "Last Opened"
 
+    static let `default`: Self = .lastOpened
+
     var id: String {
         rawValue
     }

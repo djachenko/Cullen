@@ -14,27 +14,25 @@ import Combine
 final class PhotosetFeedViewModel: ObservableObject {
     @Published var state: PhotosetFeedState = .initial
     @Published var searchText: String = ""
-    @Published var selectedSortOption: PhotosetSortOption = .recent
-    @Published var sortDirection: SortDirection = PhotosetSortOption.lastOpened.defaultDirection
+    @Published var selectedSortOption: PhotosetSortOption = .default
+    @Published var sortDirection: SortDirection = PhotosetSortOption.default.defaultDirection
+
+    var sortOptions = PhotosetSortOption.allCases.map { SortOptionDisplayModel(option: $0) }
 
     private let fetchPhotosetsUseCase: FetchPhotosetsUseCase
     private let sortPhotosetsUseCase: SortPhotosetsUseCase
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCase
     private let exportLogsUseCase: ExportLogsUseCase
-    private let preferences: AppPreferences
+    private let preferences: PhotosetFeedPreferences
 
     private var cancellables = Set<AnyCancellable>()
-
-    var sortOptions: [SortOptionDisplayModel] {
-        PhotosetSortOption.allCases.map { SortOptionDisplayModel(option: $0) }
-    }
 
     init(
         fetchPhotosetsUseCase: FetchPhotosetsUseCase,
         sortPhotosetsUseCase: SortPhotosetsUseCase,
         getStatisticsUseCase: GetPhotosetStatisticsUseCase,
         exportLogsUseCase: ExportLogsUseCase,
-        preferences: AppPreferences,
+        preferences: PhotosetFeedPreferences,
     ) {
         self.fetchPhotosetsUseCase = fetchPhotosetsUseCase
         self.sortPhotosetsUseCase = sortPhotosetsUseCase
