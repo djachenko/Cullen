@@ -108,9 +108,10 @@ private extension SigningExpirationService {
                 [.year, .month, .day, .hour, .minute],
                 from: fireDate
             )
+            let notificationId = SigningExpirationService.notificationId(daysBefore: daysBefore)
             let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
             let request = UNNotificationRequest(
-                identifier: "cullen.signing.expiration.\(daysBefore)days",
+                identifier: notificationId,
                 content: content,
                 trigger: trigger
             )
@@ -119,12 +120,8 @@ private extension SigningExpirationService {
             logger?.debug("scheduled notification \(daysBefore) day(s) before at \(fireDate.formatted())")
         }
     }
-}
 
-private extension SigningExpirationService {
-    enum NotificationId {
-        static func identifier(daysBefore: Int) -> String {
-            "cullen.signing.expiration.\(daysBefore)days"
-        }
+    static func notificationId(daysBefore: Int) -> String {
+        "cullen.signing.expiration.\(daysBefore)days"
     }
 }
