@@ -5,12 +5,22 @@
 import Foundation
 import UserNotifications
 
+protocol SigningExpirationServicePreferences: AnyObject {
+    var notificationIds: [String] { get set }
+}
+
 final class SigningExpirationService {
     private let notificationCenter: UNUserNotificationCenter
+    private let preferences: SigningExpirationServicePreferences
     private let logger: Logger?
 
-    init(notificationCenter: UNUserNotificationCenter, logger: Logger?) {
+    init(
+        notificationCenter: UNUserNotificationCenter,
+        preferences: SigningExpirationServicePreferences,
+        logger: Logger?
+    ) {
         self.notificationCenter = notificationCenter
+        self.preferences = preferences
         self.logger = logger
     }
 }
@@ -19,6 +29,7 @@ extension SigningExpirationService {
     func scheduleExpirationNotifications() async {
         guard let expirationDate = readExpirationDate() else {
             logger?.notice("no expiration date found in mobileprovision")
+
             return
         }
 
@@ -78,7 +89,8 @@ private extension SigningExpirationService {
     }
 
     func cancelExistingNotifications() async {
-        notificationCenter.removeAllPendingNotificationRequests()
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: preferences.notificationIds)
+        preferences.notificationIds.removeAll()
     }
 
     func scheduleNotifications(for expirationDate: Date) async {
@@ -92,6 +104,7 @@ private extension SigningExpirationService {
 
             guard fireDate > now else {
                 logger?.debug("skip day \(daysBefore) — fire date in the past")
+
                 continue
             }
 
@@ -108,16 +121,24 @@ private extension SigningExpirationService {
                 [.year, .month, .day, .hour, .minute],
                 from: fireDate
             )
+
             let notificationId = SigningExpirationService.notificationId(daysBefore: daysBefore)
             let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+
             let request = UNNotificationRequest(
                 identifier: notificationId,
                 content: content,
                 trigger: trigger
             )
 
-            try? await notificationCenter.add(request)
-            logger?.debug("scheduled notification \(daysBefore) day(s) before at \(fireDate.formatted())")
+            do {
+                try await notificationCenter.add(request)
+                preferences.notificationIds.append(notificationId)
+
+                logger?.debug("scheduled notification \(daysBefore) day(s) before at \(fireDate.formatted())")
+            } catch {
+                logger?.error("failed to schedule notification \(daysBefore) day(s) before: \(error)")
+            }
         }
     }
 
