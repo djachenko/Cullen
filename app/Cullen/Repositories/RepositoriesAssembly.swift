@@ -32,9 +32,7 @@ final class RepositoriesAssembly: Assembly {
             )
         }
         .inObjectScope(.container)
-
-        container.register(ImageDownloadService.self) { $0 ~> KingfisherImageSyncService.self }
-        container.register(ImageCacheService.self) { $0 ~> KingfisherImageSyncService.self }
+        .implements(ImageDownloadService.self, ImageCacheService.self)
 
         container.autoregister(AppPreferences.init)
             .inObjectScope(.container)
