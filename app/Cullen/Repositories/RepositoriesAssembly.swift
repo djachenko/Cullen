@@ -22,5 +22,10 @@ final class RepositoriesAssembly: Assembly {
 
         container.autoregister(ImageCacheService.self, initializer: KingfisherImageCacheService.init)
             .inObjectScope(.container)
+
+        container.autoregister(AppPreferences.init)
+            .inObjectScope(.container)
+            .implements(PhotosetFeedPreferences.self)
+            .implements(SigningExpirationServicePreferences.self)
     }
 }

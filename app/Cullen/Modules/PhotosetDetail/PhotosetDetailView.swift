@@ -13,8 +13,6 @@ struct PhotosetDetailView: View {
     @State private var gridWidth: CGFloat = 0
     @StateObject private var viewModel: PhotosetDetailViewModel
 
-    @State private var scrollTarget: PhotoId? = nil
-
     init(viewModel: PhotosetDetailViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
@@ -23,12 +21,12 @@ struct PhotosetDetailView: View {
         GeometryReader { geometry in
             ZStack {
                 switch viewModel.state {
-                case .initial, .loading:
-                    loadingView
-                case .content(let content):
-                    contentView(content: content)
-                case .error(let message):
-                    errorView(message: message)
+                    case .initial, .loading:
+                        loadingView
+                    case .content(let content):
+                        contentView(content: content)
+                    case .error(let message):
+                        errorView(message: message)
                 }
             }
             .onAppear {
@@ -163,13 +161,10 @@ extension PhotosetDetailView {
             }
             .scrollTargetLayout()
         }
-        .scrollPosition(id: $scrollTarget, anchor: .center)
-        .onChange(of: scrollTarget) { old, new in
-            viewModel.logger?.debug("scrollTarget \(String(describing: old)) → \(String(describing: new))")
-        }
+        .scrollPosition(id: $viewModel.scrollTarget, anchor: .center)
         .overlay(alignment: .bottomTrailing) {
-            viewModel.nextPendingId.map {
-                scrollToNextButton(nextId: $0)
+            if viewModel.showNextButton {
+                scrollToNextButton
             }
         }
         .onScrollTargetVisibilityChange(idType: PhotoId.self) { visibleIds in
@@ -217,21 +212,31 @@ extension PhotosetDetailView {
         .padding(.top, 80)
     }
 
-    private func scrollToNextButton(nextId: PhotoId) -> some View {
-        Button {
-            viewModel.logger?.debug("tap next-pending button → scrollTarget=\(nextId)")
+    private var scrollToNextButton: some View {
+        var longPressActive = false
 
-            withAnimation(.easeInOut(duration: 0.25)) {
-                scrollTarget = nextId
+        return Image(systemName: "arrow.down.circle.fill")
+            .font(.system(size: 44))
+            .foregroundStyle(.white, .blue)
+            .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
+            .onLongPressGesture(minimumDuration: 0.5) {
+                UIImpactFeedbackGenerator(style: .rigid)
+                    .impactOccurred()
+
+                longPressActive = true
+            } onPressingChanged: { pressing in
+                if !pressing,
+                   longPressActive {
+                    longPressActive = false
+
+                    viewModel.didLongPressNextButton()
+                }
             }
-        } label: {
-            Image(systemName: "arrow.down.circle.fill")
-                .font(.system(size: 44))
-                .foregroundStyle(.white, .blue)
-                .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 3)
-        }
-        .padding(.bottom, 24)
-        .padding(.trailing, 20)
+            .onTapGesture {
+                viewModel.didTapNextButton()
+            }
+            .padding(.bottom, 24)
+            .padding(.trailing, 20)
     }
 }
 

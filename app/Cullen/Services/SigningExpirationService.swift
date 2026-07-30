@@ -5,12 +5,22 @@
 import Foundation
 import UserNotifications
 
+protocol SigningExpirationServicePreferences: AnyObject {
+    var notificationIds: [String] { get set }
+}
+
 final class SigningExpirationService {
     private let notificationCenter: UNUserNotificationCenter
+    private let preferences: SigningExpirationServicePreferences
     private let logger: Logger?
 
-    init(notificationCenter: UNUserNotificationCenter, logger: Logger?) {
+    init(
+        notificationCenter: UNUserNotificationCenter,
+        preferences: SigningExpirationServicePreferences,
+        logger: Logger?
+    ) {
         self.notificationCenter = notificationCenter
+        self.preferences = preferences
         self.logger = logger
     }
 }
@@ -19,6 +29,7 @@ extension SigningExpirationService {
     func scheduleExpirationNotifications() async {
         guard let expirationDate = readExpirationDate() else {
             logger?.notice("no expiration date found in mobileprovision")
+
             return
         }
 
@@ -67,19 +78,19 @@ private extension SigningExpirationService {
     func requestPermissionIfNeeded() async -> Bool {
         let settings = await notificationCenter.notificationSettings()
 
-        switch settings.authorizationStatus {
-        case .authorized, .provisional:
-            return true
-        case .notDetermined:
-            let granted = (try? await notificationCenter.requestAuthorization(options: [.alert, .sound])) ?? false
-            return granted
-        default:
-            return false
+        return switch settings.authorizationStatus {
+            case .authorized, .provisional:
+                true
+            case .notDetermined:
+                (try? await notificationCenter.requestAuthorization(options: [.alert, .sound])) ?? false
+            default:
+                false
         }
     }
 
     func cancelExistingNotifications() async {
-        notificationCenter.removeAllPendingNotificationRequests()
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: preferences.notificationIds)
+        preferences.notificationIds.removeAll()
     }
 
     func scheduleNotifications(for expirationDate: Date) async {
@@ -93,37 +104,45 @@ private extension SigningExpirationService {
 
             guard fireDate > now else {
                 logger?.debug("skip day \(daysBefore) — fire date in the past")
+
                 continue
             }
 
             let content = UNMutableNotificationContent()
             content.title = "Cullen — истекает подпись"
-            content.body = daysBefore == 1
-                ? "Завтра сборка истекает. Последний шанс пересобрать сегодня."
-                : "Через \(daysBefore) дн. сборка перестанет запускаться. Пора пересобрать."
+            content.body = if daysBefore == 1 {
+                "Завтра сборка истекает. Последний шанс пересобрать сегодня."
+            } else {
+                "Через \(daysBefore) дн. сборка перестанет запускаться. Пора пересобрать."
+            }
             content.sound = .default
 
             let components = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute],
                 from: fireDate
             )
+
+            let notificationId = SigningExpirationService.notificationId(daysBefore: daysBefore)
             let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+
             let request = UNNotificationRequest(
-                identifier: "cullen.signing.expiration.\(daysBefore)days",
+                identifier: notificationId,
                 content: content,
                 trigger: trigger
             )
 
-            try? await notificationCenter.add(request)
-            logger?.debug("scheduled notification \(daysBefore) day(s) before at \(fireDate.formatted())")
+            do {
+                try await notificationCenter.add(request)
+                preferences.notificationIds.append(notificationId)
+
+                logger?.debug("scheduled notification \(daysBefore) day(s) before at \(fireDate.formatted())")
+            } catch {
+                logger?.error("failed to schedule notification \(daysBefore) day(s) before: \(error)")
+            }
         }
     }
-}
 
-private extension SigningExpirationService {
-    enum NotificationId {
-        static func identifier(daysBefore: Int) -> String {
-            "cullen.signing.expiration.\(daysBefore)days"
-        }
+    static func notificationId(daysBefore: Int) -> String {
+        "cullen.signing.expiration.\(daysBefore)days"
     }
 }

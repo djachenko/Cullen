@@ -1,4 +1,6 @@
 
+app/build/
+
 Cullen.xcodeproj/xcuserdata/
 
 Cullen.xcodeproj/project.xcworkspace/xcuserdata/
@@ -22,3 +24,4 @@ cli/src/cullen/__pycache__/
 *.xcbkptlist
 
 .idea/
+

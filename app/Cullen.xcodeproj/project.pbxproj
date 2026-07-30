@@ -13,6 +13,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		179616E111B545BAAF873091 /* Cullen.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Cullen.xcconfig; sourceTree = "<group>"; };
 		D0C3DE7B2EDD91AD0068307C /* Cullen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cullen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -63,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				D0C3DE7D2EDD91AD0068307C /* Cullen */,
+				179616E111B545BAAF873091 /* Cullen.xcconfig */,
 				D0C3DE7C2EDD91AD0068307C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -82,7 +84,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D0C3DE9C2EDD91AE0068307C /* Build configuration list for PBXNativeTarget "Cullen" */;
 			buildPhases = (
-				D0091126301B45DA00A95907 /* Drop old provisions, reset build lifetime */,
 				47318FD150434678A41C5539 /* Sync JSON from local source */,
 				D0C3DE772EDD91AD0068307C /* Sources */,
 				D0C3DE782EDD91AD0068307C /* Frameworks */,
@@ -156,24 +157,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		D0091126301B45DA00A95907 /* Drop old provisions, reset build lifetime */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Drop old provisions, reset build lifetime";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "find \"${HOME}/Library/MobileDevice/Provisioning Profiles\" -name \"*.mobileprovision\" -delete\n";
-		};
 		47318FD150434678A41C5539 /* Sync JSON from local source */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -322,6 +305,7 @@
 		};
 		D0C3DE9D2EDD91AE0068307C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 179616E111B545BAAF873091 /* Cullen.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -330,6 +314,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2T7P8BR7NV;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = CULLEN_DEV;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -358,6 +343,7 @@
 		};
 		D0C3DE9E2EDD91AE0068307C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 179616E111B545BAAF873091 /* Cullen.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

@@ -1,0 +1,11 @@
+#!/bin/sh
+# test branch is an ephemeral device-testing polígon — never pushed to remote
+
+while read local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" = "refs/heads/test" ]; then
+        echo "error: 'test' is an ephemeral polígon, cannot push to remote" >&2
+        exit 1
+    fi
+done
+
+exit 0

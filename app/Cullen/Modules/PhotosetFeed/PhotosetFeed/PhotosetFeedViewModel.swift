@@ -14,30 +14,34 @@ import Combine
 final class PhotosetFeedViewModel: ObservableObject {
     @Published var state: PhotosetFeedState = .initial
     @Published var searchText: String = ""
-    @Published var selectedSortOption: PhotosetSortOption = .recent
-    @Published var sortDirection: SortDirection = PhotosetSortOption.lastOpened.defaultDirection
+    @Published var selectedSortOption: PhotosetSortOption = .default
+    @Published var sortDirection: SortDirection = PhotosetSortOption.default.defaultDirection
+
+    var sortOptions = PhotosetSortOption.allCases.map { SortOptionDisplayModel(option: $0) }
 
     private let fetchPhotosetsUseCase: FetchPhotosetsUseCase
     private let sortPhotosetsUseCase: SortPhotosetsUseCase
     private let getStatisticsUseCase: GetPhotosetStatisticsUseCase
     private let exportLogsUseCase: ExportLogsUseCase
+    private let preferences: PhotosetFeedPreferences
 
     private var cancellables = Set<AnyCancellable>()
-
-    var sortOptions: [SortOptionDisplayModel] {
-        PhotosetSortOption.allCases.map { SortOptionDisplayModel(option: $0) }
-    }
 
     init(
         fetchPhotosetsUseCase: FetchPhotosetsUseCase,
         sortPhotosetsUseCase: SortPhotosetsUseCase,
         getStatisticsUseCase: GetPhotosetStatisticsUseCase,
         exportLogsUseCase: ExportLogsUseCase,
+        preferences: PhotosetFeedPreferences,
     ) {
         self.fetchPhotosetsUseCase = fetchPhotosetsUseCase
         self.sortPhotosetsUseCase = sortPhotosetsUseCase
         self.getStatisticsUseCase = getStatisticsUseCase
         self.exportLogsUseCase = exportLogsUseCase
+        self.preferences = preferences
+
+        selectedSortOption = preferences.sortOption
+        sortDirection = preferences.sortDirection
 
         setupBindings()
     }
@@ -92,6 +96,14 @@ private extension PhotosetFeedViewModel {
             .dropFirst()
             .sink { [weak self] option in
                 self?.sortDirection = option.defaultDirection
+            }
+            .store(in: &cancellables)
+
+        Publishers.CombineLatest($selectedSortOption, $sortDirection)
+            .dropFirst()
+            .sink { [weak self] option, direction in
+                self?.preferences.sortOption = option
+                self?.preferences.sortDirection = direction
             }
             .store(in: &cancellables)
 
