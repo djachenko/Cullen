@@ -39,8 +39,8 @@ protocol ImageCacheService {
     func isCached(url: URL) -> Bool
     func removeFromCache(urls: [URL]) async
 
-    // Producers (the downloader on store, CullenImage on display) report here;
-    // consumers observe via events(). One broadcast, many taps.
+    // Everything that lands in the cache is reported here by CullenImageCache,
+    // whoever wrote it; consumers observe via events(). One broadcast, many taps.
     func report(cached url: URL) async
     func events() async -> AsyncStream<CacheEvent>
 }
@@ -48,7 +48,7 @@ protocol ImageCacheService {
 
 actor KingfisherImageSyncService {
     private let downloader: ImageDownloader
-    private let cache: ImageCache
+    private let cache: CullenImageCache
     private let maxInFlight: Int
     private let maxAttempts: Int
 
@@ -60,7 +60,7 @@ actor KingfisherImageSyncService {
 
     init(
         downloader: ImageDownloader = .default,
-        cache: ImageCache = .default,
+        cache: CullenImageCache = .shared,
         maxInFlight: Int = 6,
         maxAttempts: Int = 3
     ) {
@@ -68,6 +68,17 @@ actor KingfisherImageSyncService {
         self.cache = cache
         self.maxInFlight = maxInFlight
         self.maxAttempts = maxAttempts
+
+        cache.delegate = self
+    }
+}
+
+
+// MARK: ImageCacheDelegate
+
+extension KingfisherImageSyncService: ImageCacheDelegate {
+    nonisolated func imageCache(didStore url: URL) {
+        Task { await report(cached: url) }
     }
 }
 
@@ -206,9 +217,10 @@ private extension KingfisherImageSyncService {
         inFlight[url] = nil
 
         if success {
+            // No report here — the cache announces the write itself, so a
+            // download and a plain display both arrive the same way.
             attempts[url] = nil
             priorityOf[url] = nil
-            report(cached: url)
         } else {
             let used = (attempts[url] ?? 0) + 1
             attempts[url] = used

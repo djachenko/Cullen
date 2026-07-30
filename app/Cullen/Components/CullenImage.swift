@@ -7,27 +7,17 @@
 
 import SwiftUI
 import Kingfisher
-import SwinjectAutoregistration
 
 
-// Resolved once — the cache-events hub every displayed image reports into,
-// so casual scrolling feeds the same progress as an explicit sync.
-private let cacheReporter: ImageCacheService = Cullen.resolver ~> ImageCacheService.self
-
-
+// No cache reporting here on purpose: CullenImageCache announces every write
+// itself. Hooking .onSuccess would be silently clobbered by any call site
+// that sets its own — which is exactly what happened before.
 @MainActor
 func CullenImage(_ url: URL?) -> KFImage {
     KFImage(url)
         .cancelOnDisappear(true)
         .placeholder { CullenImagePlaceholder() }
         .onFailureView { CullenImageFailureView() }
-        .onSuccess { _ in
-            guard let url else {
-                return
-            }
-
-            Task { await cacheReporter.report(cached: url) }
-        }
 }
 
 
