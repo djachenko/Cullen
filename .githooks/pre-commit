@@ -1,0 +1,20 @@
+#!/bin/sh
+# test branch is an ephemeral device-testing polygon, rebuilt from scratch on every
+# run of scripts/rebuild-test.sh — a commit made here is silently discarded by the
+# next rebuild. Block direct commits so fixes land in the feature branch instead.
+
+# MERGE_HEAD exists only while a merge is in progress. The rebuild script assembles
+# test out of merge commits, so those must pass; --git-dir keeps this correct in
+# worktrees, where .git is a file rather than a directory.
+if [ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+    exit 0
+fi
+
+# symbolic-ref fails on detached HEAD, hence the fallback to an empty string
+if [ "$(git symbolic-ref --short HEAD 2>/dev/null)" = "test" ]; then
+    echo "error: 'test' is rebuilt from scratch, commits here are lost" >&2
+    echo "       make the fix in the feature branch and rebuild" >&2
+    exit 1
+fi
+
+exit 0
