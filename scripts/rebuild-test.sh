@@ -19,6 +19,12 @@
 # -o pipefail: a failure anywhere in a pipeline fails the pipeline
 set -euo pipefail
 
+# Everything lives in main() so bash parses the whole file before running a line of
+# it: the checkout below swaps the working tree to a branch that may carry a
+# different version of this very script, and bash otherwise keeps reading the file
+# as it executes.
+main() {
+
 cd "$(git rev-parse --show-toplevel)"
 
 # `checkout -B` carries uncommitted changes across to test, and the merges below
@@ -88,3 +94,7 @@ done
 
 echo
 echo "test rebuilt at $(git rev-parse --short HEAD)"
+
+}
+
+main "$@"
