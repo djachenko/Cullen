@@ -11,23 +11,23 @@ struct SortOptionDisplayModel: Identifiable {
     let title: String
     let icon: String
     let option: PhotosetSortOption
-    
+
     init(option: PhotosetSortOption) {
         self.id = option.rawValue
         self.title = option.rawValue
         self.option = option
-        
-        switch option {
-        case .recent:
-            self.icon = "clock"
-        case .name:
-            self.icon = "textformat.abc"
-        case .progress:
-            self.icon = "chart.bar.fill"
-        case .photoCount:
-            self.icon = "photo.stack"
-        case .lastOpened:
-            self.icon = "eye"
+
+        self.icon = switch option {
+            case .recent:
+                "clock"
+            case .name:
+                "textformat.abc"
+            case .progress:
+                "chart.bar.fill"
+            case .photoCount:
+                "photo.stack"
+            case .lastOpened:
+                "eye"
         }
     }
 }
