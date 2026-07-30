@@ -26,7 +26,7 @@ final class RepositoriesAssembly: Assembly {
 
         container.register(KingfisherImageSyncService.self) { resolver in
             KingfisherImageSyncService(
-                downloader: KingfisherManager.shared.downloader,
+                manager: KingfisherManager.shared,
                 cache: resolver ~> CullenImageCache.self,
                 maxInFlight: 4 // matches KingfisherConfiguration.httpMaximumConnectionsPerHost
             )

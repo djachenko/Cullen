@@ -47,7 +47,7 @@ protocol ImageCacheService {
 
 
 actor KingfisherImageSyncService {
-    private let downloader: ImageDownloader
+    private let manager: KingfisherManager
     private let cache: CullenImageCache
     private let maxInFlight: Int
     private let maxAttempts: Int
@@ -59,12 +59,12 @@ actor KingfisherImageSyncService {
     private var subscribers: [UUID: AsyncStream<CacheEvent>.Continuation] = [:]
 
     init(
-        downloader: ImageDownloader,
+        manager: KingfisherManager,
         cache: CullenImageCache,
         maxInFlight: Int = 6,
         maxAttempts: Int = 3
     ) {
-        self.downloader = downloader
+        self.manager = manager
         self.cache = cache
         self.maxInFlight = maxInFlight
         self.maxAttempts = maxAttempts
@@ -216,10 +216,17 @@ private extension KingfisherImageSyncService {
         }
     }
 
+    // Kingfisher owns the caching: it stores under the same keys the display
+    // path uses, and skips the download outright when the image is already
+    // cached. Decoding happens inside the downloader either way, so routing
+    // through the manager costs nothing extra — but its memory copy would
+    // evict what the user is actually looking at, hence the expired lifetime.
     func perform(_ url: URL) async -> Bool {
         do {
-            let result = try await downloader.downloadImage(with: url)
-            try await cache.storeToDisk(result.originalData, forKey: url.cacheKey)
+            _ = try await manager.retrieveImage(
+                with: url,
+                options: [.memoryCacheExpiration(.expired)]
+            )
 
             return true
         } catch {
