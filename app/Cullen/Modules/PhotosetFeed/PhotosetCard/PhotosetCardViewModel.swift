@@ -33,6 +33,7 @@ final class PhotosetCardViewModel: ObservableObject {
     @Published var state: State = .loading
 
     let id: PhotosetId
+    let syncUseCase: PhotosetSyncUseCase
 
     private let fetchPhotosetUseCase: FetchPhotosetUseCase
     private let decisionsStatsUseCase: DecisionsStatsUseCase
@@ -42,11 +43,13 @@ final class PhotosetCardViewModel: ObservableObject {
         id: PhotosetId,
         fetchPhotosetUseCase: FetchPhotosetUseCase,
         decisionsStatsUseCase: DecisionsStatsUseCase,
+        syncRegistry: PhotosetSyncRegistry,
         coordinator: Coordinator
     ) {
         self.id = id
         self.fetchPhotosetUseCase = fetchPhotosetUseCase
         self.decisionsStatsUseCase = decisionsStatsUseCase
+        self.syncUseCase = syncRegistry.useCase(for: id)
         self.coordinator = coordinator
     }
 
@@ -83,5 +86,13 @@ final class PhotosetCardViewModel: ObservableObject {
 
     func didTap() {
         coordinator.show(.photosetDetail(id))
+    }
+
+    func didLongPress() {
+        Task { await syncUseCase.start() }
+    }
+
+    func prepareSync() async {
+        await syncUseCase.prepare()
     }
 }

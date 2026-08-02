@@ -64,20 +64,19 @@ private extension PhotosetDetailView {
         Button {
             viewModel.didTapPrefetchButton()
         } label: {
-            switch viewModel.prefetchState {
-                case .notCached:
-                    Image(systemName: "arrow.down.circle")
-                        .font(.system(size: 20))
-                case .partial(let ratio):
-                    CircularProgress(value: ratio, color: .yellow)
-                        .frame(width: 20, height: 20)
-                case .prefetching(let progress):
-                    CircularProgress(value: progress, color: .accentColor)
-                        .frame(width: 20, height: 20)
-                case .full:
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.green)
+            let progress = viewModel.syncUseCase?.progress
+            let isSyncing = viewModel.syncUseCase?.isSyncing ?? false
+
+            if progress == 1 {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(.green)
+            } else if isSyncing {
+                CircularProgress(value: progress ?? 0, color: .accentColor)
+                    .frame(width: 20, height: 20)
+            } else {
+                Image(systemName: "arrow.down.circle")
+                    .font(.system(size: 20))
             }
         }
         .disabled(viewModel.state.isLoading)
