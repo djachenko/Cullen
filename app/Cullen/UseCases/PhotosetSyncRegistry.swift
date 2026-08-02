@@ -26,6 +26,7 @@ final class PhotosetSyncRegistry {
     private let cacheService: ImageCacheService
     private let photosetsRepository: PhotosetsRepository
     private let desiredStore: DesiredSyncStore
+    private let cachedRatioStore: CachedRatioStore
 
     private var useCases: [PhotosetId: WeakUseCase] = [:]
 
@@ -33,12 +34,14 @@ final class PhotosetSyncRegistry {
         downloadService: ImageDownloadService,
         cacheService: ImageCacheService,
         photosetsRepository: PhotosetsRepository,
-        desiredStore: DesiredSyncStore
+        desiredStore: DesiredSyncStore,
+        cachedRatioStore: CachedRatioStore
     ) {
         self.downloadService = downloadService
         self.cacheService = cacheService
         self.photosetsRepository = photosetsRepository
         self.desiredStore = desiredStore
+        self.cachedRatioStore = cachedRatioStore
     }
 
     func useCase(for id: PhotosetId) -> PhotosetSyncUseCase {
@@ -51,7 +54,8 @@ final class PhotosetSyncRegistry {
             downloadService: downloadService,
             cacheService: cacheService,
             photosetsRepository: photosetsRepository,
-            desiredStore: desiredStore
+            desiredStore: desiredStore,
+            cachedRatioStore: cachedRatioStore
         )
 
         useCases[id] = WeakUseCase(useCase)

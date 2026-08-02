@@ -31,7 +31,8 @@ final class UseCasesAssembly: Assembly {
                 downloadService: resolver ~> ImageDownloadService.self,
                 cacheService: resolver ~> ImageCacheService.self,
                 photosetsRepository: resolver ~> PhotosetsRepository.self,
-                desiredStore: resolver ~> DesiredSyncStore.self
+                desiredStore: resolver ~> DesiredSyncStore.self,
+                cachedRatioStore: resolver ~> CachedRatioStore.self
             )
         }
         .inObjectScope(.container) // one shared sync use case per photoset, kept alive here

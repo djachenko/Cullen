@@ -28,6 +28,7 @@ final class PhotosetSyncUseCase {
     private let cacheService: ImageCacheService
     private let photosetsRepository: PhotosetsRepository
     private let desiredStore: DesiredSyncStore
+    private let cachedRatioStore: CachedRatioStore
 
     private var keys: [URL] = []
     private var keySet: Set<URL> = []
@@ -42,13 +43,15 @@ final class PhotosetSyncUseCase {
         downloadService: ImageDownloadService,
         cacheService: ImageCacheService,
         photosetsRepository: PhotosetsRepository,
-        desiredStore: DesiredSyncStore
+        desiredStore: DesiredSyncStore,
+        cachedRatioStore: CachedRatioStore
     ) {
         self.photosetId = photosetId
         self.downloadService = downloadService
         self.cacheService = cacheService
         self.photosetsRepository = photosetsRepository
         self.desiredStore = desiredStore
+        self.cachedRatioStore = cachedRatioStore
     }
 }
 
@@ -56,9 +59,14 @@ final class PhotosetSyncUseCase {
 // MARK: Commands
 
 extension PhotosetSyncUseCase {
-    // Resolve the baseline and start observing without downloading. Cheap to
-    // call repeatedly; progress stays nil until it lands.
+    // Show the persisted ratio immediately, then resolve the real baseline off
+    // the main thread. Cheap to call repeatedly; the persisted value gives the
+    // UI something to show before the disk scan lands.
     func prepare() async {
+        if progress == nil, let persisted = await cachedRatioStore.ratio(for: photosetId) {
+            progress = persisted
+        }
+
         await loadKeysIfNeeded()
     }
 
@@ -93,6 +101,7 @@ extension PhotosetSyncUseCase {
         done.removeAll()
         failed.removeAll()
         recompute()
+        await cachedRatioStore.remove(for: photosetId)
     }
 
     func window(_ urls: [URL]) async {
@@ -200,6 +209,12 @@ private extension PhotosetSyncUseCase {
             return
         }
 
-        progress = keySet.isEmpty ? 1 : Double(done.count) / Double(keySet.count)
+        let ratio = keySet.isEmpty ? 1.0 : Double(done.count) / Double(keySet.count)
+        progress = ratio
+
+        Task { [weak self] in
+            guard let self else { return }
+            await cachedRatioStore.store(ratio: ratio, for: photosetId)
+        }
     }
 }
