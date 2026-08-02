@@ -93,6 +93,14 @@ final class PhotosetCardViewModel: ObservableObject {
     }
 
     func prepareSync() async {
+        // Debounce: if the card leaves the screen before this fires, SwiftUI
+        // cancels the task and the disk scan never runs.
+        try? await Task.sleep(for: .milliseconds(400))
+
+        guard !Task.isCancelled else {
+            return
+        }
+
         await syncUseCase.prepare()
     }
 }
