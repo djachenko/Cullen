@@ -16,10 +16,10 @@ extension UIImageView {
 
         kf.setImage(with: url) { [weak self] result in
             switch result {
-            case .success:
-                break
-            case .failure:
-                self?.image = .cullenFailure
+                case .success:
+                    break
+                case .failure:
+                    self?.image = .cullenFailure
             }
             completion()
         }
