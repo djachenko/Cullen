@@ -19,8 +19,8 @@ final class GestureLayerCoordinator: NSObject {
         let recognizer: UIPanGestureRecognizer
         let filter: PanFilter
         var when: () -> Bool
-        var onChanged: (CGFloat) -> Void
-        var onEnded: (CGFloat, CGFloat) -> Void
+        var onChanged: (CGPoint) -> Void
+        var onEnded: (CGPoint, CGPoint) -> Void
     }
 
     private struct PinchEntry {
@@ -138,9 +138,9 @@ final class GestureLayerCoordinator: NSObject {
 
         switch r.state {
             case .changed:
-                entry.onChanged(r.translation(in: view).x)
+                entry.onChanged(r.translation(in: view))
             case .ended, .cancelled:
-                entry.onEnded(r.translation(in: view).x, r.velocity(in: view).x)
+                entry.onEnded(r.translation(in: view), r.velocity(in: view))
             default:
                 break
         }
