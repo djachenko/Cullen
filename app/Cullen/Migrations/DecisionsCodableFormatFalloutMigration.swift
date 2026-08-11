@@ -17,8 +17,7 @@ final class DecisionsCodableFormatFalloutMigration: Migration {
     let key: String? = nil
 
     private let photosetsRepository: PhotosetsRepository
-
-    private let fileManager = FileManager.default
+    private let fileManager: FileManager
 
     private lazy var directory = fileManager
         .urls(
@@ -29,9 +28,11 @@ final class DecisionsCodableFormatFalloutMigration: Migration {
         .appending(component: Constants.subdirectory)
 
     init(
-        photosetsRepository: PhotosetsRepository
+        photosetsRepository: PhotosetsRepository,
+        fileManager: FileManager
     ) {
         self.photosetsRepository = photosetsRepository
+        self.fileManager = fileManager
     }
 
     func run() async throws {
