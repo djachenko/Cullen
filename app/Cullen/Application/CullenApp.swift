@@ -11,20 +11,31 @@ import SwinjectAutoregistration
 
 @main
 struct Cullen: App {
+    @State private var gate = Cullen.resolver ~> MigrationGate.self
+
     init() {
         KingfisherConfiguration.configure()
 
+        // Своей таской: диалог пермишена на нотификации подвешивает её на неопределённое
+        // время, и миграции не должны ждать, пока пользователь до него доберётся.
         Task {
             await (Cullen.resolver ~> (SigningExpirationService.self, with: LogCategory.app))
                 .scheduleExpirationNotifications()
-
-            await (Cullen.resolver ~> MigrationService.self).runMigrations()
         }
     }
 
     var body: some Scene {
         WindowGroup {
-            Cullen.resolver ~> (AppCoordinatorView.self, with: AppDestination.photosetFeed)
+            Group {
+                if gate.isReady {
+                    Cullen.resolver ~> (AppCoordinatorView.self, with: AppDestination.photosetFeed)
+                } else {
+                    ProgressView()
+                }
+            }
+            .task {
+                await gate.open()
+            }
         }
     }
 }
