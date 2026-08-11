@@ -6,6 +6,7 @@
 //
 
 import Swinject
+import SwinjectAutoregistration
 
 
 final class AppAssembly: Assembly {
@@ -15,5 +16,14 @@ final class AppAssembly: Assembly {
             .inObjectScope(.container)
 
         container.autoregister(AppCoordinatorView.init)
+
+        // Не autoregister: гейт изолирован на MainActor, и потеря изоляции в
+        // Swift 6 mode станет ошибкой. Резолвится он из App.init, то есть с main.
+        container.register(MigrationGate.self) { resolver in
+            MainActor.assumeIsolated {
+                MigrationGate(migrationService: resolver ~> MigrationService.self)
+            }
+        }
+        .inObjectScope(.container)
     }
 }
