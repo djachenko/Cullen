@@ -15,6 +15,7 @@ final class MigrationsAssembly: Assembly {
             [
                 resolver ~> DecisionsCodableFormatFalloutMigration.self,
                 resolver ~> DecisionsUrlToNameIdMigration.self,
+                resolver ~> DecisionsRemoveSuffixMigration.self,
             ]
         }
 
@@ -23,5 +24,6 @@ final class MigrationsAssembly: Assembly {
 
         container.autoregister(DecisionsUrlToNameIdMigration.init)
         container.autoregister(DecisionsCodableFormatFalloutMigration.init)
+        container.autoregister(DecisionsRemoveSuffixMigration.init)
     }
 }
