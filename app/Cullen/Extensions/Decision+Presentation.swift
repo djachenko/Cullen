@@ -29,6 +29,17 @@ extension Decision {
         }
     }
 
+    var title: String {
+        switch self {
+        case .approved:
+            "Approved"
+        case .rejected:
+            "Rejected"
+        case .pending:
+            "Pending"
+        }
+    }
+
     var label: String {
         switch self {
         case .approved:

@@ -25,6 +25,16 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published var export: DecisionsExport?
     @Published var scrollTarget: PhotoId? = nil
 
+    @Published var filter: Set<Decision> = Set(Decision.allCases) {
+        didSet {
+            guard case .content = state else {
+                return
+            }
+
+            state = .content(makeContent())
+        }
+    }
+
     var showNextButton: Bool {
         nextPendingId != nil || decisionFrontId != nil
     }
@@ -156,15 +166,7 @@ extension PhotosetDetailViewModel {
             await syncUseCase.loadCacheState()
             await syncUseCase.set(isForeground: true)
 
-            state = .content(photos.map { photo in
-                PhotoGridCellViewModel(
-                    id: photo.id,
-                    imageURL: photo.url,
-                    decision: decisions[photo.id] ?? .pending,
-                ) { [weak self] in
-                    self?.didTap(photo: photo)
-                }
-            })
+            state = .content(makeContent())
 
             let photosetId = photoset.id
 
@@ -238,6 +240,26 @@ extension PhotosetDetailViewModel {
     }
 }
 
+// MARK: Building content
+
+private extension PhotosetDetailViewModel {
+    var filteredPhotos: [Photo] {
+        photos.filter { filter.contains(decisions[$0.id] ?? .pending) }
+    }
+
+    func makeContent() -> PhotosetDetailContent {
+        filteredPhotos.map { photo in
+            PhotoGridCellViewModel(
+                id: photo.id,
+                imageURL: photo.url,
+                decision: decisions[photo.id] ?? .pending,
+            ) { [weak self] in
+                self?.didTap(photo: photo)
+            }
+        }
+    }
+}
+
 // MARK: Opening detail
 
 private extension PhotosetDetailViewModel {
@@ -246,6 +268,7 @@ private extension PhotosetDetailViewModel {
             return
         }
 
+        let photos = filteredPhotos
         let startIndex = photos.firstIndex(of: photo) ?? .zero
 
         logger?.debug("didTap \(photo.id) → startIndex=\(startIndex) of \(photos.count)")
