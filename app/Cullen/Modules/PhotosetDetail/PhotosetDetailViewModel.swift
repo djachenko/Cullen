@@ -32,6 +32,8 @@ final class PhotosetDetailViewModel: ObservableObject {
             }
 
             state = .content(makeContent())
+
+            recountPendingIds()
         }
     }
 
@@ -290,11 +292,13 @@ private extension PhotosetDetailViewModel {
             return
         }
 
-        nextPendingId = nextPendingIslandStart(after: lastVisibleId)
-        decisionFrontId = computeDecisionFront(after: lastVisibleId)
+        let photos = filteredPhotos
+
+        nextPendingId = nextPendingIslandStart(after: lastVisibleId, in: photos)
+        decisionFrontId = computeDecisionFront(after: lastVisibleId, in: photos)
     }
 
-    func nextPendingIslandStart(after photoId: PhotoId) -> PhotoId? {
+    func nextPendingIslandStart(after photoId: PhotoId, in photos: [Photo]) -> PhotoId? {
         photos
             .drop { $0.id != photoId }
             .dropFirst()
@@ -304,11 +308,11 @@ private extension PhotosetDetailViewModel {
             .id
     }
 
-    func computeDecisionFront(after photoId: PhotoId) -> PhotoId? {
-        var current = nextPendingIslandStart(after: photoId)
+    func computeDecisionFront(after photoId: PhotoId, in photos: [Photo]) -> PhotoId? {
+        var current = nextPendingIslandStart(after: photoId, in: photos)
 
         while let id = current,
-              let next = nextPendingIslandStart(after: id) {
+              let next = nextPendingIslandStart(after: id, in: photos) {
             current = next
         }
 
