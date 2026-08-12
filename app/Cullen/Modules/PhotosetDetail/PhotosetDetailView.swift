@@ -129,13 +129,54 @@ extension PhotosetDetailView {
         .padding(.top, 80)
     }
 
-    @ViewBuilder
     private func contentView(content: PhotosetDetailContent) -> some View {
-        if content.isEmpty {
-            emptyView
-        } else {
-            grid(photos: content)
+        VStack(spacing: 0) {
+            filterPicker
+
+            if content.isEmpty {
+                emptyView
+
+                Spacer()
+            } else {
+                grid(photos: content)
+            }
         }
+    }
+
+    private var filterPicker: some View {
+        HStack(spacing: 4) {
+            ForEach(Decision.allCases, id: \.self) { decision in
+                filterSegment(decision: decision)
+            }
+        }
+        .padding(3)
+        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
+    }
+
+    private func filterSegment(decision: Decision) -> some View {
+        let isSelected = viewModel.filter.contains(decision)
+
+        return Button {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                viewModel.filter.formSymmetricDifference([decision])
+            }
+        } label: {
+            Label(decision.title, systemImage: decision.icon)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(isSelected ? decision.color : .secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+                .background {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 7)
+                            .fill(Color(.systemBackground))
+                            .shadow(color: .black.opacity(0.12), radius: 2, x: 0, y: 1)
+                    }
+                }
+        }
+        .buttonStyle(.plain)
     }
 
     private func grid(photos: [PhotoGridCellViewModel]) -> some View {
