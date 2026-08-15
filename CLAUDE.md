@@ -143,8 +143,8 @@ Presentation → Domain ← Data
 
 ## Git — обязательные правила
 
-- **Semantic commits**: `feat:`, `fix:`, `refactor:`, `chore:`, `style:`, `test:`, `revert:` — строчная буква после `:`, без точки в конце, императив
-- **Именование веток**: `feature/`, `fix/`, `refactor/`, `chore/` — semantic, как и коммиты
+- **Semantic commits**: `feat:`, `fix:`, `refactor:`, `perf:`, `build:`, `chore:`, `style:`, `test:`, `docs:`, `revert:` — строчная буква после `:`, без точки в конце, императив
+- **Именование веток**: `feat/`, `fix/`, `refactor/`, `chore/`, `build/`, `test/` — semantic, как и коммиты
 - **GitHub Flow**: один постоянный `master`, всё в ветках, мёрдж только `--no-ff`
 - **Автор**: всегда `Igor Djachenko <i.s.djachenko@gmail.com>`. Перед коммитом проверять `git config user.name` — если не совпадает, исправить
 - **Никакого `Co-Authored-By:`** и любых других мета-строк от инструментов в сообщениях коммитов
