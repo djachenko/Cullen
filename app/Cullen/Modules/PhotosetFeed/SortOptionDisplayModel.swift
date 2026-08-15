@@ -22,7 +22,7 @@ struct SortOptionDisplayModel: Identifiable {
                 "clock"
             case .name:
                 "textformat.abc"
-            case .progress:
+            case .progress, .syncProgress:
                 "chart.bar.fill"
             case .photoCount:
                 "photo.stack"
