@@ -23,6 +23,9 @@ final class RepositoriesAssembly: Assembly {
         container.autoregister(DesiredSyncStore.self, initializer: UserDefaultsDesiredSyncStore.init)
             .inObjectScope(.container)
 
+        container.autoregister(CachedRatioStore.self, initializer: UserDefaultsCachedRatioStore.init)
+            .inObjectScope(.container)
+
         container.autoregister(SyncEventHub.init)
             .implements(SyncEventPublisher.self)
             .implements(SyncEventSource.self)

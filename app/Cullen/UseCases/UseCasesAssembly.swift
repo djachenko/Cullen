@@ -55,7 +55,8 @@ private extension UseCasesAssembly {
                 cacheService: resolver ~> ImageCacheService.self,
                 eventSource: resolver ~> SyncEventSource.self,
                 photosetsRepository: resolver ~> PhotosetsRepository.self,
-                desiredStore: resolver ~> DesiredSyncStore.self
+                desiredStore: resolver ~> DesiredSyncStore.self,
+                cachedRatioStore: resolver ~> CachedRatioStore.self
             )
         }
     }
