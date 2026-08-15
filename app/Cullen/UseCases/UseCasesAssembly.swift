@@ -17,6 +17,7 @@ final class UseCasesAssembly: Assembly {
     func assemble(container: Container) {
         container.autoregister(FetchPhotosetsUseCase.self, initializer: FetchPhotosetsUseCaseImpl.init)
         container.autoregister(SortPhotosetsUseCase.self, initializer: SortPhotosetsUseCaseImpl.init)
+        assembleSortStrategies(container: container)
         container.autoregister(RecordLastOpenedUseCase.self, initializer: RecordLastOpenedUseCaseImpl.init)
         container.autoregister(FetchPhotosetUseCase.self, initializer: FetchPhotosetUseCaseImpl.init)
         container.autoregister(GetPhotosetStatisticsUseCase.self, initializer: GetPhotosetStatisticsUseCaseImpl.init)
@@ -47,6 +48,29 @@ final class UseCasesAssembly: Assembly {
 
 
 private extension UseCasesAssembly {
+    typealias Option = PhotosetSortOption
+
+    func assembleSortStrategies(container: Container) {
+        let strategy = PhotosetSortStrategy.self
+
+        container.autoregister(strategy, key: Option.recent, initializer: RecentSortStrategy.init)
+        container.autoregister(strategy, key: Option.name, initializer: NameSortStrategy.init)
+        container.autoregister(strategy, key: Option.progress, initializer: ProgressSortStrategy.init)
+        container.autoregister(strategy, key: Option.photoCount, initializer: PhotoCountSortStrategy.init)
+        container.autoregister(strategy, key: Option.lastOpened, initializer: LastOpenedSortStrategy.init)
+        container.autoregister(strategy, key: Option.syncProgress, initializer: SyncProgressSortStrategy.init)
+
+        // Таблица строится по allCases: незарегистрированная опция роняет резолв
+        // на первом открытии ленты, а не молча выпадает из меню сортировки.
+        container.register([PhotosetSortOption: PhotosetSortStrategy].self) { resolver in
+            let entries = PhotosetSortOption.allCases.map { option -> (PhotosetSortOption, PhotosetSortStrategy) in
+                (option, resolver ~> option)
+            }
+
+            return Dictionary(uniqueKeysWithValues: entries)
+        }
+    }
+
     func sync(for id: PhotosetId, resolver: Resolver) -> PhotosetSyncUseCase {
         photosetSyncs.value(for: id) {
             PhotosetSyncUseCaseImpl(
@@ -59,5 +83,17 @@ private extension UseCasesAssembly {
                 cachedRatioStore: resolver ~> CachedRatioStore.self
             )
         }
+    }
+}
+
+
+// Ключ регистрации, а не строковое имя: hash/== ключа берут опцию как есть.
+extension PhotosetSortOption: ServiceKeyOption {
+    public var description: String {
+        rawValue
+    }
+
+    public func isEqualTo(_ another: ServiceKeyOption) -> Bool {
+        another as? Self == self
     }
 }

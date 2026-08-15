@@ -1,0 +1,21 @@
+//
+//  RecentSortStrategy.swift
+//  Cullen
+//
+
+import Foundation
+
+
+final class RecentSortStrategy: PhotosetSortStrategy {
+    private let repository: PhotosetsRepository
+
+    init(repository: PhotosetsRepository) {
+        self.repository = repository
+    }
+
+    func sorted(ids: [PhotosetId], isAscending: Bool) async throws -> [PhotosetId] {
+        let photosets = try await repository.photosets(ids: ids)
+
+        return ids.sorted(by: { photosets[$0]?.date ?? .distantPast }, reverse: !isAscending)
+    }
+}
