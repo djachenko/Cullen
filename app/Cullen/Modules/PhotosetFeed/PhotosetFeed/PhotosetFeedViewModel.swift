@@ -81,6 +81,29 @@ final class PhotosetFeedViewModel: ObservableObject {
         }
     }
 
+    // Ключи сортировки живут вне ленты: решения и время открытия меняются на
+    // экране фотосета. Пересортировываем уже загруженные ids, не перевыбирая их.
+    func resort() async {
+        guard case .content(let content) = state else {
+            return
+        }
+
+        let sorted = try? await sortPhotosetsUseCase.execute(
+            ids: content.photosetIds,
+            option: selectedSortOption,
+            direction: sortDirection
+        )
+
+        guard let sorted else {
+            return
+        }
+
+        state = .content(content: PhotosetFeedContent(
+            photosetIds: sorted,
+            statistics: content.statistics,
+        ))
+    }
+
     func didSelectSortOption(_ option: PhotosetSortOption) {
         if option == selectedSortOption {
             sortDirection.toggle()
