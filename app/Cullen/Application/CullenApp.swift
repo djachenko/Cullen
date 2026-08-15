@@ -18,6 +18,8 @@ struct Cullen: App {
             await (Cullen.resolver ~> (SigningExpirationService.self, with: LogCategory.app))
                 .scheduleExpirationNotifications()
 
+//            try? await (Cullen.resolver ~> BackupDecisionsUseCase.self).execute(force: false)
+
             await (Cullen.resolver ~> MigrationService.self).runMigrations()
         }
     }
