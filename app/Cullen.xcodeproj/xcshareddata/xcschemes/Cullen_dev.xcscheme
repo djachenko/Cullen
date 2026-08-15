@@ -6,6 +6,24 @@
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       buildArchitectures = "Automatic">
+      <PostActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Drop old provisions, reset build lifetime"
+               scriptText = "# Xcode 16 keeps provisioning profiles here, not in ~/Library/MobileDevice&#10;DIR=&quot;${HOME}/Library/Developer/Xcode/UserData/Provisioning Profiles&quot;&#10;&#10;for f in &quot;$DIR&quot;/*.mobileprovision; do&#10;    # glob stays literal when the directory is empty&#10;    [ -f &quot;$f&quot; ] || continue&#10;&#10;    # the directory is shared with other projects, so match by bundle id&#10;    if security cms -D -i &quot;$f&quot; 2&gt;/dev/null | grep -q &quot;$PRODUCT_BUNDLE_IDENTIFIER&quot;; then&#10;        rm &quot;$f&quot;&#10;    fi&#10;done&#10;">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "D0C3DE7A2EDD91AD0068307C"
+                     BuildableName = "Cullen.app"
+                     BlueprintName = "Cullen"
+                     ReferencedContainer = "container:Cullen.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PostActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
