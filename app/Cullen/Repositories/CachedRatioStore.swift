@@ -12,6 +12,7 @@ import Foundation
 
 protocol CachedRatioStore {
     func ratio(for id: PhotosetId) async -> Double?
+    func ratios(for ids: [PhotosetId]) async -> [PhotosetId: Double]
     func store(ratio: Double, for id: PhotosetId) async
     func remove(for id: PhotosetId) async
 }
@@ -32,6 +33,12 @@ actor UserDefaultsCachedRatioStore: CachedRatioStore {
 
     func ratio(for id: PhotosetId) -> Double? {
         cache[id.description]
+    }
+
+    func ratios(for ids: [PhotosetId]) -> [PhotosetId: Double] {
+        ids.reduce(into: [:]) { result, id in
+            result[id] = cache[id.description]
+        }
     }
 
     func store(ratio: Double, for id: PhotosetId) {
