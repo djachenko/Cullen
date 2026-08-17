@@ -12,13 +12,6 @@ import PopGestureRecognizerSwiftUI
 
 struct PhotoViewerView: View {
 
-    // MARK: - Constants
-
-    private enum Layout {
-        static let maxZoomScale: CGFloat = 5
-        static let doubleTapZoomScale: CGFloat = 3
-    }
-
     // MARK: - Properties
 
     @ObservedObject var viewModel: PhotoViewerViewModel
@@ -65,29 +58,8 @@ private extension PhotoViewerView {
     }
 
     var compassView: some View {
-        ZStack {
-            ZoomableImageView(
-                viewModel: ZoomableImageViewModel(
-                    url: viewModel.currentPhoto.url,
-                    maxZoomScale: Layout.maxZoomScale,
-                    doubleTapZoomScale: Layout.doubleTapZoomScale,
-//                    onSingleTap: {
-//                        isUIVisible.toggle()
-//                    },
-                    onPan: viewModel.handle(recognizer:)
-                )
-            )
-            .onTap {
-                isUIVisible.toggle()
-            }
-            .ignoresSafeArea()
-            .id(viewModel.currentIndex)
-            .transition(.opacity)
-
-            viewModel.compassViewModel.map {
-                SwipeCompassView(viewModel: $0)
-                    .allowsHitTesting(false)
-            }
+        CompassView(viewModel: viewModel) {
+            isUIVisible.toggle()
         }
     }
 
