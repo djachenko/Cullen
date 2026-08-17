@@ -7,13 +7,55 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0098E3E873830D24B51E8484 /* FakeDecisionsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768C19EF152C6AA8C7A5DE3 /* FakeDecisionsRepository.swift */; };
+		151C39CC2F929380CA5CB0D2 /* DecisionsRemoveSuffixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172F8F900CC81A0252723A39 /* DecisionsRemoveSuffixMigrationTests.swift */; };
+		227204028E8156DACCB52706 /* FileDecisionsBackupRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367BD61BB79F8E17EEF3C5FC /* FileDecisionsBackupRepositoryTests.swift */; };
+		358D643F1361FE48294BFDE2 /* FakePhotosetsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0E91582E58EE6C0639B0612 /* FakePhotosetsRepository.swift */; };
+		47D6AAD384ABE22E94AD8125 /* FakeDecisionsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC27D64A9B16B47DF53F98E /* FakeDecisionsRepository.swift */; };
+		4E0773422EB487C92497F397 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0B1F362C4EDAEEFCC7E88B /* Foundation.framework */; };
+		5C86B00C7CC3DE514E334365 /* DecisionsRemoveSuffixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B518722FBF49AD1A769283B /* DecisionsRemoveSuffixMigrationTests.swift */; };
+		A13F95F38F5F9804426CFF07 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0B1F362C4EDAEEFCC7E88B /* Foundation.framework */; };
+		A30AFBCA869C7EAEF75759A1 /* FakePhotosetsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECEC022D05FF7299B840BF9 /* FakePhotosetsRepository.swift */; };
+		B4DE8902C229016905D53F3C /* BackupDecisionsUseCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5B2FFE787C5455D49999622 /* BackupDecisionsUseCaseTests.swift */; };
+		C88C25163D2E7DEEC2B0A89D /* FakeDecisionsBackupRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8AD8F7CAE8E8D0F075EFD7 /* FakeDecisionsBackupRepository.swift */; };
 		D002A4842F6DC9040053419C /* PopGestureRecognizerSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */; };
 		D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D055F2F22F66A1F900380F46 /* Kingfisher */; };
 		D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */ = {isa = PBXBuildFile; productRef = D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */; };
+		D32AA54CD9A6FE4357ABC10E /* DecisionsBackupMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95124C022ABCC8C27782EF1B /* DecisionsBackupMigrationTests.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		5030C2FB85A12DADD1D7864C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0C3DE732EDD91AD0068307C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0C3DE7A2EDD91AD0068307C;
+			remoteInfo = Cullen;
+		};
+		717CC9CDF7C5D771815813F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0C3DE732EDD91AD0068307C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0C3DE7A2EDD91AD0068307C;
+			remoteInfo = Cullen;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		0ECEC022D05FF7299B840BF9 /* FakePhotosetsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FakePhotosetsRepository.swift; sourceTree = "<group>"; };
+		172F8F900CC81A0252723A39 /* DecisionsRemoveSuffixMigrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DecisionsRemoveSuffixMigrationTests.swift; sourceTree = "<group>"; };
 		179616E111B545BAAF873091 /* Cullen.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Cullen.xcconfig; sourceTree = "<group>"; };
+		367BD61BB79F8E17EEF3C5FC /* FileDecisionsBackupRepositoryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FileDecisionsBackupRepositoryTests.swift; sourceTree = "<group>"; };
+		3C09B3197E8FE72D59924009 /* CullenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CullenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5B518722FBF49AD1A769283B /* DecisionsRemoveSuffixMigrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DecisionsRemoveSuffixMigrationTests.swift; sourceTree = "<group>"; };
+		8768C19EF152C6AA8C7A5DE3 /* FakeDecisionsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FakeDecisionsRepository.swift; sourceTree = "<group>"; };
+		8E8AD8F7CAE8E8D0F075EFD7 /* FakeDecisionsBackupRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FakeDecisionsBackupRepository.swift; sourceTree = "<group>"; };
+		8F0B1F362C4EDAEEFCC7E88B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		95124C022ABCC8C27782EF1B /* DecisionsBackupMigrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DecisionsBackupMigrationTests.swift; sourceTree = "<group>"; };
+		C0E91582E58EE6C0639B0612 /* FakePhotosetsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FakePhotosetsRepository.swift; sourceTree = "<group>"; };
+		C3ECAECC0277B2B389434D67 /* CullenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CullenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C5B2FFE787C5455D49999622 /* BackupDecisionsUseCaseTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupDecisionsUseCaseTests.swift; sourceTree = "<group>"; };
+		CEC27D64A9B16B47DF53F98E /* FakeDecisionsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FakeDecisionsRepository.swift; sourceTree = "<group>"; };
 		D0C3DE7B2EDD91AD0068307C /* Cullen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cullen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -47,6 +89,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A643D8523107E3E031893C1E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A13F95F38F5F9804426CFF07 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0C3DE782EDD91AD0068307C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -60,12 +110,45 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3EE01BEA0B433097A5DEF26D /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				8F0B1F362C4EDAEEFCC7E88B /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		4E903AD0648BC15262E16C70 /* CullenTests */ = {
+			isa = PBXGroup;
+			children = (
+				C5B2FFE787C5455D49999622 /* BackupDecisionsUseCaseTests.swift */,
+				95124C022ABCC8C27782EF1B /* DecisionsBackupMigrationTests.swift */,
+				5B518722FBF49AD1A769283B /* DecisionsRemoveSuffixMigrationTests.swift */,
+				8E8AD8F7CAE8E8D0F075EFD7 /* FakeDecisionsBackupRepository.swift */,
+				8768C19EF152C6AA8C7A5DE3 /* FakeDecisionsRepository.swift */,
+				C0E91582E58EE6C0639B0612 /* FakePhotosetsRepository.swift */,
+				367BD61BB79F8E17EEF3C5FC /* FileDecisionsBackupRepositoryTests.swift */,
+			);
+			name = CullenTests;
+			path = CullenTests;
+			sourceTree = "<group>";
+		};
+		51B102D0615A54E4930CBF8C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3EE01BEA0B433097A5DEF26D /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D0C3DE722EDD91AD0068307C = {
 			isa = PBXGroup;
 			children = (
 				D0C3DE7D2EDD91AD0068307C /* Cullen */,
 				179616E111B545BAAF873091 /* Cullen.xcconfig */,
 				D0C3DE7C2EDD91AD0068307C /* Products */,
+				51B102D0615A54E4930CBF8C /* Frameworks */,
+				4E903AD0648BC15262E16C70 /* CullenTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -73,6 +156,8 @@
 			isa = PBXGroup;
 			children = (
 				D0C3DE7B2EDD91AD0068307C /* Cullen.app */,
+				C3ECAECC0277B2B389434D67 /* CullenTests.xctest */,
+				3C09B3197E8FE72D59924009 /* CullenTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,6 +165,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		BB5AF38A5BB0CED8765A76BF /* CullenTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A5F41CBF72B46DAAD7FF76B /* Build configuration list for PBXNativeTarget "CullenTests" */;
+			buildPhases = (
+				19CD6907FD33B36D9B13FA80 /* Sources */,
+				A643D8523107E3E031893C1E /* Frameworks */,
+				B6630E039B4DF16F2B2DA685 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				89755DFFAC6653CF8BABCEF3 /* PBXTargetDependency */,
+			);
+			name = CullenTests;
+			productName = CullenTests;
+			productReference = 3C09B3197E8FE72D59924009 /* CullenTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D0C3DE7A2EDD91AD0068307C /* Cullen */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D0C3DE9C2EDD91AE0068307C /* Build configuration list for PBXNativeTarget "Cullen" */;
@@ -143,11 +246,19 @@
 			projectRoot = "";
 			targets = (
 				D0C3DE7A2EDD91AD0068307C /* Cullen */,
+				BB5AF38A5BB0CED8765A76BF /* CullenTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		B6630E039B4DF16F2B2DA685 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0C3DE792EDD91AD0068307C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -158,6 +269,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		47318FD150434678A41C5539 /* Sync JSON from local source */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Sync JSON from local source";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "\"$SRCROOT/Scripts/sync_json.sh\"\n";
+		};
 		D0091126301B45DA00A95907 /* Drop old provisions, reset build lifetime */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -176,23 +301,23 @@
 			shellPath = /bin/sh;
 			shellScript = "find \"${HOME}/Library/MobileDevice/Provisioning Profiles\" -name \"*.mobileprovision\" -delete\n";
 		};
-		47318FD150434678A41C5539 /* Sync JSON from local source */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Sync JSON from local source";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
-			shellScript = "\"$SRCROOT/Scripts/sync_json.sh\"\n";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		19CD6907FD33B36D9B13FA80 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4DE8902C229016905D53F3C /* BackupDecisionsUseCaseTests.swift in Sources */,
+				D32AA54CD9A6FE4357ABC10E /* DecisionsBackupMigrationTests.swift in Sources */,
+				5C86B00C7CC3DE514E334365 /* DecisionsRemoveSuffixMigrationTests.swift in Sources */,
+				C88C25163D2E7DEEC2B0A89D /* FakeDecisionsBackupRepository.swift in Sources */,
+				0098E3E873830D24B51E8484 /* FakeDecisionsRepository.swift in Sources */,
+				358D643F1361FE48294BFDE2 /* FakePhotosetsRepository.swift in Sources */,
+				227204028E8156DACCB52706 /* FileDecisionsBackupRepositoryTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0C3DE772EDD91AD0068307C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -202,7 +327,69 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		89755DFFAC6653CF8BABCEF3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Cullen;
+			target = D0C3DE7A2EDD91AD0068307C /* Cullen */;
+			targetProxy = 717CC9CDF7C5D771815813F6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		25449FCE5E492EFF2DED7853 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2T7P8BR7NV;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.CullenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cullen.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cullen";
+			};
+			name = Debug;
+		};
+		8A274764917EC6547F6DF2C7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2T7P8BR7NV;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.CullenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cullen.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cullen";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9842FFE0E111A777BCA969FA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2T7P8BR7NV;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.CullenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cullen.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cullen";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		D0C3DE9A2EDD91AE0068307C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -397,9 +584,35 @@
 			};
 			name = Release;
 		};
+		FEFF5B94FC527A19CD48EF79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2T7P8BR7NV;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.djachenko.ios.CullenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cullen.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cullen";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1A5F41CBF72B46DAAD7FF76B /* Build configuration list for PBXNativeTarget "CullenTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9842FFE0E111A777BCA969FA /* Release */,
+				25449FCE5E492EFF2DED7853 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D0C3DE762EDD91AD0068307C /* Build configuration list for PBXProject "Cullen" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
