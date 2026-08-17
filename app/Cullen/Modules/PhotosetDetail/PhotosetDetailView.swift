@@ -64,17 +64,21 @@ private extension PhotosetDetailView {
         Button {
             viewModel.didTapPrefetchButton()
         } label: {
-            switch viewModel.prefetchState {
-                case .notCached:
+            switch viewModel.syncState {
+                case .unknown:
+                    // Пустое кольцо утверждало бы «ничего не скачано», а мы
+                    // этого пока не знаем — приглушённая иконка не врёт.
                     Image(systemName: "arrow.down.circle")
                         .font(.system(size: 20))
-                case .partial(let ratio):
-                    CircularProgress(value: ratio, color: .yellow)
-                        .frame(width: 20, height: 20)
-                case .prefetching(let progress):
-                    CircularProgress(value: progress, color: .accentColor)
-                        .frame(width: 20, height: 20)
-                case .full:
+                        .foregroundStyle(.secondary)
+                case .online:
+                    Image(systemName: "arrow.down.circle")
+                        .font(.system(size: 20))
+                case .partial(let progress):
+                    circularProgress(progress, color: .blue)
+                case .downloading(let progress):
+                    circularProgress(progress, color: .yellow)
+                case .downloaded:
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 20))
                         .foregroundStyle(.green)
@@ -112,6 +116,11 @@ private extension PhotosetDetailView {
             Image(systemName: "square.grid.3x3")
                 .font(.system(size: 20))
         }
+    }
+
+    func circularProgress(_ progress: Double, color: Color) -> some View {
+        CircularProgress(value: progress, color: color)
+            .frame(width: 20, height: 20)
     }
 }
 
