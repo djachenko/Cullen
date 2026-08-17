@@ -48,6 +48,11 @@ struct PhotosetFeedView: View {
                 await viewModel.loadPhotosets()
             }
         }
+        // .task не перезапускается на pop — корень стека не пересоздаётся.
+        // На первом появлении state ещё .initial, и resort уходит в no-op.
+        .onAppear {
+            Task { await viewModel.resort() }
+        }
     }
 
     // MARK: - Content View
