@@ -1,5 +1,5 @@
 //
-//  DecisionsMigration.swift
+//  DecisionsRemoveSuffixMigration.swift
 //  Cullen
 //
 //  Created by justin on 28/3/26.
@@ -8,8 +8,8 @@
 import Foundation
 
 
-final class DecisionsUrlToNameIdMigration: Migration {
-    let key: String? = nil
+final class DecisionsRemoveSuffixMigration: Migration {
+    let key: String? = "decisions_remove_prefix_migration"
 
     private let decisionsRepository: DecisionsRepository
     private let photosetsRepository: PhotosetsRepository
@@ -32,18 +32,8 @@ final class DecisionsUrlToNameIdMigration: Migration {
                 continue
             }
 
-            let photoset = try await photosetsRepository.getPhotoset(id: photosetId)
-            var migrated = decisions
-
-            for photo in photoset.photos {
-                let oldKey = photo.url.lastPathComponent
-
-                guard let value = migrated[oldKey] else {
-                    continue
-                }
-
-                migrated.removeValue(forKey: oldKey)
-                migrated[photo.id] = value
+            let migrated = decisions.reduce(into: [:]) { acc, e in
+                acc[e.key.removing(suffix: ".jpg")] = e.value
             }
 
             guard migrated != decisions else {
