@@ -19,7 +19,7 @@ struct DecisionsRemoveSuffixMigrationTests {
             "ZSC_1691.jpg": .rejected,
             "ZSC_1692.jpg": .pending,
         ]
-        let repository = FakeDecisionsRepository(stored: [photosetId: decisions])
+        let repository = MockDecisionsRepository(stored: [photosetId: decisions])
 
         try await migration(decisions: repository).run()
 
@@ -32,7 +32,7 @@ struct DecisionsRemoveSuffixMigrationTests {
 
     @Test
     func skipsPhotosetWithoutDecisions() async throws {
-        let repository = FakeDecisionsRepository(stored: [photosetId: [:]])
+        let repository = MockDecisionsRepository(stored: [photosetId: [:]])
 
         try await migration(decisions: repository).run()
 
@@ -41,7 +41,7 @@ struct DecisionsRemoveSuffixMigrationTests {
 
     @Test
     func skipsAlreadyMigratedKeys() async throws {
-        let repository = FakeDecisionsRepository(stored: [photosetId: ["ZSC_1690": .approved]])
+        let repository = MockDecisionsRepository(stored: [photosetId: ["ZSC_1690": .approved]])
 
         try await migration(decisions: repository).run()
 
@@ -51,11 +51,11 @@ struct DecisionsRemoveSuffixMigrationTests {
     @Test
     func migratesEveryPhotosetInIndex() async throws {
         let other = PhotosetId.string("26.05.01.maevka")
-        let repository = FakeDecisionsRepository(stored: [
+        let repository = MockDecisionsRepository(stored: [
             photosetId: ["ZSC_1.jpg": .approved],
             other: ["ZSC_2.jpg": .rejected],
         ])
-        let photosets = FakePhotosetsRepository(photosets: [
+        let photosets = MockPhotosetsRepository(photosets: [
             .stub(id: "26.03.22.fen_init_lab", photos: []),
             .stub(id: "26.05.01.maevka", photos: []),
         ])
@@ -71,10 +71,10 @@ struct DecisionsRemoveSuffixMigrationTests {
 }
 
 private extension DecisionsRemoveSuffixMigrationTests {
-    func migration(decisions: FakeDecisionsRepository) -> DecisionsRemoveSuffixMigration {
+    func migration(decisions: MockDecisionsRepository) -> DecisionsRemoveSuffixMigration {
         DecisionsRemoveSuffixMigration(
             decisionsRepository: decisions,
-            photosetsRepository: FakePhotosetsRepository(
+            photosetsRepository: MockPhotosetsRepository(
                 photosets: [.stub(id: "26.03.22.fen_init_lab", photos: [])]
             )
         )

@@ -1,5 +1,5 @@
 //
-//  FakePhotosetsRepository.swift
+//  MockPhotosetsRepository.swift
 //  CullenTests
 //
 
@@ -7,7 +7,7 @@ import Foundation
 @testable import Cullen
 
 
-final class FakePhotosetsRepository: PhotosetsRepository {
+final class MockPhotosetsRepository: PhotosetsRepository {
     private let photosets: [PhotosetId: Photoset]
 
     init(photosets: [Photoset]) {

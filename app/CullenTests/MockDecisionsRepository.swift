@@ -1,5 +1,5 @@
 //
-//  FakeDecisionsRepository.swift
+//  MockDecisionsRepository.swift
 //  CullenTests
 //
 
@@ -7,7 +7,7 @@ import Foundation
 @testable import Cullen
 
 
-final class FakeDecisionsRepository: DecisionsRepository {
+final class MockDecisionsRepository: DecisionsRepository {
     private(set) var saves: [(photosetId: PhotosetId, decisions: [PhotoId: Decision])] = []
 
     var stored: [PhotosetId: [PhotoId: Decision]]

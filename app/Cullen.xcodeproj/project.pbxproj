@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		151C39CC2F929380CA5CB0D2 /* DecisionsRemoveSuffixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172F8F900CC81A0252723A39 /* DecisionsRemoveSuffixMigrationTests.swift */; };
-		47D6AAD384ABE22E94AD8125 /* FakeDecisionsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC27D64A9B16B47DF53F98E /* FakeDecisionsRepository.swift */; };
+		47D6AAD384ABE22E94AD8125 /* MockDecisionsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC27D64A9B16B47DF53F98E /* MockDecisionsRepository.swift */; };
 		4E0773422EB487C92497F397 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0B1F362C4EDAEEFCC7E88B /* Foundation.framework */; };
-		A30AFBCA869C7EAEF75759A1 /* FakePhotosetsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECEC022D05FF7299B840BF9 /* FakePhotosetsRepository.swift */; };
+		A30AFBCA869C7EAEF75759A1 /* MockPhotosetsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECEC022D05FF7299B840BF9 /* MockPhotosetsRepository.swift */; };
 		D002A4842F6DC9040053419C /* PopGestureRecognizerSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */; };
 		D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D055F2F22F66A1F900380F46 /* Kingfisher */; };
 		D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */ = {isa = PBXBuildFile; productRef = D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */; };
@@ -27,12 +27,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0ECEC022D05FF7299B840BF9 /* FakePhotosetsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FakePhotosetsRepository.swift; sourceTree = "<group>"; };
+		0ECEC022D05FF7299B840BF9 /* MockPhotosetsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPhotosetsRepository.swift; sourceTree = "<group>"; };
 		172F8F900CC81A0252723A39 /* DecisionsRemoveSuffixMigrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DecisionsRemoveSuffixMigrationTests.swift; sourceTree = "<group>"; };
 		179616E111B545BAAF873091 /* Cullen.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Cullen.xcconfig; sourceTree = "<group>"; };
 		8F0B1F362C4EDAEEFCC7E88B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		C3ECAECC0277B2B389434D67 /* CullenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CullenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEC27D64A9B16B47DF53F98E /* FakeDecisionsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FakeDecisionsRepository.swift; sourceTree = "<group>"; };
+		CEC27D64A9B16B47DF53F98E /* MockDecisionsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDecisionsRepository.swift; sourceTree = "<group>"; };
 		D0C3DE7B2EDD91AD0068307C /* Cullen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cullen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -107,8 +107,8 @@
 			isa = PBXGroup;
 			children = (
 				172F8F900CC81A0252723A39 /* DecisionsRemoveSuffixMigrationTests.swift */,
-				CEC27D64A9B16B47DF53F98E /* FakeDecisionsRepository.swift */,
-				0ECEC022D05FF7299B840BF9 /* FakePhotosetsRepository.swift */,
+				CEC27D64A9B16B47DF53F98E /* MockDecisionsRepository.swift */,
+				0ECEC022D05FF7299B840BF9 /* MockPhotosetsRepository.swift */,
 			);
 			name = CullenTests;
 			path = CullenTests;
@@ -281,8 +281,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				151C39CC2F929380CA5CB0D2 /* DecisionsRemoveSuffixMigrationTests.swift in Sources */,
-				47D6AAD384ABE22E94AD8125 /* FakeDecisionsRepository.swift in Sources */,
-				A30AFBCA869C7EAEF75759A1 /* FakePhotosetsRepository.swift in Sources */,
+				47D6AAD384ABE22E94AD8125 /* MockDecisionsRepository.swift in Sources */,
+				A30AFBCA869C7EAEF75759A1 /* MockPhotosetsRepository.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
