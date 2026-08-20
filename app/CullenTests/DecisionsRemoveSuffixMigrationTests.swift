@@ -9,30 +9,24 @@ import Testing
 
 
 struct DecisionsRemoveSuffixMigrationTests {
-    private let photosetId = PhotosetId.string("26.03.22.fen_init_lab")
-
     // Главный тест этой миграции: решения обязаны пережить переименование ключей.
     @Test
     func stripsSuffixKeepingEveryDecision() async throws {
-        let decisions: [PhotoId: Decision] = [
-            "ZSC_1690.jpg": .approved,
-            "ZSC_1691.jpg": .rejected,
-            "ZSC_1692.jpg": .pending,
+        let expected: [PhotoId: Decision] = [
+            Fixture.firstPhoto: .approved,
+            Fixture.secondPhoto: .rejected,
+            Fixture.thirdPhoto: .pending,
         ]
-        let repository = MockDecisionsRepository(stored: [photosetId: decisions])
+        let repository = MockDecisionsRepository(stored: [Fixture.photosetId: expected.withSuffixes])
 
         try await migration(decisions: repository).run()
 
-        #expect(try await repository.load(for: photosetId) == [
-            "ZSC_1690": .approved,
-            "ZSC_1691": .rejected,
-            "ZSC_1692": .pending,
-        ])
+        #expect(try await repository.load(for: Fixture.photosetId) == expected)
     }
 
     @Test
     func skipsPhotosetWithoutDecisions() async throws {
-        let repository = MockDecisionsRepository(stored: [photosetId: [:]])
+        let repository = MockDecisionsRepository(stored: [Fixture.photosetId: [:]])
 
         try await migration(decisions: repository).run()
 
@@ -41,7 +35,7 @@ struct DecisionsRemoveSuffixMigrationTests {
 
     @Test
     func skipsAlreadyMigratedKeys() async throws {
-        let repository = MockDecisionsRepository(stored: [photosetId: ["ZSC_1690": .approved]])
+        let repository = MockDecisionsRepository(stored: [Fixture.photosetId: [Fixture.firstPhoto: .approved]])
 
         try await migration(decisions: repository).run()
 
@@ -50,14 +44,15 @@ struct DecisionsRemoveSuffixMigrationTests {
 
     @Test
     func migratesEveryPhotosetInIndex() async throws {
-        let other = PhotosetId.string("26.05.01.maevka")
+        let expected: [PhotoId: Decision] = [Fixture.firstPhoto: .approved]
+        let otherExpected: [PhotoId: Decision] = [Fixture.secondPhoto: .rejected]
         let repository = MockDecisionsRepository(stored: [
-            photosetId: ["ZSC_1.jpg": .approved],
-            other: ["ZSC_2.jpg": .rejected],
+            Fixture.photosetId: expected.withSuffixes,
+            Fixture.otherPhotosetId: otherExpected.withSuffixes,
         ])
         let photosets = MockPhotosetsRepository(photosets: [
-            .stub(id: "26.03.22.fen_init_lab", photos: []),
-            .stub(id: "26.05.01.maevka", photos: []),
+            .stub(id: Fixture.photosetName, photos: []),
+            .stub(id: Fixture.otherPhotosetName, photos: []),
         ])
 
         try await DecisionsRemoveSuffixMigration(
@@ -65,8 +60,30 @@ struct DecisionsRemoveSuffixMigrationTests {
             photosetsRepository: photosets
         ).run()
 
-        #expect(try await repository.load(for: photosetId) == ["ZSC_1": .approved])
-        #expect(try await repository.load(for: other) == ["ZSC_2": .rejected])
+        #expect(try await repository.load(for: Fixture.photosetId) == expected)
+        #expect(try await repository.load(for: Fixture.otherPhotosetId) == otherExpected)
+    }
+}
+
+private enum Fixture {
+    static let suffix = ".jpg"
+
+    static let photosetName = "26.01.01.photoset_a"
+    static let otherPhotosetName = "26.01.02.photoset_b"
+
+    static let photosetId = PhotosetId.string(photosetName)
+    static let otherPhotosetId = PhotosetId.string(otherPhotosetName)
+
+    static let firstPhoto: PhotoId = "IMG_0001"
+    static let secondPhoto: PhotoId = "IMG_0002"
+    static let thirdPhoto: PhotoId = "IMG_0003"
+}
+
+private extension Dictionary where Key == PhotoId, Value == Decision {
+    // Состояние «до миграции» строится из ожидаемого, а не выписывается второй раз руками:
+    // разъехаться на опечатке в одной из двух копий уже нельзя.
+    var withSuffixes: Self {
+        Dictionary(uniqueKeysWithValues: map { ($0.key + Fixture.suffix, $0.value) })
     }
 }
 
@@ -75,7 +92,7 @@ private extension DecisionsRemoveSuffixMigrationTests {
         DecisionsRemoveSuffixMigration(
             decisionsRepository: decisions,
             photosetsRepository: MockPhotosetsRepository(
-                photosets: [.stub(id: "26.03.22.fen_init_lab", photos: [])]
+                photosets: [.stub(id: Fixture.photosetName, photos: [])]
             )
         )
     }
