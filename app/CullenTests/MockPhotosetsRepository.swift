@@ -15,7 +15,7 @@ final class MockPhotosetsRepository: PhotosetsRepository {
     }
 
     func getPhotosetIds() async throws -> [PhotosetId] {
-        photosets.keys.sorted { "\($0)" < "\($1)" }
+        photosets.keys.sorted(by: \.description)
     }
 
     func getPhotoset(id: PhotosetId) async throws -> Photoset {

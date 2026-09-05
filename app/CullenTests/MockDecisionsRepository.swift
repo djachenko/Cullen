@@ -10,7 +10,7 @@ import Foundation
 final class MockDecisionsRepository: DecisionsRepository {
     private(set) var saves: [(photosetId: PhotosetId, decisions: [PhotoId: Decision])] = []
 
-    var stored: [PhotosetId: [PhotoId: Decision]]
+    private(set) var stored: [PhotosetId: [PhotoId: Decision]]
 
     init(stored: [PhotosetId: [PhotoId: Decision]] = [:]) {
         self.stored = stored
