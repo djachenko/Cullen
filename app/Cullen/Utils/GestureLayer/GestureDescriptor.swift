@@ -38,14 +38,14 @@ enum PanFilter {
 struct GesturePan: GestureDescriptor {
     var filter: PanFilter
     var when: () -> Bool
-    var onChanged: (CGFloat) -> Void
-    var onEnded: (CGFloat, CGFloat) -> Void
+    var onChanged: (CGPoint) -> Void
+    var onEnded: (CGPoint, CGPoint) -> Void
 
     init(
         filter: PanFilter = .any,
         when: @escaping () -> Bool = { true },
-        onChanged: @escaping (CGFloat) -> Void = { _ in },
-        onEnded: @escaping (CGFloat, CGFloat) -> Void = { _, _ in }
+        onChanged: @escaping (CGPoint) -> Void = { _ in },
+        onEnded: @escaping (CGPoint, CGPoint) -> Void = { _, _ in }
     ) {
         self.filter = filter
         self.when = when
