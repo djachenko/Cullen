@@ -24,9 +24,9 @@ final class SystemAssembly: Assembly {
             .standard
         }.inObjectScope(.weak)
 
-        container.register(ImageCache.self) { _ in
-            .default
-        }.inObjectScope(.weak)
+        container.register(CullenImageCache.self) { _ in
+            .shared
+        }.inObjectScope(.container)
 
         container.register(UNUserNotificationCenter.self) { _ in
             .current()

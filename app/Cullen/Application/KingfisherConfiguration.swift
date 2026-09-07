@@ -21,7 +21,12 @@ enum KingfisherConfiguration {
             .transition(.fade(0.15)),
         ]
 
-        ImageCache.default.diskStorage.config.expiration = .days(30)
-        ImageCache.default.diskStorage.config.sizeLimit = 16 * 1024 * 1024 * 1024
+        // Displayed images must land in our cache too — that's how casual
+        // scrolling feeds the same progress as an explicit sync.
+        let cache = CullenImageCache.shared
+        KingfisherManager.shared.cache = cache
+
+        cache.diskStorage.config.expiration = .days(30)
+        cache.diskStorage.config.sizeLimit = 16 * 1024 * 1024 * 1024
     }
 }

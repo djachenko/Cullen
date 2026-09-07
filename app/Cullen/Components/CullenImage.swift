@@ -9,6 +9,9 @@ import SwiftUI
 import Kingfisher
 
 
+// No cache reporting here on purpose: CullenImageCache announces every write
+// itself. Hooking .onSuccess would be silently clobbered by any call site
+// that sets its own — which is exactly what happened before.
 @MainActor
 func CullenImage(_ url: URL?) -> KFImage {
     KFImage(url)

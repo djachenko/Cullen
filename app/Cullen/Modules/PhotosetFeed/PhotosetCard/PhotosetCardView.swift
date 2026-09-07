@@ -30,8 +30,14 @@ struct PhotosetCardView: View {
         .task {
             await viewModel.load()
         }
+        .task {
+            await viewModel.prepareSync()
+        }
         .onTapGesture {
             viewModel.didTap()
+        }
+        .onLongPressGesture(minimumDuration: 0.4) {
+            viewModel.didLongPress()
         }
     }
 }
@@ -113,5 +119,33 @@ extension PhotosetCardView {
             .aspectRatio(contentMode: .fill)
             .frame(height: 200)
             .clipped()
+            .overlay(alignment: .bottom) {
+                cacheSyncIndicator
+            }
+            .overlay(alignment: .topTrailing) {
+                cacheSyncedBadge
+            }
+    }
+
+    @ViewBuilder
+    private var cacheSyncIndicator: some View {
+        if let progress = viewModel.syncUseCase.progress, progress > 0, progress < 1 {
+            GeometryReader { geometry in
+                Rectangle()
+                    .fill(viewModel.syncUseCase.isSyncing ? Color.accentColor : Color.secondary)
+                    .frame(width: geometry.size.width * progress)
+            }
+            .frame(height: 3)
+        }
+    }
+
+    @ViewBuilder
+    private var cacheSyncedBadge: some View {
+        if viewModel.syncUseCase.progress == 1 {
+            Image(systemName: "arrow.down.circle.fill")
+                .font(.system(size: 18))
+                .foregroundStyle(.white, .green)
+                .padding(8)
+        }
     }
 }

@@ -18,7 +18,6 @@ final class UseCasesAssembly: Assembly {
         container.autoregister(GetPhotosetStatisticsUseCase.self, initializer: GetPhotosetStatisticsUseCaseImpl.init)
         container.autoregister(FetchPhotosUseCase.self, initializer: FetchPhotosUseCaseImpl.init)
         container.autoregister(ExportDecisionsUseCase.self, initializer: ExportDecisionsUseCaseImpl.init)
-        container.autoregister(CacheUseCase.self, initializer: CacheUseCaseImpl.init)
         container.autoregister(DecisionsStatsUseCase.self, initializer: DecisionsStatsUseCaseImpl.init)
         container.autoregister(ExportLogsUseCase.self, initializer: ExportLogsUseCaseImpl.init)
 
@@ -26,5 +25,15 @@ final class UseCasesAssembly: Assembly {
             .inObjectScope(.container) // shared state: decisions cache is shared across screens
             .implements(SaveDecisionUseCase.self)
             .implements(LoadDecisionsUseCase.self)
+
+        container.register(PhotosetSyncRegistry.self) { resolver in
+            PhotosetSyncRegistry(
+                downloadService: resolver ~> ImageDownloadService.self,
+                cacheService: resolver ~> ImageCacheService.self,
+                photosetsRepository: resolver ~> PhotosetsRepository.self,
+                desiredStore: resolver ~> DesiredSyncStore.self
+            )
+        }
+        .inObjectScope(.container) // one shared sync use case per photoset, kept alive here
     }
 }
