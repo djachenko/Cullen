@@ -55,7 +55,7 @@ VK API использует int для photo ID. Одновременно с T-0
 
 ### Удалить `__trash/`
 
-Папка `app/Cullen/__trash/` — старый код коллапсируемого хедера. Удалить. Git history сохранит: `git log --all --full-history -- '**/BottomBar.swift'`.
+Папка `Cullen/__trash/` — старый код коллапсируемого хедера. Удалить. Git history сохранит: `git log --all --full-history -- '**/BottomBar.swift'`.
 
 ### Закомментированный код к удалению
 
