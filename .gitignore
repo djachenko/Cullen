@@ -8,8 +8,6 @@ Cullen.xcodeproj/project.xcworkspace/xcuserdata/
 Cullen/Resources/photosets/
 app/Cullen/Resources/photosets/
 
-CLI/.idea/
-
 .claude/worktrees/
 .claude/settings.local.json
 
@@ -17,12 +15,6 @@ _claude
 CLAUDE.local.md
 memory/
 
-cli_/.idea/
-
-cli/src/cullen/__pycache__/
-cli/build/
-cli/src/cullen.egg-info/
-cli/.venv/
 .pytest_cache/
 __pycache__/
 
