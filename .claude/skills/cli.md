@@ -1,57 +1,31 @@
 ---
-description: Apply when working on the Python CLI companion tool in the cli/ directory
+description: Apply when the task touches the Python CLI companion, culled.json, or how decisions get applied to files on disk
 ---
 
-# Python CLI (cullen.py)
+# Python CLI (cullen-cli)
 
-Расположение: `CLI/src/cullen/cullen.py`  
-Запуск: `python cullen.py [path] [file_name]`
+CLI живёт в отдельном репозитории: https://github.com/djachenko/cullen-cli (`~/projects/cullen-cli`). Здесь — только контракт между приложением и утилитой.
 
-## Что делает
+## Контракт: `culled.json`
 
-Читает `cullen.json` из папки фотосета и раскладывает файлы по папкам по решениям.
-
-**Алгоритм**:
-1. Сначала поднимает все файлы из подпапок решений обратно в корень (`move_up`)
-2. Затем раскладывает файлы по папкам согласно маппингу из `cullen.json` (`move_down`)
-
-## Аргументы
-
-```bash
-python cullen.py [path] [file_name]
-# path     — путь к папке фотосета (по умолчанию: cwd)
-# file_name — имя JSON-файла с решениями (по умолчанию: cullen.json)
-```
-
-## Формат cullen.json
+Приложение экспортирует, CLI читает. Лежит в корне фотосета.
 
 ```json
 {
+  "name": "26.03.22.fen_init_lab",
   "decisions": {
-    "approved": ["DSC_0001", "DSC_0003.jpg"],
-    "rejected": ["DSC_0002", "DSC_0005.jpg"]
+    "good": ["ZSC_2541", "ZSC_2542"],
+    "bad": ["ZSC_2543"]
   }
 }
 ```
 
-Суффикс `.jpg` у стемов опциональный — `removesuffix(".jpg")` применяется при маппинге.
+Категории — произвольные ключи, значения — стемы файлов. Пишет `ExportDecisionsUseCase`. Изменение формата — правка в обоих репо.
 
-## Зависимости
+## Команды
 
-- `typer` — CLI фреймворк
-- `justin_utils` — внешняя библиотека с `Exif`, `parse_exif` (используется в `sources.py`)
-
-## sources.py
-
-Вспомогательный модуль для работы с файлами-источниками (пока не подключён к основному CLI):
-
-- `InternalMetadataSource` — JPEG, TIFF, DNG, HEIC (метаданные внутри файла)
-- `ExternalMetadataSource` — RAW + XMP (NEF, RAF, ARW + sidecar)
-- `parse_sources(seq)` — парсит список файлов в список Source-объектов
-
-## Планируемые улучшения (из backlog)
-
-- Матчинг по имени файла (основной режим) — текущий
-- Матчинг по индексу — для VK где имена файлов потеряны
-- `--dry-run` режим — показывает что будет сделано без реального перемещения
-- Перемещение в `approved/` и `rejected/` (сейчас имя папки берётся из ключей JSON)
+```
+cullen cull [PATHS...] [--file culled.json]   # разложить сорсы по папкам-категориям
+cullen flop PATH [FILE] [--dry-run]           # поднять папки-категории обратно
+cullen relocate PATH [ROOT]                   # найти экспортированные json и разнести по фотосетам
+```
