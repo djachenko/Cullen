@@ -20,6 +20,11 @@ memory/
 cli_/.idea/
 
 cli/src/cullen/__pycache__/
+cli/build/
+cli/src/cullen.egg-info/
+cli/.venv/
+.pytest_cache/
+__pycache__/
 
 *.xcbkptlist
 
