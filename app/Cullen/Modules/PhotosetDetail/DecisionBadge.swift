@@ -33,6 +33,6 @@ struct DecisionBadge: View {
 
 extension DecisionBadge {
     init(decision: Decision) {
-        self.init(icon: decision.icon, color: decision.color)
+        self.init(icon: decision.presentation.icon, color: decision.presentation.color)
     }
 }
