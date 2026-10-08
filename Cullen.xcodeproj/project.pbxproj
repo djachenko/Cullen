@@ -253,7 +253,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "\"$SRCROOT/Scripts/sync_json.sh\"\n";
+			shellScript = "\"$SRCROOT/scripts/sync_json.sh\"\n";
 		};
 		D0091126301B45DA00A95907 /* Drop old provisions, reset build lifetime */ = {
 			isa = PBXShellScriptBuildPhase;

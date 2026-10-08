@@ -1,12 +1,11 @@
 
-app/build/
+build/
 
 Cullen.xcodeproj/xcuserdata/
 
 Cullen.xcodeproj/project.xcworkspace/xcuserdata/
 
 Cullen/Resources/photosets/
-app/Cullen/Resources/photosets/
 
 .claude/worktrees/
 .claude/settings.local.json
