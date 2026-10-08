@@ -172,7 +172,7 @@ Presentation → Domain ← Data
 - `/prefetch` — PrefetchManager, оффлайн-кэш, стратегии разрешения
 
 ### Инфраструктура
-- `/cli` — Python CLI: cullen.py, формат данных, sources.py
+- `/cli` — Python CLI: живёт в `djachenko/cullen-cli`, здесь только контракт `culled.json`
 - `/spm` — план SPM-пакетов (CullenUI, SwiftFoundationExtensions, CullenDesignSystem)
 - `/distribution` — AltStore, индикатор срока подписи
 - `/git` — GitHub Flow, именование веток, semantic commits, merge-соглашения
