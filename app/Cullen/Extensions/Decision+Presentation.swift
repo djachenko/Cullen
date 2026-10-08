@@ -6,48 +6,45 @@
 import SwiftUI
 
 
+struct DecisionPresentation {
+    let icon: String
+    let color: Color
+    let title: String
+    let label: String
+}
+
+extension DecisionPresentation {
+    static let approved = DecisionPresentation(
+        icon: "checkmark.circle.fill",
+        color: .green,
+        title: "Approved",
+        label: "Approve"
+    )
+
+    static let rejected = DecisionPresentation(
+        icon: "xmark.circle.fill",
+        color: .red,
+        title: "Rejected",
+        label: "Reject"
+    )
+
+    static let pending = DecisionPresentation(
+        icon: "circle.dotted",
+        color: .secondary,
+        title: "Pending",
+        label: ""
+    )
+}
+
 extension Decision {
-    var icon: String {
+    var presentation: DecisionPresentation {
         switch self {
         case .approved:
-            "checkmark.circle.fill"
+            .approved
         case .rejected:
-            "xmark.circle.fill"
+            .rejected
         case .pending:
-            "circle.dotted"
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .approved:
-            .green
-        case .rejected:
-            .red
-        case .pending:
-            .secondary
-        }
-    }
-
-    var title: String {
-        switch self {
-        case .approved:
-            "Approved"
-        case .rejected:
-            "Rejected"
-        case .pending:
-            "Pending"
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .approved:
-            "Approve"
-        case .rejected:
-            "Reject"
-        case .pending:
-            ""
+            .pending
         }
     }
 }

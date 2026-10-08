@@ -18,7 +18,7 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published var scrollTarget: PhotoId? = nil
     @Published var prefetchState: PhotosetDetailPrefetchState = .notCached
 
-    @Published var filter: Set<Decision> = Set(Decision.allCases) {
+    @Published var filterStates: Set<Decision> = Set(Decision.allCases) {
         didSet {
             guard case .content = state else {
                 return
@@ -200,11 +200,31 @@ extension PhotosetDetailViewModel {
     }
 }
 
+// MARK: Filter picker
+
+extension PhotosetDetailViewModel {
+    var filterPickerViewModel: MultiSegmentPickerViewModel {
+        MultiSegmentPickerViewModel(
+            segments: Decision.allCases.map { decision in
+                SegmentViewModel(
+                    title: decision.presentation.title,
+                    icon: decision.presentation.icon,
+                    color: decision.presentation.color,
+                    isSelected: filterStates.contains(decision),
+                    onTap: { [weak self] in
+                        self?.filterStates.formSymmetricDifference([decision])
+                    }
+                )
+            }
+        )
+    }
+}
+
 // MARK: Building content
 
 private extension PhotosetDetailViewModel {
     var filteredPhotos: [Photo] {
-        photos.filter { filter.contains(decisions[$0.id] ?? .pending) }
+        photos.filter { filterStates.contains(decisions[$0.id] ?? .pending) }
     }
 
     func makeContent() -> PhotosetDetailContent {
