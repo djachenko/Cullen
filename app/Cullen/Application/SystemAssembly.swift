@@ -24,9 +24,12 @@ final class SystemAssembly: Assembly {
             .standard
         }.inObjectScope(.weak)
 
-        container.register(ImageCache.self) { _ in
-            .default
-        }.inObjectScope(.weak)
+        container.register(CullenImageCache.self) { _ in
+            // Same name as ImageCache.default — keeps pointing at the existing cache directory.
+            CullenImageCache(name: "default")
+        }
+        .inObjectScope(.container)
+        .implements(ImageCache.self)
 
         container.register(UNUserNotificationCenter.self) { _ in
             .current()

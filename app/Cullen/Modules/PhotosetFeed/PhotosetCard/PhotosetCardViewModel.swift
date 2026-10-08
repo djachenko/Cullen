@@ -32,8 +32,18 @@ final class PhotosetCardViewModel: ObservableObject {
 
     @Published var state: State = .loading
 
+
     let id: PhotosetId
 
+    var progress: Double {
+        syncUseCase.progress ?? 0
+    }
+
+    var isSyncing: Bool {
+        syncUseCase.isSyncing
+    }
+
+    private let syncUseCase: PhotosetSyncUseCase
     private let fetchPhotosetUseCase: FetchPhotosetUseCase
     private let decisionsStatsUseCase: DecisionsStatsUseCase
     private let coordinator: Coordinator
@@ -42,11 +52,13 @@ final class PhotosetCardViewModel: ObservableObject {
         id: PhotosetId,
         fetchPhotosetUseCase: FetchPhotosetUseCase,
         decisionsStatsUseCase: DecisionsStatsUseCase,
+        syncUseCase: PhotosetSyncUseCase,
         coordinator: Coordinator
     ) {
         self.id = id
         self.fetchPhotosetUseCase = fetchPhotosetUseCase
         self.decisionsStatsUseCase = decisionsStatsUseCase
+        self.syncUseCase = syncUseCase
         self.coordinator = coordinator
     }
 
@@ -83,5 +95,15 @@ final class PhotosetCardViewModel: ObservableObject {
 
     func didTap() {
         coordinator.show(.photosetDetail(id))
+    }
+
+    func didLongPress() {
+        Task {
+            await syncUseCase.startOfflineSync()
+        }
+    }
+
+    func prepareSync() async {
+        await syncUseCase.loadCacheState()
     }
 }
