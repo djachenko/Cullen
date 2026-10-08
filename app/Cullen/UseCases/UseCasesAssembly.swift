@@ -35,6 +35,13 @@ final class UseCasesAssembly: Assembly {
         container.register(PhotosetSyncUseCase.self) { resolver in
             self.sync(for: resolver ~> PhotosetId.self, resolver: resolver)
         }
+
+        container.register(ResumeOfflineSyncUseCase.self) { resolver in
+            ResumeOfflineSyncUseCaseImpl(
+                desiredStore: resolver ~> DesiredSyncStore.self,
+                syncProvider: { self.sync(for: $0, resolver: resolver) }
+            )
+        }
     }
 }
 

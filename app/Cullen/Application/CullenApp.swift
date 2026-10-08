@@ -23,6 +23,7 @@ struct Cullen: App {
             // Резолв, а не вызов: сервис в init подписывается на записи кэша,
             // и без этого до первого открытого фотосета их никто не слышит.
             _ = Cullen.resolver ~> ImageCacheService.self
+            await (Cullen.resolver ~> ResumeOfflineSyncUseCase.self).execute()
         }
     }
 
