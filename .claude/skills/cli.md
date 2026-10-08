@@ -4,7 +4,7 @@ description: Apply when the task touches the Python CLI companion, culled.json, 
 
 # Python CLI (cullen-cli)
 
-CLI живёт в отдельном репозитории: https://github.com/djachenko/cullen-cli (`~/projects/cullen-cli`). Здесь — только контракт между приложением и утилитой.
+CLI живёт в отдельном репозитории: https://github.com/djachenko/cullen-cli (`~/projects/cullen-cli`, команды — `cullen-cli/README.md`). Здесь — только контракт между приложением и утилитой.
 
 ## Контракт: `culled.json`
 
@@ -20,12 +20,6 @@ CLI живёт в отдельном репозитории: https://github.com/
 }
 ```
 
-Категории — произвольные ключи, значения — стемы файлов. Пишет `ExportDecisionsUseCase`. Изменение формата — правка в обоих репо.
+Категории — произвольные ключи, значения — стемы файлов **без расширения** (`entry.name` из индекса). Пишет `ExportDecisionsUseCase`. Изменение формата — правка в обоих репо.
 
-## Команды
-
-```
-cullen cull [PATHS...] [--file culled.json]   # разложить сорсы по папкам-категориям
-cullen flop PATH [FILE] [--dry-run]           # поднять папки-категории обратно
-cullen relocate PATH [ROOT]                   # найти экспортированные json и разнести по фотосетам
-```
+**`name` — это `String(describing: photosetId)`, не `photoset.name`.** Совпадают, пока `JsonPhotosRepository` отдаёт `.string(filename)`; источник с `.int`/`.uuid` сломает `cullen relocate`. Открытый риск, известен обеим сторонам.
