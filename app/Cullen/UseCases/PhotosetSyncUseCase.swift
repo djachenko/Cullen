@@ -96,6 +96,7 @@ final class PhotosetSyncUseCaseImpl {
     private let eventSource: SyncEventSource
     private let photosetsRepository: PhotosetsRepository
     private let desiredStore: DesiredSyncStore
+    private let cachedRatioStore: CachedRatioStore
 
     // Единственная точка записи публичных свойств — рассинхрону взяться неоткуда.
     @ObservationIgnored private var state = PhotosetSyncState() {
@@ -114,7 +115,8 @@ final class PhotosetSyncUseCaseImpl {
         cacheService: ImageCacheService,
         eventSource: SyncEventSource,
         photosetsRepository: PhotosetsRepository,
-        desiredStore: DesiredSyncStore
+        desiredStore: DesiredSyncStore,
+        cachedRatioStore: CachedRatioStore
     ) {
         self.photosetId = photosetId
         self.downloadService = downloadService
@@ -122,6 +124,7 @@ final class PhotosetSyncUseCaseImpl {
         self.eventSource = eventSource
         self.photosetsRepository = photosetsRepository
         self.desiredStore = desiredStore
+        self.cachedRatioStore = cachedRatioStore
     }
 }
 
@@ -129,9 +132,11 @@ final class PhotosetSyncUseCaseImpl {
 // MARK: Commands
 
 extension PhotosetSyncUseCaseImpl: PhotosetSyncUseCase {
-    // Resolve the baseline and start observing without committing to anything.
-    // Cheap to call repeatedly; progress stays nil until it lands.
+    // Show the persisted ratio immediately, then resolve the real baseline off
+    // the main thread. Cheap to call repeatedly; the persisted value gives the
+    // UI something to show before the disk scan lands.
     func loadCacheState() async {
+        await restoreRatio()
         await load()
     }
 
@@ -163,6 +168,7 @@ extension PhotosetSyncUseCaseImpl: PhotosetSyncUseCase {
         await cacheService.removeFromCache(urls: state.photos.urls)
 
         state.photos = PhotoStatusMap(urls: state.photos.urls)
+        await dropRatio()
     }
 
     // Ephemeral by design: a boost belongs to the scroll position, not to the
@@ -229,7 +235,14 @@ private extension PhotosetSyncUseCaseImpl {
         // a fresh commitment and reconcile picks the download back up.
         await reconcile(from: old)
     }
+}
 
+
+// MARK: Cache events
+
+// Факт: что реально лежит на диске. Источник правды — кэш, а не наши загрузки,
+// поэтому статусы приезжают из общего потока и правятся только отсюда.
+private extension PhotosetSyncUseCaseImpl {
     func observe() {
         observeTask = observeTask ?? Task { [weak self] in
             guard let stream = await self?.eventSource.events() else {
@@ -267,19 +280,32 @@ private extension PhotosetSyncUseCaseImpl {
 }
 
 
-// MARK: Effects
+// MARK: Publishing
 
+// Зеркалирование состояния в @Observable-свойства. Единственное место, где
+// пишутся публичные поля.
 private extension PhotosetSyncUseCaseImpl {
     func publish() {
         if progress != state.progress {
             progress = state.progress
+
+            if let ratio = state.progress {
+                persistRatio(ratio)
+            }
         }
 
         if isSyncing != state.isSyncing {
             isSyncing = state.isSyncing
         }
     }
+}
 
+
+// MARK: Intent
+
+// Намерение: чего хочет пользователь. Живёт дольше запуска приложения, отсюда
+// персист, и только отсюда трогается движок загрузок.
+private extension PhotosetSyncUseCaseImpl {
     // Diffs the intent, not the resulting set: the comparisons are scalar, and
     // the O(n) pending list is only built on the branches that actually need it.
     // Everything that has to happen when the commitment changes happens here —
@@ -304,5 +330,30 @@ private extension PhotosetSyncUseCaseImpl {
             default:
                 break
         }
+    }
+}
+
+
+// MARK: Ratio persistence
+
+// Кэш производного значения, а не состояние: нужен только чтобы UI показал долю
+// до того, как приземлится скан диска. Ни на что здесь не влияет.
+private extension PhotosetSyncUseCaseImpl {
+    func restoreRatio() async {
+        if progress == nil, let persisted = await cachedRatioStore.ratio(for: photosetId) {
+            progress = persisted
+        }
+    }
+
+    func persistRatio(_ ratio: Double) {
+        Task { [weak self] in
+            guard let self else { return }
+
+            await cachedRatioStore.store(ratio: ratio, for: photosetId)
+        }
+    }
+
+    func dropRatio() async {
+        await cachedRatioStore.remove(for: photosetId)
     }
 }
