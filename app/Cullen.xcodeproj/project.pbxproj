@@ -10,7 +10,10 @@
 		151C39CC2F929380CA5CB0D2 /* DecisionsRemoveSuffixMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 172F8F900CC81A0252723A39 /* DecisionsRemoveSuffixMigrationTests.swift */; };
 		47D6AAD384ABE22E94AD8125 /* MockDecisionsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC27D64A9B16B47DF53F98E /* MockDecisionsRepository.swift */; };
 		4E0773422EB487C92497F397 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0B1F362C4EDAEEFCC7E88B /* Foundation.framework */; };
+		6E4AFA99C8989DA8F7EB9E0C /* DecisionsCodableFormatFalloutMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350ACE3BF36CB2B0B5164921 /* DecisionsCodableFormatFalloutMigrationTests.swift */; };
+		8ADB037A0D9A1F0BABA3EBA5 /* MigrationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E500D9F1ADDCF3025226D8 /* MigrationServiceTests.swift */; };
 		A30AFBCA869C7EAEF75759A1 /* MockPhotosetsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECEC022D05FF7299B840BF9 /* MockPhotosetsRepository.swift */; };
+		CF37CA5A8EF6F3CB1A4DAEDB /* DecisionsUrlToNameIdMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27F893A5811734A4A05AA16 /* DecisionsUrlToNameIdMigrationTests.swift */; };
 		D002A4842F6DC9040053419C /* PopGestureRecognizerSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = D002A4832F6DC9040053419C /* PopGestureRecognizerSwiftUI */; };
 		D055F2F32F66A1F900380F46 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = D055F2F22F66A1F900380F46 /* Kingfisher */; };
 		D0999ED62F4645E100D352C3 /* SwinjectAutoregistration in Frameworks */ = {isa = PBXBuildFile; productRef = D0999ED52F4645E100D352C3 /* SwinjectAutoregistration */; };
@@ -30,7 +33,10 @@
 		0ECEC022D05FF7299B840BF9 /* MockPhotosetsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockPhotosetsRepository.swift; sourceTree = "<group>"; };
 		172F8F900CC81A0252723A39 /* DecisionsRemoveSuffixMigrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DecisionsRemoveSuffixMigrationTests.swift; sourceTree = "<group>"; };
 		179616E111B545BAAF873091 /* Cullen.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Cullen.xcconfig; sourceTree = "<group>"; };
+		350ACE3BF36CB2B0B5164921 /* DecisionsCodableFormatFalloutMigrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DecisionsCodableFormatFalloutMigrationTests.swift; sourceTree = "<group>"; };
+		66E500D9F1ADDCF3025226D8 /* MigrationServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MigrationServiceTests.swift; sourceTree = "<group>"; };
 		8F0B1F362C4EDAEEFCC7E88B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		B27F893A5811734A4A05AA16 /* DecisionsUrlToNameIdMigrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DecisionsUrlToNameIdMigrationTests.swift; sourceTree = "<group>"; };
 		C3ECAECC0277B2B389434D67 /* CullenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CullenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEC27D64A9B16B47DF53F98E /* MockDecisionsRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MockDecisionsRepository.swift; sourceTree = "<group>"; };
 		D0C3DE7B2EDD91AD0068307C /* Cullen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cullen.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +115,9 @@
 				172F8F900CC81A0252723A39 /* DecisionsRemoveSuffixMigrationTests.swift */,
 				CEC27D64A9B16B47DF53F98E /* MockDecisionsRepository.swift */,
 				0ECEC022D05FF7299B840BF9 /* MockPhotosetsRepository.swift */,
+				350ACE3BF36CB2B0B5164921 /* DecisionsCodableFormatFalloutMigrationTests.swift */,
+				B27F893A5811734A4A05AA16 /* DecisionsUrlToNameIdMigrationTests.swift */,
+				66E500D9F1ADDCF3025226D8 /* MigrationServiceTests.swift */,
 			);
 			name = CullenTests;
 			path = CullenTests;
@@ -283,6 +292,9 @@
 				151C39CC2F929380CA5CB0D2 /* DecisionsRemoveSuffixMigrationTests.swift in Sources */,
 				47D6AAD384ABE22E94AD8125 /* MockDecisionsRepository.swift in Sources */,
 				A30AFBCA869C7EAEF75759A1 /* MockPhotosetsRepository.swift in Sources */,
+				6E4AFA99C8989DA8F7EB9E0C /* DecisionsCodableFormatFalloutMigrationTests.swift in Sources */,
+				CF37CA5A8EF6F3CB1A4DAEDB /* DecisionsUrlToNameIdMigrationTests.swift in Sources */,
+				8ADB037A0D9A1F0BABA3EBA5 /* MigrationServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
