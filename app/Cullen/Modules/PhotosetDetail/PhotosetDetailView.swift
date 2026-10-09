@@ -129,13 +129,26 @@ extension PhotosetDetailView {
         .padding(.top, 80)
     }
 
-    @ViewBuilder
     private func contentView(content: PhotosetDetailContent) -> some View {
-        if content.isEmpty {
-            emptyView
-        } else {
-            grid(photos: content)
+        VStack(spacing: 0) {
+            // Пикер живёт вне ветки isEmpty: пустая выборка — валидное состояние фильтра,
+            // и снять его можно только через сам пикер.
+            filterPicker
+
+            if content.isEmpty {
+                emptyView
+
+                Spacer()
+            } else {
+                grid(photos: content)
+            }
         }
+    }
+
+    private var filterPicker: some View {
+        MultiSegmentPickerView(viewModel: viewModel.filterPickerViewModel)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
     }
 
     private func grid(photos: [PhotoGridCellViewModel]) -> some View {
