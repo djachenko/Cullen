@@ -25,6 +25,10 @@ final class SystemAssembly: Assembly {
             .standard
         }.inObjectScope(.weak)
 
+        container.register(KingfisherManager.self) { _ in
+            .shared
+        }.inObjectScope(.weak)
+
         container.register(CullenImageCache.self) { _ in
             // Same name as ImageCache.default — keeps pointing at the existing cache directory.
             CullenImageCache(name: "default")

@@ -23,6 +23,13 @@ private struct UrlDescriptor {
 }
 
 
+private struct Limits {
+    // Совпадает с KingfisherConfiguration.httpMaximumConnectionsPerHost.
+    let maxInFlight = 4
+    let maxAttempts = 3
+}
+
+
 // Актор здесь по делу: очередь и дескрипторы правятся и снаружи (с главного
 // актора), и из завершений загрузок. Очередь знает, что ждёт и с каким
 // приоритетом; дескрипторы — текущую загрузку и число попыток.
@@ -30,8 +37,7 @@ actor ImageDownloadServiceImpl {
     private let manager: KingfisherManager
     private let cacheService: any ImageCacheService
     private let publisher: any SyncEventPublisher
-    private let maxInFlight: Int
-    private let maxAttempts: Int
+    private let limits = Limits()
 
     private var queue = PriorityQueue()
     private var descriptions: [URL: UrlDescriptor] = [:]
@@ -40,15 +46,11 @@ actor ImageDownloadServiceImpl {
     init(
         manager: KingfisherManager,
         cacheService: any ImageCacheService,
-        publisher: any SyncEventPublisher,
-        maxInFlight: Int = 4,
-        maxAttempts: Int = 3
+        publisher: any SyncEventPublisher
     ) {
         self.manager = manager
         self.cacheService = cacheService
         self.publisher = publisher
-        self.maxInFlight = maxInFlight
-        self.maxAttempts = maxAttempts
     }
 }
 
@@ -117,7 +119,7 @@ private extension ImageDownloadServiceImpl {
 
 private extension ImageDownloadServiceImpl {
     func pump() {
-        while inFlight < maxInFlight,
+        while inFlight < limits.maxInFlight,
               let url = next() {
             start(url)
         }
@@ -161,7 +163,7 @@ private extension ImageDownloadServiceImpl {
         descriptions[url]?.task = nil
         descriptions[url]?.attempts += 1
 
-        if (descriptions[url]?.attempts ?? 0) < maxAttempts,
+        if (descriptions[url]?.attempts ?? 0) < limits.maxAttempts,
            let priority = descriptions[url]?.priority {
             queue.enqueue(url, priority: priority)
         } else {
