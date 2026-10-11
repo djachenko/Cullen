@@ -24,8 +24,8 @@ private struct UrlDescriptor {
 
 
 // Актор здесь по делу: очередь и дескрипторы правятся и снаружи (с главного
-// актора), и из завершений загрузок. Очередь знает, что ждёт и с каким
-// приоритетом; дескрипторы — текущую загрузку и число попыток.
+// актора), и из завершений загрузок. Очередь знает только порядок;
+// дескрипторы — что нужно, текущую загрузку и число попыток.
 actor ImageDownloadServiceImpl {
     struct Limits {
         let maxInFlight: Int
@@ -53,10 +53,13 @@ actor ImageDownloadServiceImpl {
 
 
 extension ImageDownloadServiceImpl: ImageDownloadService {
+    // Дескриптор — это «URL нужен», приоритет из него пригодится для ретрая.
     func download(urls: [URL], with priority: SyncPriority) {
         urls.forEach {
-            enqueue($0, priority: priority)
+            descriptions[$0, default: UrlDescriptor(priority: priority)].priority = priority
         }
+
+        queue.enqueue(urls, priority: priority)
 
         pump()
     }
@@ -64,8 +67,11 @@ extension ImageDownloadServiceImpl: ImageDownloadService {
     // Снимает и очередь, и текущие загрузки: отмена задачи рвёт загрузку
     // в Kingfisher, докачивания не будет.
     func stop(urls: [URL]) {
+        queue.remove(urls)
+
         urls.forEach {
-            remove($0)
+            descriptions[$0]?.task?.cancel()
+            descriptions.removeValue(forKey: $0)
         }
     }
 }
@@ -74,26 +80,21 @@ extension ImageDownloadServiceImpl: ImageDownloadService {
 // MARK: Queue
 
 private extension ImageDownloadServiceImpl {
-    func enqueue(_ url: URL, priority: SyncPriority) {
-        descriptions[url, default: UrlDescriptor(priority: priority)].priority = priority
-
-        // Уже качается — очередь не трогаем, иначе получим вторую загрузку
-        // того же файла. Приоритет из дескриптора пригодится для ретрая.
-        if descriptions[url]?.task == nil {
-            queue.enqueue(url, priority: priority)
-        }
-    }
-
-    func remove(_ url: URL) {
-        queue.remove(url)
-        descriptions[url]?.task?.cancel()
-        descriptions.removeValue(forKey: url)
-    }
-
-    // Закэшированное отсекает сам Kingfisher: загрузка вырождается в чтение
-    // из кэша.
+    // Очередь не знает, что качается: URL, поставленный во время загрузки,
+    // выкидывается здесь — или потому что ещё качается, или потому что уже
+    // скачан и дескриптора нет. Закэшированное отсекает сам Kingfisher:
+    // загрузка вырождается в чтение из кэша.
     func next() -> URL? {
-        queue.dequeue()
+        while let url = queue.dequeue() {
+            guard let descriptor = descriptions[url],
+                  descriptor.task == nil else {
+                continue
+            }
+
+            return url
+        }
+
+        return nil
     }
 }
 
@@ -148,7 +149,7 @@ private extension ImageDownloadServiceImpl {
 
         if (descriptions[url]?.attempts ?? 0) < limits.maxAttempts,
            let priority = descriptions[url]?.priority {
-            queue.enqueue(url, priority: priority)
+            queue.enqueue([url], priority: priority)
         } else {
             descriptions.removeValue(forKey: url)
 

@@ -20,33 +20,41 @@ enum SyncPriority: Int, Comparable, CaseIterable {
 }
 
 
-// Each URL is queued at most once. Re-prioritizing or removing doesn't dig it out
-// of its bucket: the old entry stays behind and dequeue() skips it, because only
-// the entry matching `priorities` is live.
+// Each URL sits in exactly one bucket; the latest priority wins, so a URL can
+// be demoted as well as boosted. Moving and removing take one pass per bucket
+// for the whole batch, dequeue stays O(1).
 struct PriorityQueue {
     private var buckets: [SyncPriority: Deque<URL>] = [:]
     private var priorities: [URL: SyncPriority] = [:]
 
-    mutating func enqueue(_ url: URL, priority: SyncPriority) {
-        guard priorities[url] != priority else {
-            return
+    mutating func enqueue(_ urls: [URL], priority: SyncPriority) {
+        var seen = Set<URL>()
+        let fresh = urls.filter { priorities[$0] != priority && seen.insert($0).inserted }
+
+        remove(fresh)
+
+        fresh.forEach {
+            priorities[$0] = priority
         }
 
-        priorities[url] = priority
-        buckets[priority, default: []].append(url)
+        buckets[priority, default: []].append(contentsOf: fresh)
     }
 
-    mutating func remove(_ url: URL) {
-        priorities[url] = nil
+    mutating func remove(_ urls: [URL]) {
+        let queued = Set(urls)
+
+        for priority in Set(queued.compactMap { priorities[$0] }) {
+            buckets[priority]?.removeAll { queued.contains($0) }
+        }
+
+        queued.forEach {
+            priorities[$0] = nil
+        }
     }
 
     mutating func dequeue() -> URL? {
         for priority in SyncPriority.allCases.reversed() {
-            while let url = buckets[priority]?.popFirst() {
-                guard priorities[url] == priority else {
-                    continue
-                }
-
+            if let url = buckets[priority]?.popFirst() {
                 priorities[url] = nil
 
                 return url
