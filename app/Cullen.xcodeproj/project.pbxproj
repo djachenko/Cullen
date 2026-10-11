@@ -112,7 +112,6 @@
 				CEC27D64A9B16B47DF53F98E /* MockDecisionsRepository.swift */,
 				0ECEC022D05FF7299B840BF9 /* MockPhotosetsRepository.swift */,
 			);
-			name = CullenTests;
 			path = CullenTests;
 			sourceTree = "<group>";
 		};

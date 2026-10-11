@@ -21,6 +21,7 @@ extension UIImageView {
                 case .failure:
                     self?.image = .cullenFailure
             }
+
             completion()
         }
     }
