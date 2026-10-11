@@ -66,11 +66,17 @@ extension ImageCacheServiceImpl: ImageCacheService {
         }.value
     }
 
+    // Kingfisher's IO queue is serial anyway — the group only saves waiting on
+    // each callback in turn.
     func removeFromCache(urls: [URL]) async {
-        for url in urls {
-            await withCheckedContinuation { continuation in
-                cache.removeImage(forKey: url.cacheKey) {
-                    continuation.resume()
+        await withTaskGroup(of: Void.self) { group in
+            for url in urls {
+                group.addTask { [cache] in
+                    await withCheckedContinuation { continuation in
+                        cache.removeImage(forKey: url.cacheKey) {
+                            continuation.resume()
+                        }
+                    }
                 }
             }
         }

@@ -32,10 +32,18 @@ final class ResumeOfflineSyncUseCaseImpl {
 
 extension ResumeOfflineSyncUseCaseImpl: ResumeOfflineSyncUseCase {
     // Each sync enqueues into the download service and can then be released —
-    // the download outlives the use case that started it.
+    // the download outlives the use case that started it. In parallel: every
+    // start loads its photoset and scans the cache first, and one set shouldn't
+    // wait behind another's scan.
     func execute() async {
-        for id in await desiredStore.all() {
-            await syncProvider(id).startOfflineSync()
+        let ids = await desiredStore.all()
+
+        await withTaskGroup(of: Void.self) { [syncProvider] group in
+            for id in ids {
+                group.addTask {
+                    await syncProvider(id).startOfflineSync()
+                }
+            }
         }
     }
 }
