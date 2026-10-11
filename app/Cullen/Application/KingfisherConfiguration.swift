@@ -42,17 +42,3 @@ enum KingfisherConfiguration {
     }
 }
 
-
-extension UInt {
-    static func gb(_ size: UInt) -> Self {
-        return size * .mb(1024)
-    }
-
-    static func mb(_ size: UInt) -> Self {
-        return size * .kb(1024)
-    }
-
-    static func kb(_ size: UInt) -> Self {
-        return size * 1024
-    }
-}
