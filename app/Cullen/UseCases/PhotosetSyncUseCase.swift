@@ -213,6 +213,10 @@ private extension PhotosetSyncUseCaseImpl {
             return
         }
 
+        // Subscribe before the scan: a write landing mid-scan is buffered in the
+        // stream instead of lost, and replays on top of the baseline.
+        let events = await eventSource.events()
+
         let keys = photoset.photos.map(\.url)
         let cached = await cacheService.cached(among: keys)
         let isDesired = await desiredStore.all().contains(photosetId)
@@ -223,20 +227,16 @@ private extension PhotosetSyncUseCaseImpl {
         state.isDesired = isDesired
         state.isLoaded = true
 
-        observe()
+        observe(events)
 
         // old.isDesired is false here, so a set restored from the store reads as
         // a fresh commitment and reconcile picks the download back up.
         await reconcile(from: old)
     }
 
-    func observe() {
+    func observe(_ events: AsyncStream<SyncEvent>) {
         observeTask = observeTask ?? Task { [weak self] in
-            guard let stream = await self?.eventSource.events() else {
-                return
-            }
-
-            for await event in stream {
+            for await event in events {
                 guard let self else {
                     break
                 }
