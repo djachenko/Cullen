@@ -33,8 +33,19 @@ final class RepositoriesAssembly: Assembly {
             .implements(ImageCacheDelegate.self)
             .inObjectScope(.container)
 
-        container.autoregister(ImageDownloadService.self, initializer: ImageDownloadServiceImpl.init)
-            .inObjectScope(.container)
+        container.autoregister(ImageDownloadServiceImpl.init)
+
+        container.register(ImageDownloadService.self) { resolver in
+            resolver ~> (
+                ImageDownloadServiceImpl.self,
+                with: ImageDownloadServiceImpl.Limits(
+                    // Совпадает с KingfisherConfiguration.httpMaximumConnectionsPerHost.
+                    maxInFlight: 4,
+                    maxAttempts: 3
+                )
+            )
+        }
+        .inObjectScope(.container)
 
         container.autoregister(AppPreferences.init)
             .inObjectScope(.container)

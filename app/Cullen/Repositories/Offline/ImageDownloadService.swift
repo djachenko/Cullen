@@ -23,21 +23,19 @@ private struct UrlDescriptor {
 }
 
 
-private struct Limits {
-    // Совпадает с KingfisherConfiguration.httpMaximumConnectionsPerHost.
-    let maxInFlight = 4
-    let maxAttempts = 3
-}
-
-
 // Актор здесь по делу: очередь и дескрипторы правятся и снаружи (с главного
 // актора), и из завершений загрузок. Очередь знает, что ждёт и с каким
 // приоритетом; дескрипторы — текущую загрузку и число попыток.
 actor ImageDownloadServiceImpl {
+    struct Limits {
+        let maxInFlight: Int
+        let maxAttempts: Int
+    }
+
     private let manager: KingfisherManager
     private let cacheService: any ImageCacheService
     private let publisher: any SyncEventPublisher
-    private let limits = Limits()
+    private let limits: Limits
 
     private var queue = PriorityQueue()
     private var descriptions: [URL: UrlDescriptor] = [:]
@@ -46,11 +44,13 @@ actor ImageDownloadServiceImpl {
     init(
         manager: KingfisherManager,
         cacheService: any ImageCacheService,
-        publisher: any SyncEventPublisher
+        publisher: any SyncEventPublisher,
+        limits: Limits
     ) {
         self.manager = manager
         self.cacheService = cacheService
         self.publisher = publisher
+        self.limits = limits
     }
 }
 
