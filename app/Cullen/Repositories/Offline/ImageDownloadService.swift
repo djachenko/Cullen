@@ -16,6 +16,7 @@ protocol ImageDownloadService: Sendable {
 
 
 private struct UrlDescriptor {
+    let id = UUID()
     var priority: SyncPriority
     var attempts = 0
     var task: Task<Void, Never>?
@@ -23,8 +24,8 @@ private struct UrlDescriptor {
 
 
 // Актор здесь по делу: очередь и дескрипторы правятся и снаружи (с главного
-// актора), и из завершений загрузок. Словарь дескрипторов — источник правды,
-// очередь лишь подсказывает порядок.
+// актора), и из завершений загрузок. Очередь знает, что ждёт и с каким
+// приоритетом; дескрипторы — текущую загрузку и число попыток.
 actor ImageDownloadServiceImpl {
     private let manager: KingfisherManager
     private let cacheService: any ImageCacheService
@@ -61,6 +62,8 @@ extension ImageDownloadServiceImpl: ImageDownloadService {
         pump()
     }
 
+    // Снимает и очередь, и текущие загрузки: отмена задачи рвёт загрузку
+    // в Kingfisher, докачивания не будет.
     func stop(urls: [URL]) {
         urls.forEach {
             remove($0)
@@ -77,33 +80,32 @@ private extension ImageDownloadServiceImpl {
             return
         }
 
-        // Не было приоритета — URL новый, значит в очередь. Уже качается —
-        // приоритет запоминаем, но очередь не трогаем, иначе получим вторую
-        // загрузку того же файла.
-        if descriptions[url]?.priority != priority,
-           descriptions[url]?.task == nil {
+        descriptions[url, default: UrlDescriptor(priority: priority)].priority = priority
+
+        // Уже качается — очередь не трогаем, иначе получим вторую загрузку
+        // того же файла. Приоритет из дескриптора пригодится для ретрая.
+        if descriptions[url]?.task == nil {
             queue.enqueue(url, priority: priority)
         }
-
-        descriptions[url, default: UrlDescriptor(priority: priority)].priority = priority
     }
 
-    // Из очереди ничего не выковыривается: убитый дескриптор и есть надгробие,
-    // мертвеца отсеет next() при съёме.
     func remove(_ url: URL) {
+        queue.remove(url)
         descriptions[url]?.task?.cancel()
         descriptions.removeValue(forKey: url)
     }
 
+    // Между постановкой и стартом картинку мог закэшировать показ — тогда
+    // качать нечего, а .cached уже ушёл из кэша.
     func next() -> URL? {
-        while let entry = queue.dequeue() {
-            // Дескриптора нет — URL сняли. Приоритет разошёлся — это старая
-            // копия, живая лежит в другом бакете.
-            guard descriptions[entry.url]?.priority == entry.priority else {
+        while let url = queue.dequeue() {
+            guard !cacheService.isCached(url: url) else {
+                descriptions.removeValue(forKey: url)
+
                 continue
             }
 
-            return entry.url
+            return url
         }
 
         return nil
@@ -122,14 +124,18 @@ private extension ImageDownloadServiceImpl {
     }
 
     func start(_ url: URL) {
+        guard let id = descriptions[url]?.id else {
+            return
+        }
+
         inFlight += 1
 
         descriptions[url]?.task = Task { [weak self] in
-            await self?.run(url)
+            await self?.run(url, id: id)
         }
     }
 
-    func run(_ url: URL) async {
+    func run(_ url: URL, id: UUID) async {
         let succeeded = await retrieve(url)
 
         inFlight -= 1
@@ -138,8 +144,9 @@ private extension ImageDownloadServiceImpl {
             pump()
         }
 
-        // Пока качали, URL могли снять — тогда докладывать не о чем.
-        guard descriptions[url] != nil else {
+        // Пока качали, URL могли снять или снять и поставить заново — тогда
+        // дескриптор уже чужой, и докладывать не о чем.
+        guard descriptions[url]?.id == id else {
             return
         }
 

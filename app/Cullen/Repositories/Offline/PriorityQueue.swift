@@ -20,33 +20,39 @@ enum SyncPriority: Int, Comparable, CaseIterable {
 }
 
 
-// FIFO без удаления из середины: снятые и переприоритезированные URL остаются
-// лежать мертвецами, отсеивает их потребитель по своему словарю. Поэтому здесь
-// только две операции — положить и взять следующий.
+// Each URL is queued at most once. Re-prioritizing or removing doesn't dig it out
+// of its bucket: the old entry stays behind and dequeue() skips it, because only
+// the entry matching `priorities` is live.
 struct PriorityQueue {
-    // Инвариант: пустых бакетов не бывает, иначе keys.max() соврёт.
     private var buckets: [SyncPriority: Deque<URL>] = [:]
-
-    var isEmpty: Bool {
-        buckets.isEmpty
-    }
+    private var priorities: [URL: SyncPriority] = [:]
 
     mutating func enqueue(_ url: URL, priority: SyncPriority) {
+        guard priorities[url] != priority else {
+            return
+        }
+
+        priorities[url] = priority
         buckets[priority, default: []].append(url)
     }
 
-    // Приоритет возвращается вместе с URL: по нему потребитель отличает живую
-    // запись от мертвеца, оставшегося в старом бакете после переприоритизации.
-    mutating func dequeue() -> (url: URL, priority: SyncPriority)? {
-        guard let priority = buckets.keys.max(),
-              let url = buckets[priority]?.popFirst() else {
-            return nil
+    mutating func remove(_ url: URL) {
+        priorities[url] = nil
+    }
+
+    mutating func dequeue() -> URL? {
+        for priority in SyncPriority.allCases.reversed() {
+            while let url = buckets[priority]?.popFirst() {
+                guard priorities[url] == priority else {
+                    continue
+                }
+
+                priorities[url] = nil
+
+                return url
+            }
         }
 
-        if buckets[priority]?.isEmpty == true {
-            buckets[priority] = nil
-        }
-
-        return (url, priority)
+        return nil
     }
 }
