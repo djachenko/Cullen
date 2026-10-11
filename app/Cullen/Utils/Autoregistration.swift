@@ -26,6 +26,10 @@ extension Container {
     // Ключ живёт в ServiceKey.option — том же поле, через которое SwinjectStoryboard
     // различает регистрации. Участвует в hash/== ключа наравне с типом, так что
     // ключом может быть любой Hashable, а не строковое имя.
+    //
+    // _register — публичный метод Container для расширений Swinject: обычный
+    // register(_:name:factory:) вызывает его же, но без option. Подчёркивание =
+    // SPI, сигнатура может поменяться при обновлении Swinject.
     @discardableResult
     func autoregister<S, each A>(
         _ type: S.Type,
@@ -43,6 +47,8 @@ extension Container {
 }
 
 
+// Публичный resolve(_:name:) option не принимает — регистрацию с option достать
+// можно только через _resolve, такой же SPI для расширений, как _register.
 func ~> <T>(resolver: Resolver, key: some ServiceKeyOption) -> T {
     guard let container = resolver as? Container else {
         fatalError("Resolver is not a Container — cannot resolve by key")
