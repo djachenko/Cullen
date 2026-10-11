@@ -30,8 +30,6 @@ final class ImageCacheServiceImpl: Sendable {
     init(cache: CullenImageCache, publisher: any SyncEventPublisher) {
         self.cache = cache
         self.publisher = publisher
-
-        cache.delegate = self
     }
 }
 

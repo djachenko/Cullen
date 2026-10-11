@@ -31,9 +31,9 @@ final class RepositoriesAssembly: Assembly {
         .implements(SyncEventPublisher.self)
         .implements(SyncEventSource.self)
 
-        // Вешает себя делегатом кэша в init, поэтому его резолвят на старте —
-        // иначе записи от листания ленты потерялись бы до первого фотосета.
-        container.autoregister(ImageCacheService.self, initializer: ImageCacheServiceImpl.init)
+        container.autoregister(ImageCacheServiceImpl.init)
+            .implements(ImageCacheService.self)
+            .implements(ImageCacheDelegate.self)
             .inObjectScope(.container)
 
         container.register(ImageDownloadService.self) { resolver in

@@ -8,6 +8,7 @@
 import Foundation
 import Kingfisher
 import Swinject
+import SwinjectAutoregistration
 import UserNotifications
 
 
@@ -28,8 +29,13 @@ final class SystemAssembly: Assembly {
             // Same name as ImageCache.default — keeps pointing at the existing cache directory.
             CullenImageCache(name: "default")
         }
-        .inObjectScope(.container)
         .implements(ImageCache.self)
+        .inObjectScope(.container)
+        // KingfisherConfiguration resolves the cache before anything is shown,
+        // so the delegate is in place before the first write can happen.
+        .initCompleted { resolver, cache in
+            cache.delegate = resolver ~> ImageCacheDelegate.self
+        }
 
         container.register(UNUserNotificationCenter.self) { _ in
             .current()
