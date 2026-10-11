@@ -13,6 +13,7 @@
 //
 
 import Foundation
+import Synchronization
 
 
 final class WeakValueMap<Key: Hashable, Value: AnyObject> {
@@ -24,20 +25,19 @@ final class WeakValueMap<Key: Hashable, Value: AnyObject> {
         }
     }
 
-    private var storage: [Key: Box] = [:]
-    private let lock = NSLock()
+    // Not an actor: callers are Swinject factories, which are synchronous.
+    private let storage = Mutex<[Key: Box]>([:])
 
     func value(for key: Key, make: () -> Value) -> Value {
-        lock.lock()
-        defer { lock.unlock() }
+        storage.withLock { storage in
+            if let existing = storage[key]?.value {
+                return existing
+            }
 
-        if let existing = storage[key]?.value {
-            return existing
+            let value = make()
+            storage[key] = Box(value)
+
+            return value
         }
-
-        let value = make()
-        storage[key] = Box(value)
-
-        return value
     }
 }
