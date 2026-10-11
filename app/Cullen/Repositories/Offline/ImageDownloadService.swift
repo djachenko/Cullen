@@ -33,7 +33,6 @@ actor ImageDownloadServiceImpl {
     }
 
     private let manager: KingfisherManager
-    private let cacheService: any ImageCacheService
     private let publisher: any SyncEventPublisher
     private let limits: Limits
 
@@ -43,12 +42,10 @@ actor ImageDownloadServiceImpl {
 
     init(
         manager: KingfisherManager,
-        cacheService: any ImageCacheService,
         publisher: any SyncEventPublisher,
         limits: Limits
     ) {
         self.manager = manager
-        self.cacheService = cacheService
         self.publisher = publisher
         self.limits = limits
     }
@@ -78,10 +75,6 @@ extension ImageDownloadServiceImpl: ImageDownloadService {
 
 private extension ImageDownloadServiceImpl {
     func enqueue(_ url: URL, priority: SyncPriority) {
-        guard !cacheService.isCached(url: url) else {
-            return
-        }
-
         descriptions[url, default: UrlDescriptor(priority: priority)].priority = priority
 
         // Уже качается — очередь не трогаем, иначе получим вторую загрузку
@@ -97,20 +90,10 @@ private extension ImageDownloadServiceImpl {
         descriptions.removeValue(forKey: url)
     }
 
-    // Между постановкой и стартом картинку мог закэшировать показ — тогда
-    // качать нечего, а .cached уже ушёл из кэша.
+    // Закэшированное отсекает сам Kingfisher: загрузка вырождается в чтение
+    // из кэша.
     func next() -> URL? {
-        while let url = queue.dequeue() {
-            guard !cacheService.isCached(url: url) else {
-                descriptions.removeValue(forKey: url)
-
-                continue
-            }
-
-            return url
-        }
-
-        return nil
+        queue.dequeue()
     }
 }
 
