@@ -218,7 +218,7 @@ private extension PhotosetSyncUseCaseImpl {
         let events = await eventSource.events()
 
         let keys = photoset.photos.map(\.url)
-        let cached = await cacheService.cached(among: keys)
+        let cached = await cacheService.cachedSubset(among: keys)
         let isDesired = await desiredStore.all().contains(photosetId)
 
         let old = state

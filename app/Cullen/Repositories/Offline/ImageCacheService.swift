@@ -14,7 +14,7 @@ protocol ImageCacheService: Sendable {
 
     // Scanning a whole photoset means thousands of disk hits — always off the
     // caller's thread, never one isCached at a time from a @MainActor type.
-    func cached(among urls: [URL]) async -> Set<URL>
+    func cachedSubset(among urls: [URL]) async -> Set<URL>
 
     func removeFromCache(urls: [URL]) async
 }
@@ -54,29 +54,21 @@ extension ImageCacheServiceImpl: ImageCacheService {
         cache.isCached(forKey: url.cacheKey)
     }
 
-    // Detached on purpose: the scan is long and synchronous, so it must not run
+    // Concurrent on purpose: the scan is long and synchronous, so it must not run
     // on the main actor — it would freeze the feed for its whole duration.
-    func cached(among urls: [URL]) async -> Set<URL> {
-        await Task.detached(priority: .utility) { [self] in
-            urls.reduce(into: Set<URL>()) { cached, url in
-                if isCached(url: url) {
-                    cached.insert(url)
-                }
-            }
-        }.value
+    @concurrent
+    func cachedSubset(among urls: [URL]) async -> Set<URL> {
+        Set(urls.filter { isCached(url: $0) })
     }
 
     // Kingfisher's IO queue is serial anyway — the group only saves waiting on
     // each callback in turn.
+    @concurrent
     func removeFromCache(urls: [URL]) async {
         await withTaskGroup(of: Void.self) { group in
-            for url in urls {
+            urls.forEach { url in
                 group.addTask { [cache] in
-                    await withCheckedContinuation { continuation in
-                        cache.removeImage(forKey: url.cacheKey) {
-                            continuation.resume()
-                        }
-                    }
+                    try? await cache.removeImage(forKey: url.cacheKey)
                 }
             }
         }
