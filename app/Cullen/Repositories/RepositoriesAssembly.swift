@@ -24,12 +24,11 @@ final class RepositoriesAssembly: Assembly {
             .inObjectScope(.container)
 
         container.autoregister(SyncEventHub.init)
-            .inObjectScope(.container)
             .implements(SyncEventPublisher.self)
             .implements(SyncEventSource.self)
+            .inObjectScope(.container)
 
-        container.autoregister(ImageCacheServiceImpl.init)
-            .implements(ImageCacheService.self)
+        container.autoregister(ImageCacheService.self, initializer: ImageCacheServiceImpl.init)
             .implements(ImageCacheDelegate.self)
             .inObjectScope(.container)
 
