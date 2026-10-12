@@ -39,7 +39,7 @@ extension ResumeOfflineSyncUseCaseImpl: ResumeOfflineSyncUseCase {
         let ids = await desiredStore.all()
 
         await withTaskGroup(of: Void.self) { [syncProvider] group in
-            for id in ids {
+            ids.forEach { id in
                 group.addTask {
                     await syncProvider(id).startOfflineSync()
                 }
