@@ -9,6 +9,14 @@ import Foundation
 import SwiftUI
 import Combine
 
+enum SyncState {
+    case unknown // baseline ещё не посчитан: «не знаем», а не «ноль»
+    case online
+    case partial(progress: Double)
+    case downloading(progress: Double)
+    case downloaded
+}
+
 
 @MainActor
 final class PhotosetDetailViewModel: ObservableObject {
@@ -16,7 +24,6 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published var aspectRatio: Double = 3.0 / 2.0
     @Published var export: DecisionsExport?
     @Published var scrollTarget: PhotoId? = nil
-    @Published var prefetchState: PhotosetDetailPrefetchState = .notCached
 
     var showNextButton: Bool {
         nextPendingId != nil || decisionFrontId != nil
@@ -26,13 +33,29 @@ final class PhotosetDetailViewModel: ObservableObject {
         photoset?.name ?? ""
     }
 
+    var syncState: SyncState {
+        guard let progress = syncUseCase.progress else {
+            return .unknown
+        }
+
+        return if progress == 1 {
+            .downloaded
+        } else if syncUseCase.isSyncing {
+            .downloading(progress: progress)
+        } else if progress == 0 {
+            .online
+        } else {
+            .partial(progress: progress)
+        }
+    }
+
     let logger: Logger?
 
     private let coordinator: Coordinator
     private let fetchPhotosUseCase: FetchPhotosUseCase
     private let loadDecisionsUseCase: LoadDecisionsUseCase
     private let exportDecisionsUseCase: ExportDecisionsUseCase
-    private let cacheUseCase: CacheUseCase
+    private let syncUseCase: PhotosetSyncUseCase
     private let recordLastOpenedUseCase: RecordLastOpenedUseCase
 
     private let photosetTask: Task<Photoset, Error>
@@ -58,7 +81,7 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published private var nextPendingId: PhotoId? = nil
     @Published private var decisionFrontId: PhotoId? = nil
 
-    private var prefetchTask: Task<Void, Never>?
+    private var windowBoostTask: Task<Void, Never>?
 
     nonisolated private init(
         photosetTask: Task<Photoset, Error>,
@@ -66,7 +89,7 @@ final class PhotosetDetailViewModel: ObservableObject {
         fetchPhotosUseCase: FetchPhotosUseCase,
         loadDecisionsUseCase: LoadDecisionsUseCase,
         exportDecisionsUseCase: ExportDecisionsUseCase,
-        cacheUseCase: CacheUseCase,
+        syncUseCase: PhotosetSyncUseCase,
         recordLastOpenedUseCase: RecordLastOpenedUseCase,
         logger: Logger?
     ) {
@@ -76,7 +99,7 @@ final class PhotosetDetailViewModel: ObservableObject {
         self.fetchPhotosUseCase = fetchPhotosUseCase
         self.loadDecisionsUseCase = loadDecisionsUseCase
         self.exportDecisionsUseCase = exportDecisionsUseCase
-        self.cacheUseCase = cacheUseCase
+        self.syncUseCase = syncUseCase
         self.recordLastOpenedUseCase = recordLastOpenedUseCase
     }
 
@@ -87,7 +110,7 @@ final class PhotosetDetailViewModel: ObservableObject {
         fetchPhotosUseCase: FetchPhotosUseCase,
         loadDecisionsUseCase: LoadDecisionsUseCase,
         exportDecisionsUseCase: ExportDecisionsUseCase,
-        cacheUseCase: CacheUseCase,
+        syncUseCase: PhotosetSyncUseCase,
         recordLastOpenedUseCase: RecordLastOpenedUseCase,
         logger: Logger?
     ) {
@@ -99,7 +122,7 @@ final class PhotosetDetailViewModel: ObservableObject {
             fetchPhotosUseCase: fetchPhotosUseCase,
             loadDecisionsUseCase: loadDecisionsUseCase,
             exportDecisionsUseCase: exportDecisionsUseCase,
-            cacheUseCase: cacheUseCase,
+            syncUseCase: syncUseCase,
             recordLastOpenedUseCase: recordLastOpenedUseCase,
             logger: logger
         )
@@ -130,7 +153,8 @@ extension PhotosetDetailViewModel {
 
             recountPendingIds()
 
-            prefetchState = await countPrefetchState()
+            await syncUseCase.loadCacheState()
+            await syncUseCase.set(isForeground: true)
 
             state = .content(photos.map { photo in
                 PhotoGridCellViewModel(
@@ -159,17 +183,21 @@ extension PhotosetDetailViewModel {
 
 extension PhotosetDetailViewModel {
     func onDisappear() {
-        cancelPrefetch()
+        Task {
+            await syncUseCase.set(isForeground: false)
+        }
     }
 
     func didTapPrefetchButton() {
-        switch prefetchState {
-            case .notCached, .partial:
-                startPrefetch()
-            case .full:
-                clearCache()
-            case .prefetching:
-                cancelPrefetch()
+        Task {
+            switch syncState {
+                case .downloaded:
+                    await syncUseCase.clear()
+                case .downloading:
+                    await syncUseCase.cancel()
+                case .partial, .online, .unknown:
+                    await syncUseCase.startOfflineSync()
+            }
         }
     }
 
@@ -193,6 +221,20 @@ extension PhotosetDetailViewModel {
         lastVisibleId = last
 
         recountPendingIds()
+
+        let visible = Set(photoIds)
+        let urls = photos.filter { visible.contains($0.id) }.map(\.url)
+
+        windowBoostTask?.cancel()
+        windowBoostTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(250))
+
+            guard !Task.isCancelled else {
+                return
+            }
+
+            await self?.syncUseCase.window(urls)
+        }
     }
 }
 
@@ -215,73 +257,6 @@ private extension PhotosetDetailViewModel {
                 photosetId: photoset.id
             )
         )
-    }
-}
-
-// MARK: Handle cache workflow
-
-private extension PhotosetDetailViewModel {
-    func startPrefetch() {
-        guard let photosetId = photoset?.id else {
-            return
-        }
-
-        prefetchTask = Task { [weak self] in
-            guard let self,
-                  let stream = try? await cacheUseCase.prefetch(photoset: photosetId) else {
-                return
-            }
-
-            for await event in stream {
-                switch event {
-                    case .progress(let done, let total):
-                        let progress = Double(done) / Double(total)
-                        prefetchState = .prefetching(progress: progress)
-                    case .finished:
-                        prefetchState = await countPrefetchState()
-                }
-            }
-        }
-    }
-
-    func cancelPrefetch() {
-        prefetchTask?.cancel()
-        prefetchTask = nil
-
-        Task { [weak self] in
-            guard let self else {
-                return
-            }
-
-            prefetchState = await countPrefetchState()
-        }
-    }
-
-    func clearCache() {
-        guard let photosetId = photoset?.id else {
-            return
-        }
-
-        Task { [weak self] in
-            guard let self else {
-                return
-            }
-
-            try? await cacheUseCase.removeFromCache(photoset: photosetId)
-            prefetchState = await countPrefetchState()
-        }
-    }
-}
-
-
-private extension PhotosetDetailViewModel {
-    func countPrefetchState() async -> PhotosetDetailPrefetchState {
-        if let photosetId = photoset?.id,
-           let ratio = try? await cacheUseCase.cacheRatio(photoset: photosetId) {
-            PhotosetDetailPrefetchState(ratio: ratio)
-        } else {
-            .notCached
-        }
     }
 }
 
@@ -326,20 +301,6 @@ private extension Decision? {
                 false
             case .pending, nil:
                 true
-        }
-    }
-}
-
-
-private extension PhotosetDetailPrefetchState {
-    init(ratio: Double) {
-        self = switch ratio {
-            case 0:
-                .notCached
-            case 1:
-                .full
-            default:
-                .partial(ratio: ratio)
         }
     }
 }

@@ -30,14 +30,20 @@ struct PhotosetCardView: View {
         .task {
             await viewModel.load()
         }
+        .task {
+            await viewModel.prepareSync()
+        }
         .onTapGesture {
             viewModel.didTap()
+        }
+        .onLongPressGesture(minimumDuration: 0.4) {
+            viewModel.didLongPress()
         }
     }
 }
 
-extension PhotosetCardView {
-    private var loadingView: some View {
+private extension PhotosetCardView {
+    var loadingView: some View {
         RoundedRectangle(cornerRadius: 16)
 //            .fill(Color(.systemBackground))
             .fill(.blue)
@@ -46,7 +52,7 @@ extension PhotosetCardView {
             .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
     }
 
-    private var errorView: some View {
+    var errorView: some View {
         RoundedRectangle(cornerRadius: 16)
             .fill(Color(.systemBackground))
             .frame(height: 300)
@@ -57,7 +63,7 @@ extension PhotosetCardView {
             .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 4)
     }
 
-    private func contentView(content: PhotosetCardViewModel.Content) -> some View {
+    func contentView(content: PhotosetCardViewModel.Content) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             coverImage(url: content.coverUrl)
 
@@ -107,11 +113,37 @@ extension PhotosetCardView {
         )
     }
 
-    private func coverImage(url: URL?) -> some View {
+    func coverImage(url: URL?) -> some View {
         CullenImage(url)
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(height: 200)
             .clipped()
+            .overlay(alignment: .bottom) {
+                cacheSyncIndicator
+            }
+    }
+
+    @ViewBuilder
+    var cacheSyncIndicator: some View {
+        let progress = viewModel.progress
+
+        if progress > 0 {
+
+            let color: Color = if progress == 1 {
+                .green
+            } else if viewModel.isSyncing {
+                .accentColor
+            } else {
+                .secondary
+            }
+
+            GeometryReader { geometry in
+                Rectangle()
+                    .fill(color)
+                    .frame(width: geometry.size.width * progress)
+            }
+            .frame(height: 3)
+        }
     }
 }

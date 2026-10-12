@@ -11,7 +11,8 @@ enum PhotosetSortOption: String, CaseIterable, Identifiable {
     case name = "Name"
     case progress = "Progress"
     case photoCount = "Photos"
-    case lastOpened = "Last Opened"
+    case lastOpened = "Last opened"
+    case syncProgress = "Sync progress"
 
     static let `default`: Self = .lastOpened
 
