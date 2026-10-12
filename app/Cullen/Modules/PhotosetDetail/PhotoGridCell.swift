@@ -31,9 +31,8 @@ struct PhotoGridCell: View {
         ZStack(alignment: .topTrailing) {
             photoImage
 
-            if success {
-                decisionBadge.padding(6)
-            }
+            decisionBadge
+                .padding(6)
         }
         .aspectRatio(aspectRatio, contentMode: .fit)
         .onTapGesture { viewModel.onTap() }
