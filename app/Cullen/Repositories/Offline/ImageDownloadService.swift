@@ -15,21 +15,22 @@ protocol ImageDownloadService: Sendable {
 }
 
 
-private struct UrlDescriptor {
-    let id = UUID()
-    var priority: SyncPriority
-    var attempts = 0
-    var task: Task<Void, Never>?
-}
-
-
 // Актор здесь по делу: очередь и дескрипторы правятся и снаружи (с главного
-// актора), и из завершений загрузок. Очередь знает только порядок;
-// дескрипторы — что нужно, текущую загрузку и число попыток.
+// актора), и из завершений загрузок. Приоритет живёт в очереди, пока URL
+// ждёт, в дескрипторе — пока качается, и возвращается в очередь на ретрае.
 actor ImageDownloadServiceImpl {
     struct Limits {
         let maxInFlight: Int
         let maxAttempts: Int
+    }
+
+    // Заводится заново на каждой попытке и живёт до успеха, последней неудачной
+    // попытки или stop — то есть описывает то, что качается или ждёт ретрая.
+    private struct UrlDescriptor {
+        let id = UUID()
+        let priority: SyncPriority
+        var attempts: Int
+        var task: Task<Void, Never>?
     }
 
     private let manager: KingfisherManager
@@ -37,7 +38,7 @@ actor ImageDownloadServiceImpl {
     private let limits: Limits
 
     private var queue = PriorityQueue()
-    private var descriptions: [URL: UrlDescriptor] = [:]
+    private var descriptors: [URL: UrlDescriptor] = [:]
     private var inFlight = 0
 
     init(
@@ -53,12 +54,7 @@ actor ImageDownloadServiceImpl {
 
 
 extension ImageDownloadServiceImpl: ImageDownloadService {
-    // Дескриптор — это «URL нужен», приоритет из него пригодится для ретрая.
     func download(urls: [URL], with priority: SyncPriority) {
-        urls.forEach {
-            descriptions[$0, default: UrlDescriptor(priority: priority)].priority = priority
-        }
-
         queue.enqueue(urls, priority: priority)
 
         pump()
@@ -70,8 +66,8 @@ extension ImageDownloadServiceImpl: ImageDownloadService {
         queue.remove(urls)
 
         urls.forEach {
-            descriptions[$0]?.task?.cancel()
-            descriptions.removeValue(forKey: $0)
+            descriptors[$0]?.task?.cancel()
+            descriptors.removeValue(forKey: $0)
         }
     }
 }
@@ -81,17 +77,15 @@ extension ImageDownloadServiceImpl: ImageDownloadService {
 
 private extension ImageDownloadServiceImpl {
     // Очередь не знает, что качается: URL, поставленный во время загрузки,
-    // выкидывается здесь — или потому что ещё качается, или потому что уже
-    // скачан и дескриптора нет. Закэшированное отсекает сам Kingfisher:
-    // загрузка вырождается в чтение из кэша.
-    func next() -> URL? {
-        while let url = queue.dequeue() {
-            guard let descriptor = descriptions[url],
-                  descriptor.task == nil else {
+    // выкидывается здесь. Уже скачанное отсекает сам Kingfisher: загрузка
+    // вырождается в чтение из кэша.
+    func next() -> (url: URL, priority: SyncPriority)? {
+        while let entry = queue.dequeue() {
+            guard descriptors[entry.url]?.task == nil else {
                 continue
             }
 
-            return url
+            return entry
         }
 
         return nil
@@ -104,21 +98,25 @@ private extension ImageDownloadServiceImpl {
 private extension ImageDownloadServiceImpl {
     func pump() {
         while inFlight < limits.maxInFlight,
-              let url = next() {
-            start(url)
+              let entry = next() {
+            start(entry.url, priority: entry.priority)
         }
     }
 
-    func start(_ url: URL) {
-        guard let id = descriptions[url]?.id else {
-            return
-        }
+    func start(_ url: URL, priority: SyncPriority) {
+        let oldDescriptor = descriptors[url] // in case there was old attempt
 
-        inFlight += 1
+        var descriptor = UrlDescriptor(
+            priority: priority,
+            attempts: oldDescriptor?.attempts ?? 0
+        )
 
-        descriptions[url]?.task = Task { [weak self] in
+        descriptor.task = Task { [weak self, id = descriptor.id] in
             await self?.run(url, id: id)
         }
+
+        descriptors[url] = descriptor
+        inFlight += 1
     }
 
     func run(_ url: URL, id: UUID) async {
@@ -132,26 +130,30 @@ private extension ImageDownloadServiceImpl {
 
         // Пока качали, URL могли снять или снять и поставить заново — тогда
         // дескриптор уже чужой, и докладывать не о чем.
-        guard descriptions[url]?.id == id else {
+        guard descriptors[url]?.id == id else {
             return
         }
 
         guard !succeeded else {
             // Об успехе расскажет сам кэш, когда допишет файл. Здесь молчим,
             // чтобы загрузка и обычный показ картинки приходили одним путём.
-            descriptions.removeValue(forKey: url)
+            descriptors.removeValue(forKey: url)
 
             return
         }
 
-        descriptions[url]?.task = nil
-        descriptions[url]?.attempts += 1
+        descriptors[url]?.task = nil
+        descriptors[url]?.attempts += 1
 
-        if (descriptions[url]?.attempts ?? 0) < limits.maxAttempts,
-           let priority = descriptions[url]?.priority {
-            queue.enqueue([url], priority: priority)
+        if let descriptor = descriptors[url],
+           descriptor.attempts < limits.maxAttempts {
+            // Запрошенный заново во время загрузки URL уже стоит в очереди
+            // с последним приоритетом — возвращать ему старый незачем.
+            if !queue.contains(url) {
+                queue.enqueue(url, priority: descriptor.priority)
+            }
         } else {
-            descriptions.removeValue(forKey: url)
+            descriptors.removeValue(forKey: url)
 
             await publisher.post(.failed(url))
         }
@@ -166,7 +168,9 @@ private extension ImageDownloadServiceImpl {
         do {
             _ = try await manager.retrieveImage(
                 with: url,
-                options: [.memoryCacheExpiration(.expired)]
+                options: [
+                    .memoryCacheExpiration(.expired),
+                ]
             )
 
             return true

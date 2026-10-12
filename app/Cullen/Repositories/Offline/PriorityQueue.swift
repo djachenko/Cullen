@@ -42,26 +42,37 @@ struct PriorityQueue {
     }
 
     mutating func remove(_ urls: [URL]) {
-        let queued = Set(urls)
+        let distinctUrls = Set(urls)
+        let prioritiesOfUrls = Set(distinctUrls.compactMap { priorities[$0] })
 
-        for priority in Set(queued.compactMap { priorities[$0] }) {
-            buckets[priority]?.removeAll { queued.contains($0) }
+        prioritiesOfUrls.forEach {
+            buckets[$0]?.removeAll { distinctUrls.contains($0) }
         }
 
-        queued.forEach {
+        distinctUrls.forEach {
             priorities[$0] = nil
         }
     }
 
-    mutating func dequeue() -> URL? {
-        for priority in SyncPriority.allCases.reversed() {
-            if let url = buckets[priority]?.popFirst() {
-                priorities[url] = nil
+    func contains(_ url: URL) -> Bool {
+        priorities[url] != nil
+    }
 
-                return url
-            }
+    mutating func dequeue() -> (url: URL, priority: SyncPriority)? {
+        guard let priority = SyncPriority.allCases.reversed().first(where: { buckets[$0]?.isEmpty == false }),
+              let url = buckets[priority]?.popFirst() else {
+            return nil
         }
 
-        return nil
+        priorities[url] = nil
+
+        return (url, priority)
+    }
+}
+
+
+extension PriorityQueue {
+    mutating func enqueue(_ url: URL, priority: SyncPriority) {
+        enqueue([url], priority: priority)
     }
 }
