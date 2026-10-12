@@ -13,3 +13,11 @@ extension Array {
         }
     }
 }
+
+extension Array {
+    func distinct() -> [Element] where Element: Hashable {
+        var seen = Set<Element>()
+
+        return filter { seen.insert($0).inserted }
+    }
+}

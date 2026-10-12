@@ -28,8 +28,9 @@ struct PriorityQueue {
     private var priorities: [URL: SyncPriority] = [:]
 
     mutating func enqueue(_ urls: [URL], priority: SyncPriority) {
-        var seen = Set<URL>()
-        let fresh = urls.filter { priorities[$0] != priority && seen.insert($0).inserted }
+        let fresh = urls
+            .distinct()
+            .filter { priorities[$0] != priority }
 
         remove(fresh)
 
