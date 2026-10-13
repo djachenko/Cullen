@@ -15,15 +15,19 @@ struct StripUnderlayView: View {
 
     let decision: Decision
 
+    private var presentation: DecisionPresentation {
+        decision.presentation
+    }
+
     var body: some View {
         ZStack {
-            decision.color
+            presentation.color
 
             VStack(spacing: Layout.spacing) {
-                Image(systemName: decision.icon)
+                Image(systemName: presentation.icon)
                     .font(.system(size: Layout.iconSize, weight: .bold))
 
-                Text(decision.label)
+                Text(presentation.label)
                     .font(.system(size: Layout.labelSize, weight: .semibold))
             }
             .foregroundStyle(.white)

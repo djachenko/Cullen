@@ -25,6 +25,18 @@ final class PhotosetDetailViewModel: ObservableObject {
     @Published var export: DecisionsExport?
     @Published var scrollTarget: PhotoId? = nil
 
+    @Published var filterStates: Set<Decision> = Set(Decision.allCases) {
+        didSet {
+            guard case .content = state else {
+                return
+            }
+
+            state = .content(makeContent())
+
+            recountPendingIds()
+        }
+    }
+
     var showNextButton: Bool {
         nextPendingId != nil || decisionFrontId != nil
     }
@@ -156,15 +168,7 @@ extension PhotosetDetailViewModel {
             await syncUseCase.loadCacheState()
             await syncUseCase.set(isForeground: true)
 
-            state = .content(photos.map { photo in
-                PhotoGridCellViewModel(
-                    id: photo.id,
-                    imageURL: photo.url,
-                    decision: decisions[photo.id] ?? .pending,
-                ) { [weak self] in
-                    self?.didTap(photo: photo)
-                }
-            })
+            state = .content(makeContent())
 
             let photosetId = photoset.id
 
@@ -238,6 +242,46 @@ extension PhotosetDetailViewModel {
     }
 }
 
+// MARK: Filter picker
+
+extension PhotosetDetailViewModel {
+    var filterPickerViewModel: MultiSegmentPickerViewModel {
+        MultiSegmentPickerViewModel(
+            segments: Decision.allCases.map { decision in
+                SegmentViewModel(
+                    title: decision.presentation.title,
+                    icon: decision.presentation.icon,
+                    color: decision.presentation.color,
+                    isSelected: filterStates.contains(decision),
+                    onTap: { [weak self] in
+                        self?.filterStates.formSymmetricDifference([decision])
+                    }
+                )
+            }
+        )
+    }
+}
+
+// MARK: Building content
+
+private extension PhotosetDetailViewModel {
+    var filteredPhotos: [Photo] {
+        photos.filter { filterStates.contains(decisions[$0.id] ?? .pending) }
+    }
+
+    func makeContent() -> PhotosetDetailContent {
+        filteredPhotos.map { photo in
+            PhotoGridCellViewModel(
+                id: photo.id,
+                imageURL: photo.url,
+                decision: decisions[photo.id] ?? .pending,
+            ) { [weak self] in
+                self?.didTap(photo: photo)
+            }
+        }
+    }
+}
+
 // MARK: Opening detail
 
 private extension PhotosetDetailViewModel {
@@ -246,6 +290,7 @@ private extension PhotosetDetailViewModel {
             return
         }
 
+        let photos = filteredPhotos
         let startIndex = photos.firstIndex(of: photo) ?? .zero
 
         logger?.debug("didTap \(photo.id) → startIndex=\(startIndex) of \(photos.count)")
@@ -267,11 +312,13 @@ private extension PhotosetDetailViewModel {
             return
         }
 
-        nextPendingId = nextPendingIslandStart(after: lastVisibleId)
-        decisionFrontId = computeDecisionFront(after: lastVisibleId)
+        let photos = filteredPhotos
+
+        nextPendingId = nextPendingIslandStart(after: lastVisibleId, in: photos)
+        decisionFrontId = computeDecisionFront(after: lastVisibleId, in: photos)
     }
 
-    func nextPendingIslandStart(after photoId: PhotoId) -> PhotoId? {
+    func nextPendingIslandStart(after photoId: PhotoId, in photos: [Photo]) -> PhotoId? {
         photos
             .drop { $0.id != photoId }
             .dropFirst()
@@ -281,11 +328,11 @@ private extension PhotosetDetailViewModel {
             .id
     }
 
-    func computeDecisionFront(after photoId: PhotoId) -> PhotoId? {
-        var current = nextPendingIslandStart(after: photoId)
+    func computeDecisionFront(after photoId: PhotoId, in photos: [Photo]) -> PhotoId? {
+        var current = nextPendingIslandStart(after: photoId, in: photos)
 
         while let id = current,
-              let next = nextPendingIslandStart(after: id) {
+              let next = nextPendingIslandStart(after: id, in: photos) {
             current = next
         }
 
