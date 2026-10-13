@@ -13,6 +13,7 @@ final class MigrationsAssembly: Assembly {
     func assemble(container: Container) {
         container.register([Migration].self) { resolver in
             [
+//                resolver ~> DecisionsBackupMigration.self,
                 resolver ~> DecisionsCodableFormatFalloutMigration.self,
                 resolver ~> DecisionsUrlToNameIdMigration.self,
                 resolver ~> DecisionsRemoveSuffixMigration.self,
@@ -22,6 +23,7 @@ final class MigrationsAssembly: Assembly {
         container.autoregister(MigrationService.init)
             .inObjectScope(.container)
 
+        container.autoregister(DecisionsBackupMigration.init)
         container.autoregister(DecisionsUrlToNameIdMigration.init)
         container.autoregister(DecisionsCodableFormatFalloutMigration.init)
         container.autoregister(DecisionsRemoveSuffixMigration.init)
