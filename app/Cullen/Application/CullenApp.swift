@@ -20,6 +20,8 @@ struct Cullen: App {
 
             await (Cullen.resolver ~> MigrationService.self).runMigrations()
 
+            try? await (Cullen.resolver ~> BackupDecisionsUseCase.self).execute(force: false)
+
             await (Cullen.resolver ~> ResumeOfflineSyncUseCase.self).execute()
         }
     }
