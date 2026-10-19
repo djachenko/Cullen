@@ -14,8 +14,6 @@ final class DecisionsCodableFormatFalloutMigration: Migration {
         static let subdirectory  = "decisions"
     }
 
-    let key: String? = nil
-
     private let photosetsRepository: PhotosetsRepository
 
     private let fileManager = FileManager.default

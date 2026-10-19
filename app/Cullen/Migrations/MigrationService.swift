@@ -15,6 +15,12 @@ protocol Migration {
     func run() async throws
 }
 
+extension Migration {
+    var key: String? {
+        nil
+    }
+}
+
 final class MigrationService {
     private let migrations: [any Migration]
     private let userDefaults: UserDefaults
