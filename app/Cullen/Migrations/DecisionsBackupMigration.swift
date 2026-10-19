@@ -11,8 +11,6 @@ import Foundation
 
 
 final class DecisionsBackupMigration: Migration {
-    let key: String? = nil
-
     private let backupUseCase: BackupDecisionsUseCase
 
     init(backupUseCase: BackupDecisionsUseCase) {

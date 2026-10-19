@@ -9,8 +9,6 @@ import Foundation
 
 
 final class DecisionsUrlToNameIdMigration: Migration {
-    let key: String? = nil
-
     private let decisionsRepository: DecisionsRepository
     private let photosetsRepository: PhotosetsRepository
 
